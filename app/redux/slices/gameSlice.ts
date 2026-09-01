@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { IBaseState } from "@types";
 import { handleAsyncAction } from "@utils/reduxHelper";
-import { getGameDetailProcess, getGamesProcess, searchGamesProcess } from "../actions/gameActions";
+import { getGameDetailProcess, getGameScreenshotsProcess, getGamesProcess, searchGamesProcess } from "../actions/gameActions";
 
 const initialState: IBaseState = {
     isLoading: {},
