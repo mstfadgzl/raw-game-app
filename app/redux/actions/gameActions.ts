@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { IGameDetail, IGameListResponse } from "../../types";
+import { IGameDetail, IGameListResponse } from "@types";
 import { gameService } from "@services/index";
 
 export const getGamesProcess = createAsyncThunk<IGameListResponse, { page: number }>(

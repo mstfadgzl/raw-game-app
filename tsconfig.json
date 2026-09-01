@@ -22,7 +22,10 @@
       ],
       "@hooks/*": [
         "./app/hooks/*"
-      ]
+      ],
+      "@types": [
+        "./app/types"
+      ],
     }
   },
   "include": [
