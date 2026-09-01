@@ -1,4 +1,3 @@
-import Config from "react-native-config";
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { RAWG_API_KEY, RAWG_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
