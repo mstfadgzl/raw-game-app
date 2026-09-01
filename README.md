@@ -1,6 +1,6 @@
  
  ---  başlangıç
- npx [@react-native-community/cli@latest init RawgGameApp] yazarak klasör oluşturdum
+npx [@react-native-community/cli@latest init RawgGameApp] yazarak klasör oluşturdum
 app klasörü oluşturup içerisine api/assets/compnents/hooks/navigators/redux/screens/types/utils klasörleri oluşturdum
 
 --1. adım interface oluşturma 
