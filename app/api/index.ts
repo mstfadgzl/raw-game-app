@@ -1,6 +1,7 @@
 import Config from "react-native-config";
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { RAWG_API_KEY, RAWG_BASE_URL } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const apiClient = axios.create({
@@ -12,11 +13,15 @@ const apiClient = axios.create({
     },
 });
 apiClient.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
+    async (config: InternalAxiosRequestConfig) => {
         config.params = {
             ...config.params,
             key: RAWG_API_KEY,
         };
+        const token = await AsyncStorage.getItem('@TOKEN');
+        if (token && config.headers) {
+            config.headers.Authorization = `Bearer ${token}`
+        }
         return config;
     },
     (error) => {
@@ -25,18 +30,21 @@ apiClient.interceptors.request.use(
 );
 
 apiClient.interceptors.response.use(
-    (response: AxiosResponse) => {
-        return response;
-    },
-    (error) => {
-        if (error.response) {
-            console.error('API Error Status:', error.response.status);
-            console.error('API Error Data:', error.response.data);
-        } else if (error.request) {
-            console.error('Network Error: Sunucuya ulaşılamadı');
-        } else {
-            console.error('Error:', error.message);
+    (response: AxiosResponse) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            console.warn('Oturum süresi doldu, kullanıcı çıkışa yönlendiriliyor...');
+            await AsyncStorage.removeItem('@TOKEN');
+            // store.dispatch(logout());
         }
-        return Promise.reject(error);
+        const customError = {
+            message: error.response?.data?.detail || error.message || 'Bilinmeyen bir hata oluştu',
+            status: error.response?.status,
+            data: error.response?.data,
+        };
+
+        return Promise.reject(customError);
     }
 );
