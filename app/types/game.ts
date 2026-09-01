@@ -82,3 +82,7 @@ export interface IScreenshotResponse {
     count: number;
     results: IScreenshot[];
 }
+export interface IGenreResponse {
+    count: number;
+    results: IGenre[];
+}

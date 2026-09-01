@@ -6,7 +6,7 @@ export const gameService = {
         Promise<IGameListResponse> => {
         const response = await apiClient.get<IGameListResponse>('/games', {
             params: {
-                page,
+                page: page,
                 page_size: pageSize,
             },
         });
@@ -20,6 +20,17 @@ export const gameService = {
         const response = await apiClient.get<IGameListResponse>('/games', {
             params: {
                 search: query,
+                search_precise: true,
+            },
+        });
+        return response.data;
+    },
+    getGamesByGenre: async (genreSlug: string, page: number = 1):
+        Promise<IGameListResponse> => {
+        const response = await apiClient.get<IGameListResponse>('/games', {
+            params: {
+                genres: genreSlug,
+                page: page,
             },
         });
         return response.data;
