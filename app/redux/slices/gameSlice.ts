@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { IBaseState } from "@types";
 import { handleAsyncAction } from "@utils/reduxHelper";
-import { getGameDetailProcess, getGamesProcess } from "../actions/gameActions";
+import { getGameDetailProcess, getGamesProcess, searchGamesProcess } from "../actions/gameActions";
 
 const initialState: IBaseState = {
     isLoading: {},
@@ -10,23 +10,25 @@ const initialState: IBaseState = {
     status: {},
     message: {},
 };
-
 export const gameSlice = createSlice({
     name: 'game',
     initialState,
     reducers: {
-        resetGame: (state) => {
-            Object.assign(state, initialState);
+        resetGameDetail: (state) => {
+            state.data.getGameDetailProcess = undefined;
+            state.data.getGameScreenshotsProcess = undefined;
         },
-        clearErrors: (state) => {
-            state.error = {};
-        },
+        resetSearch: (state) => {
+            state.data.searchGamesProcess = undefined;
+        }
     },
     extraReducers: (builder) => {
-        handleAsyncAction(builder, getGamesProcess, 'getGameProcess');
+        handleAsyncAction(builder, getGamesProcess, 'getGamesProcess');
         handleAsyncAction(builder, getGameDetailProcess, 'getGameDetailProcess');
+        handleAsyncAction(builder, searchGamesProcess, 'searchGamesProcess');
+        handleAsyncAction(builder, getGameScreenshotsProcess, 'getGameScreenshotsProcess');
     },
 });
 
-export const { resetGame, clearErrors } = gameSlice.actions;
+export const { resetGameDetail, resetSearch } = gameSlice.actions;
 export default gameSlice.reducer;
