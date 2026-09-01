@@ -22,6 +22,7 @@ module.exports = {
           '@utils': './app/utils',
           '@hooks': './app/hooks',
           '@types': '.app/types',
+          '@api': './app/services',
         },
       },
     ],

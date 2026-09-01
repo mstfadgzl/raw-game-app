@@ -26,6 +26,9 @@
       "@types": [
         "./app/types"
       ],
+      "@api": [
+        "./app/services"
+      ]
     }
   },
   "include": [

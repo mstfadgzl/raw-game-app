@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { IGameDetail, IGameListResponse } from "@types";
-import { gameService } from "@services/index";
+import { IGameDetail, IGameListResponse, IScreenshotResponse } from "@types";
+import { gameService, screenshotService } from "@services/index";
 
 export const getGamesProcess = createAsyncThunk<IGameListResponse, { page: number }>(
     'game/getGamesProcess',
@@ -22,4 +22,26 @@ export const getGameDetailProcess = createAsyncThunk<IGameDetail, number>(
             return rejectWithValue(error);
         }
     },
+);
+
+export const searchGamesProcess = createAsyncThunk<IGameListResponse, string>(
+    'game/searchGamesProcess',
+    async (query, { rejectWithValue }) => {
+        try {
+            return await gameService.searchGames(query);
+        } catch (error: any) {
+            return rejectWithValue(error);
+        }
+    }
+);
+
+export const getGameScreenshotsProcess = createAsyncThunk<IScreenshotResponse, number>(
+    'game/getGameScreenshotsProcess',
+    async (id, { rejectWithValue }) => {
+        try {
+            return await screenshotService.getGameScreenshots(id);
+        } catch (error: any) {
+            return rejectWithValue(error);
+        }
+    }
 );
