@@ -88,10 +88,10 @@ export interface IGenreResponse {
 }
 
 export interface IGameState {
-    isLoading: { [key: string]: boolean };
-    data: {
-        getGamesProcess?: IGameListResponse;
-        getGameDetailProcess?: IGameDetail;
-    };
-    error: { [key: string]: any };
+  isLoading: {[key: string]: boolean};
+  data: {
+    getGamesProcess?: IGameListResponse;
+    getGameDetailProcess?: IGameDetail;
+  };
+  error: {[key: string]: any};
 }
