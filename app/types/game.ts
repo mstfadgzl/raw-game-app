@@ -86,3 +86,12 @@ export interface IGenreResponse {
     count: number;
     results: IGenre[];
 }
+
+export interface IGameState {
+    isLoading: { [key: string]: boolean };
+    data: {
+        getGamesProcess?: IGameListResponse;
+        getGameDetailProcess?: IGameDetail;
+    };
+    error: { [key: string]: any };
+}
