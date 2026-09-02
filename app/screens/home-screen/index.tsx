@@ -19,20 +19,14 @@ import { HomeScreenNavigationProp } from '@types';
 const HomeScreen = () => {
     const dispatch = useAppDispatch();
     const navigation = useNavigation<HomeScreenNavigationProp>();
-
     const [page, setPage] = useState(1);
-
-    // Redux State'leri
     const { data, isLoading, error } = useAppSelector(state => state.game);
     const { data: genreData } = useAppSelector(state => state.genre);
-
     const games = data.getGamesProcess?.results || [];
     const genres = genreData.getGenresProcess?.results || [];
-
-    // Hataların çözümü için bu değişken tanımları kritik:
     const isInitialLoading = isLoading['getGamesProcess'] && page === 1;
     const isMoreLoading = isLoading['getGamesProcess'] && page > 1;
-    const isRefreshing = isLoading['getGamesProcess'] && page === 1; // Hata veren değişken
+    const isRefreshing = isLoading['getGamesProcess'] && page === 1;
     const hasError = error['getGamesProcess'];
 
     useEffect(() => {
@@ -46,20 +40,15 @@ const HomeScreen = () => {
     }, [dispatch]);
 
     const loadMore = () => {
-        // API'nin 'next' alanı varsa ve şu an yükleme yapılmıyorsa yeni sayfa iste
         if (!isLoading['getGamesProcess'] && data.getGamesProcess?.next) {
             const nextPage = page + 1;
             setPage(nextPage);
             dispatch(getGamesProcess({ page: nextPage }));
         }
     };
-
     if (hasError && games.length === 0) {
         return <ErrorState onRetry={onRefresh} message="Sunucuya bağlanırken bir hata oluştu." />;
     }
-
-    // --- RENDER PARÇALARI ---
-
     const renderHeader = () => (
         <View style={styles.header}>
             <View>
@@ -114,7 +103,6 @@ const HomeScreen = () => {
                         tintColor={colors.primary}
                     />
                 }
-                // ListEmptyComponent hatası için null yerine boş bir View veya undefined dönmek daha sağlıklıdır
                 ListEmptyComponent={!isInitialLoading ? <EmptyState /> : undefined}
                 ListFooterComponent={
                     isMoreLoading ? (
@@ -123,7 +111,6 @@ const HomeScreen = () => {
                 }
             />
 
-            {/* İlk yükleme için Skeleton Overlay */}
             {isInitialLoading && (
                 <View style={styles.skeletonOverlay}>
                     {[1, 2, 3, 4].map((i) => (
