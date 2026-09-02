@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tab-navigator';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BottomTabParamList } from '@types';
 import { HomeStack } from './home-stack';
 import { colors } from '../theme/color';

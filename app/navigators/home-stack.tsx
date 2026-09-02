@@ -5,9 +5,9 @@ import { HomeStackParamList } from "@types";
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 
-export const HomeStack = () => {
+export const HomeStack = () => (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="HomeScreen" component={HomeScreen} />
         <Stack.Screen name="GameDetail" component={DetailScreen} />
     </Stack.Navigator>
-};
+);
