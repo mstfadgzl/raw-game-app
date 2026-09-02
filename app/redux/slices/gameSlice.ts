@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { IBaseState } from "@types";
-import { handleAsyncAction } from "@utils/reduxHelper";
+import { handleAsyncAction } from "@utils";
 import { getGameDetailProcess, getGameScreenshotsProcess, getGamesProcess, searchGamesProcess } from "../actions/gameActions";
 
 const initialState: IBaseState = {
@@ -47,7 +47,6 @@ export const gameSlice = createSlice({
             state.status['getGamesProcess'] = 'error';
             state.error['getGamesProcess'] = action.payload || action.error;
         });
-        handleAsyncAction(builder, getGamesProcess, 'getGamesProcess');
         handleAsyncAction(builder, getGameDetailProcess, 'getGameDetailProcess');
         handleAsyncAction(builder, searchGamesProcess, 'searchGamesProcess');
         handleAsyncAction(builder, getGameScreenshotsProcess, 'getGameScreenshotsProcess');

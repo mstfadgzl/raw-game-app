@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BottomTabParamList } from '@types';
 import { HomeStack } from './home-stack';
 import { colors } from '../theme/colors';
-import SearchScreen from '@screens/search-screen';
+import { SearchScreen } from '@screens';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 

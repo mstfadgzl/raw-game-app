@@ -2,26 +2,26 @@
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
     "paths": {
-      "@components/*": [
-        "./app/components/*"
+      "@components": [
+        "./app/components"
       ],
-      "@services/*": [
-        "./app/api/*"
+      "@services": [
+        "./app/api"
       ],
-      "@screens/*": [
-        "./app/screens/*"
+      "@screens": [
+        "./app/screens"
       ],
-      "@assets/*": [
-        "./app/assets/*"
+      "@assets": [
+        "./app/assets"
       ],
-      "@navigators/*": [
-        "./app/navigators/*"
+      "@navigators": [
+        "./app/navigators"
       ],
-      "@utils/*": [
-        "./app/utils/*"
+      "@utils": [
+        "./app/utils"
       ],
-      "@hooks/*": [
-        "./app/hooks/*"
+      "@hooks": [
+        "./app/hooks"
       ],
       "@types": [
         "./app/types"
@@ -31,6 +31,9 @@
       ],
       "@theme": [
         "./app/theme"
+      ],
+      "@redux": [
+        "./app/redux"
       ],
     }
   },

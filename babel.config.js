@@ -24,6 +24,7 @@ module.exports = {
           '@types': '.app/types',
           '@api': './app/services',
           '@theme': './app/theme',
+          '@redux': './app/redux',
         },
       },
     ],
