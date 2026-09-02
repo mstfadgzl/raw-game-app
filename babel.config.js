@@ -23,6 +23,7 @@ module.exports = {
           '@hooks': './app/hooks',
           '@types': '.app/types',
           '@api': './app/services',
+          '@theme': './app/theme',
         },
       },
     ],

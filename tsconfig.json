@@ -28,7 +28,10 @@
       ],
       "@api": [
         "./app/services"
-      ]
+      ],
+      "@theme": [
+        "./app/theme"
+      ],
     }
   },
   "include": [

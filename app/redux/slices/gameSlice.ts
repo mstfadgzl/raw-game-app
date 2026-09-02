@@ -23,6 +23,30 @@ export const gameSlice = createSlice({
         }
     },
     extraReducers: (builder) => {
+        builder.addCase(getGamesProcess.pending, (state) => {
+            state.isLoading['getGamesProcess'] = true;
+        });
+        builder.addCase(getGamesProcess.fulfilled, (state, action) => {
+            state.isLoading['getGamesProcess'] = false;
+            state.status['getGamesProcess'] = 'success';
+            const { page } = action.meta.arg;
+            if (page === 1) {
+                state.data['getGamesProcess'] = action.payload;
+            } else {
+                state.data['getGamesProcess'] = {
+                    ...action.payload,
+                    results: [
+                        ...(state.data['getGameProcess']?.results || []),
+                        ...action.payload.results
+                    ]
+                };
+            }
+        });
+        builder.addCase(getGamesProcess.rejected, (state, action) => {
+            state.isLoading['getGamesProcess'] = false;
+            state.status['getGamesProcess'] = 'error';
+            state.error['getGamesProcess'] = action.payload || action.error;
+        });
         handleAsyncAction(builder, getGamesProcess, 'getGamesProcess');
         handleAsyncAction(builder, getGameDetailProcess, 'getGameDetailProcess');
         handleAsyncAction(builder, searchGamesProcess, 'searchGamesProcess');

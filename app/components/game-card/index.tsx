@@ -1,34 +1,30 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import FastImage from 'react-native-fast-image'; // 4. Adım optimizasyonu burada!
 import { IGame } from '@types';
 import { styles } from './styles';
 
 interface GameCardProps {
     game: IGame;
-    onPress: (game: IGame) => void;
+    onPress: (id: number, name: string) => void;
 }
 
-export const GameCard: React.FC<GameCardProps> = ({ game, onPress }) => {
-    return (
-        <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.container}
-            onPress={() => onPress(game)}
-        >
-            <Image
-                source={{ uri: game.background_image }}
-                style={styles.image}
-                resizeMode="cover"
-            />
-            <View style={styles.infoContainer}>
-                <Text style={styles.title} numberOfLines={1}>{game.name}</Text>
-                <View style={styles.footer}>
-                    <View style={styles.ratingContainer}>
-                        <Text style={styles.ratingText}>★ {game.rating.toFixed(1)}</Text>
-                    </View>
-                    <Text style={styles.releaseDate}>{game.released}</Text>
-                </View>
+export const GameCard: React.FC<GameCardProps> = ({ game, onPress }) => (
+    <TouchableOpacity
+        style={styles.container}
+        onPress={() => onPress(game.id, game.name)}
+        activeOpacity={0.9}
+    >
+        <FastImage
+            style={styles.image}
+            source={{ uri: game.background_image, priority: FastImage.priority.normal }}
+            resizeMode={FastImage.resizeMode.cover}
+        />
+        <View style={styles.info}>
+            <Text style={styles.title} numberOfLines={2}>{game.name}</Text>
+            <View style={styles.badge}>
+                <Text style={styles.rating}>★ {game.rating}</Text>
             </View>
-        </TouchableOpacity>
-    );
-};
+        </View>
+    </TouchableOpacity>
+);
