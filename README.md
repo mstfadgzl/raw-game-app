@@ -17,6 +17,6 @@ babel de anlaması için {npm i babel-plugin-module-resolver} kullanıyoruz sonr
 
 ----2.3 adım redux klasörünün içine actions klasörü açıyoruz ve thunk işlemlerini buraya yazıyoruz 
 
----2.4 sliceları tek tek yazmak yerine utils içine redux helper oluşturuyoruz ve tüm sliceları ortak toplayacak bir yapı oluşturuyoruz daha sonra slice dsyasına gidip bu reduxhelperi import ediyoruz... daha sonra bunları configurestore diye store.ts dosyasına atıyoruz 
+---2.4 sliceları tek tek yazmak yerine utils içine redux helper oluşturuyoruz ve tüm sliceları ortak toplayacak bir yapı oluşturuyoruz daha sonra slice dsyasına gidip bu reduxhelperi import ediyoruz... daha sonra bunları configurestore diye store.ts dosyasına atıyoruz ondan sonra da hooks içine useappdispatch ve useappselector oluşturuyoruz
 
 
