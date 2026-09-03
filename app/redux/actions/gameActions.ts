@@ -3,15 +3,10 @@ import { IAchievementResponse, IGameDetail, IGameListResponse, IRedditResponse, 
 import { gameService, screenshotService } from "@services";
 import { createAppAsyncThunk } from "@utils";
 
-export const getGamesProcess = createAsyncThunk<IGameListResponse, { page: number }>(
+
+export const getGamesProcess = createAppAsyncThunk<IGameListResponse, { page: number }>(
     'game/getGamesProcess',
-    async ({ page }, { rejectWithValue }) => {
-        try {
-            return await gameService.getGames(page);
-        } catch (error: any) {
-            return rejectWithValue(error);
-        }
-    },
+    ({ page }) => gameService.getGames(page)
 );
 
 export const getGameDetailProcess = createAsyncThunk<IGameDetail, number>(
