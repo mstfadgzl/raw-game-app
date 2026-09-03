@@ -96,3 +96,18 @@ export interface IGameState {
     };
     error: { [key: string]: any };
 }
+export interface ITrailer {
+
+}
+export interface IAchievements {
+    id: number;
+    name: string;
+    description: string;
+    image: string;
+}
+export interface IAchievementsResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: IAchievements[];
+}
