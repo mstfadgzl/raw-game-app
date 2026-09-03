@@ -7,9 +7,5 @@ export interface IRedditPost {
     username: string;
     created: string;
 }
-export interface IRedditResponse {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: IRedditPost[];
-}
+
+export type IRedditResponse = IPaginatedResponse<IRedditPost>;
