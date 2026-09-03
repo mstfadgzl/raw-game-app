@@ -9,5 +9,7 @@ export interface IRedditPost {
 }
 export interface IRedditResponse {
     count: number;
+    next: string | null;
+    previous: string | null;
     results: IRedditPost[];
 }
