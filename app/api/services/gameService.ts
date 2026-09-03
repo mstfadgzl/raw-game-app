@@ -1,4 +1,4 @@
-import { IGameDetail, IGameListResponse, ITrailer, ITrailerResponse } from "../../types";
+import { IAchievementResponse, IGameDetail, IGameListResponse, IRedditResponse, ITrailer, ITrailerResponse } from "../../types";
 import apiClient from '../client';
 
 export const gameService = {
@@ -39,4 +39,24 @@ export const gameService = {
         const response = await apiClient.get<ITrailerResponse>(`/games/${id}/movies`);
         return response.data;
     },
+    getGameAchievements: async (id: number, page: number = 1): Promise<IAchievementResponse> => {
+        const response = await apiClient.get<IAchievementResponse>(`/games/${id}/achievements`, {
+            params: { page }
+        });
+        return response.data;
+    },
+    getGameSeries: async (id: number): Promise<IGameListResponse> => {
+        const response = await apiClient.get<IGameListResponse>(`/games/${id}/game-series`);
+        return response.data;
+    },
+    getGameAddition: async (id: number): Promise<IGameListResponse> => {
+        const response = await apiClient.get<IGameListResponse>(`/games/${id}/additions`);
+        return response.data;
+    },
+    getGameRedditPosts: async (id: number, page: number = 1): Promise<IRedditResponse> => {
+        const response = await apiClient.get<IRedditResponse>(`/games/${id}/reddit`, {
+            params: { page }
+        });
+        return response.data;
+    }
 };
