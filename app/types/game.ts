@@ -112,14 +112,7 @@ export interface IGenreResponse {
     results: IGenre[];
 }
 
-export interface IGameState {
-    isLoading: { [key: string]: boolean };
-    data: {
-        getGamesProcess?: IGameListResponse;
-        getGameDetailProcess?: IGameDetail;
-    };
-    error: { [key: string]: any };
-}
+
 export interface ITrailer {
     id: number;
     name: string;
