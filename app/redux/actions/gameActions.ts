@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { IGameDetail, IGameListResponse, IScreenshotResponse, ITrailerResponse } from "@types";
+import { IAchievementResponse, IGameDetail, IGameListResponse, IScreenshotResponse, ITrailerResponse } from "@types";
 import { gameService, screenshotService } from "@services";
 
 export const getGamesProcess = createAsyncThunk<IGameListResponse, { page: number }>(
@@ -55,4 +55,24 @@ export const getGameTrailersProcess = createAsyncThunk<ITrailerResponse, number>
             return rejectWithValue(error);
         }
     }
-)
+);
+export const getGameAchievementsProcess = createAsyncThunk<IAchievementResponse, number>(
+    'game/getGameAchievementProcess',
+    async (id, { rejectWithValue }) => {
+        try {
+            return await gameService.getGameAchievements(id);
+        } catch (error: any) {
+            return rejectWithValue(error);
+        }
+    }
+);
+export const getGameAdditionProcess = createAsyncThunk<IGameListResponse, number>(
+    'game/getGameAdditionProcess',
+    async (id, { rejectWithValue }) => {
+        try {
+            return await gameService.getGameSeries(id);
+        } catch (error: any) {
+            return rejectWithValue(error);
+        }
+    }
+);
