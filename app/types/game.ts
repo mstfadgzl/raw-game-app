@@ -1,26 +1,7 @@
 import { IDeveloper, IPaginatedResponse } from "@types";
+import { IParentPlatform, IPlatform } from "./platform";
 
-export interface IParentPlatform {
-    platform: {
-        id: number;
-        name: string;
-        slug: string;
-    };
-}
 
-export interface IPlatform {
-    platform: {
-        id: number;
-        name: string;
-        slug: string;
-        image_background?: string;
-    };
-    released_at?: string;
-    requirements?: {
-        minimum?: string;
-        recommended?: string;
-    };
-}
 
 export interface IGenre {
     id: number;
@@ -113,3 +94,8 @@ export interface IAchievement {
 
 export type IAchievementResponse = IPaginatedResponse<IAchievement>;
 export type ITrailerResponse = IPaginatedResponse<ITrailer>;
+export type IGameListResponse = IPaginatedResponse<IGame>;
+export type IScreenshotResponse = IPaginatedResponse<IScreenshot>;
+export type IGenreResponse = IPaginatedResponse<IGenre>;
+export type ITagResponse = IPaginatedResponse<ITag>;
+export type IDeveloperResponse = IPaginatedResponse<IDeveloper>;
