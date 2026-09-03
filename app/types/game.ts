@@ -1,4 +1,4 @@
-import { IPaginatedResponse } from "@types";
+import { IDeveloper, IPaginatedResponse } from "@types";
 
 export interface IParentPlatform {
     platform: {
@@ -47,9 +47,11 @@ export interface IGame {
     rating: number;
     metacritic: number;
     added: number;
+    playtime: number;
     parent_platforms?: IParentPlatform[];
     platforms?: IPlatform[];
     genres?: IGenre[];
+    tags?: ITag[];
 }
 
 export interface IGameDetail extends IGame {
@@ -61,57 +63,33 @@ export interface IGameDetail extends IGame {
     metacritic_url: string;
     metacritic_platforms: {
         metascore: number;
-        url: string,
+        url: string;
         platform: {
             platform: number;
             name: string;
             slug: string;
         };
     }[];
-    tags: ITag[];
     website: string;
-    playtime: number;
-    developers: {
-        id: number;
-        name: string;
-        image_background: string;
-    }[];
-    publishers: {
-        id: number;
-        name: string;
-        image_background: string;
-    }[];
+    dominant_color: string;
+    saturated_color: string;
+    developers: IDeveloper[];
+    publishers: IDeveloper[];
     stores: {
         id: number;
         store: {
             id: number;
             name: string;
             domain: string;
+            slug: string;
         };
     }[];
 }
-
 export interface IScreenshot {
     id: number;
     image: string;
     width: number;
     height: number;
-}
-
-export interface IGameListResponse {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: IGame[];
-}
-
-export interface IScreenshotResponse {
-    count: number;
-    results: IScreenshot[];
-}
-export interface IGenreResponse {
-    count: number;
-    results: IGenre[];
 }
 
 
@@ -124,10 +102,7 @@ export interface ITrailer {
         max: string;
     };
 }
-export interface ITrailerResponse {
-    count: number;
-    results: ITrailer[];
-}
+
 export interface IAchievement {
     id: number;
     name: string;
@@ -137,3 +112,4 @@ export interface IAchievement {
 }
 
 export type IAchievementResponse = IPaginatedResponse<IAchievement>;
+export type ITrailerResponse = IPaginatedResponse<ITrailer>;
