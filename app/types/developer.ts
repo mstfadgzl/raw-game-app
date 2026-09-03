@@ -1,3 +1,5 @@
+import { IPaginatedResponse } from "@types";
+
 export interface IDeveloper {
     id: number;
     name: string;
@@ -6,11 +8,6 @@ export interface IDeveloper {
     image_background: string;
     description: string;
 }
-export interface IPublishers {
-    id: number;
-    name: string;
-    slug: string;
-    game_count: number;
-    image_background: string;
-    description: string;
-}
+//IPublisher yapısı IDeveloper ile aynı olduğu için ayrı ayrı yazmana gerek yok
+
+export type IDeveloperResponse = IPaginatedResponse<IDeveloper>;
