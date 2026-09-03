@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { genreService } from "@services/index";
+import { genreService } from "@services";
 
 export const getGenresProcess = createAsyncThunk(
     'genre/getGenresProcess',
