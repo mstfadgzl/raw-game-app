@@ -67,7 +67,7 @@ export const DetailScreen = () => {
                             <AppText variant="body" bold>{detail?.released ? detail.released.split('-')[0] : '-'}</AppText>
                         </View>
                         <View style={styles.metaBox}>
-                            <AppText variant="caption">PUAN (META)</AppText>
+                            <AppText variant="caption">METACRİTİC</AppText>
                             <AppText style={styles.metacritic}>{detail?.metacritic || 'N/A'}</AppText>
                         </View>
                         <View style={styles.metaBox}>
