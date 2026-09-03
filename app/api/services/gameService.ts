@@ -1,4 +1,4 @@
-import { IGameDetail, IGameListResponse } from "../../types";
+import { IGameDetail, IGameListResponse, ITrailer, ITrailerResponse } from "../../types";
 import apiClient from '../client';
 
 export const gameService = {
@@ -33,6 +33,10 @@ export const gameService = {
                 page: page,
             },
         });
+        return response.data;
+    },
+    getGameTrailers: async (id: number): Promise<ITrailerResponse> => {
+        const response = await apiClient.get<ITrailerResponse>(`/games/${id}/movies`);
         return response.data;
     },
 };
