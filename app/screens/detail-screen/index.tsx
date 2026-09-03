@@ -83,7 +83,7 @@ export const DetailScreen = () => {
                         keyExtractor={(item) => item.id.toString()}
                         showsHorizontalScrollIndicator={false}
                         renderItem={({ item, index }) => (
-                            <TouchableOpacity onPress={() => setSelectedImageIndex(item)}>
+                            <TouchableOpacity onPress={() => setSelectedImageIndex(index)}>
                                 <Image source={{ uri: item.image }} style={styles.screenshot} />
                             </TouchableOpacity>
                         )}
