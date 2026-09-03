@@ -57,6 +57,7 @@ export const gameSlice = createSlice({
         });
         builder.addCase(getGamesProcess.rejected, (state, action) => {
             state.isLoading['getGamesProcess'] = false;
+            state.isLoading['getGamesMoreLoading'] = false;
             state.status['getGamesProcess'] = 'error';
             state.error['getGamesProcess'] = action.payload || action.error;
         });
