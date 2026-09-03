@@ -26,12 +26,21 @@ export const gameSlice = createSlice({
         }
     },
     extraReducers: (builder) => {
-        builder.addCase(getGamesProcess.pending, (state) => {
-            state.isLoading['getGamesProcess'] = true;
+        builder.addCase(getGamesProcess.pending, (state, action) => {
+
+            const { page } = action.meta.arg;
+            if (page === 1) {
+
+                state.isLoading['getGamesProcess'] = true;
+            } else {
+                state.isLoading['getGamesProcess'] = false;
+                state.isLoading['getGamesMoreLoading'] = true
+            }
             state.error['getGamesProcess'] = undefined;
         });
         builder.addCase(getGamesProcess.fulfilled, (state, action) => {
             state.isLoading['getGamesProcess'] = false;
+            state.isLoading['getGamesMoreLoading'] = false;
             state.status['getGamesProcess'] = 'success';
             const { page } = action.meta.arg;
             if (page === 1) {
