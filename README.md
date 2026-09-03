@@ -20,3 +20,8 @@ babel de anlaması için {npm i babel-plugin-module-resolver} kullanıyoruz sonr
 ---2.4 sliceları tek tek yazmak yerine utils içine redux helper oluşturuyoruz ve tüm sliceları ortak toplayacak bir yapı oluşturuyoruz daha sonra slice dsyasına gidip bu reduxhelperi import ediyoruz... daha sonra bunları configurestore diye store.ts dosyasına atıyoruz ondan sonra da hooks içine useappdispatch ve useappselector oluşturuyoruz
 
 
+
+
+1.interface oluştur
+2.servisleri yaz
+3.action ları yaz ve actionları tekrar yazmamak için createAppAsyncThunk helperı yaz
