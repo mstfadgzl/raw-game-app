@@ -18,6 +18,8 @@ export const DetailScreen = () => {
     const { gameId, gameName } = route.params;
 
     const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+    const windowWidth = Math.round(Dimensions.get('window').width);
+    const windowHeight = Math.round(Dimensions.get('window').height);
 
     const { data, isLoading, error } = useAppSelector((state) => state.game);
     const detail = data.getGameDetailProcess;
@@ -103,14 +105,12 @@ export const DetailScreen = () => {
 
             >
                 <View style={styles.modalOverlay}>
-                    {/* KRİTİK DÜZELTME: Sadece index null değilse FlatList'i çiz */}
                     {selectedImageIndex !== null && screenshots.length > 0 && (
                         <FlatList
                             data={screenshots}
                             horizontal
                             pagingEnabled
                             keyExtractor={(item) => item.id.toString()}
-                            // initialScrollIndex'in null olmadığından emin oluyoruz
                             initialScrollIndex={selectedImageIndex}
                             getItemLayout={(_, index) => ({
                                 length: width,
