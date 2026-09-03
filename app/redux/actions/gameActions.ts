@@ -46,6 +46,11 @@ export const getGameScreenshotsProcess = createAsyncThunk<IScreenshotResponse, n
         }
     }
 );
+export const getGamesByGenreProcess = createAppAsyncThunk<IGameListResponse, { genreSlug: string, page: number }>(
+    'game/getGamesByGenreProcess',
+    ({ genreSlug, page }) => gameService.getGamesByGenre(genreSlug, page)
+);
+
 
 export const getGameTrailersProcess = createAsyncThunk<ITrailerResponse, number>(
     'game/getGameTrailerProcess',
@@ -67,6 +72,10 @@ export const getGameAchievementsProcess = createAsyncThunk<IAchievementResponse,
         }
     }
 );
+export const getGameSeriesProcess = createAppAsyncThunk<IGameListResponse, number>(
+    'game/getGameSeriesProcess',
+    (id) => gameService.getGameSeries(id)
+);
 export const getGameAdditionProcess = createAppAsyncThunk<IGameListResponse, number>(
     'game/getGameAdditionProcess',
     (id) => gameService.getGameSeries(id)
@@ -74,8 +83,4 @@ export const getGameAdditionProcess = createAppAsyncThunk<IGameListResponse, num
 export const getGameRedditPostsProcess = createAppAsyncThunk<IRedditResponse, { id: number, page: number }>(
     'game/getGameRedditPostsProcess',
     ({ id, page }) => gameService.getGameRedditPosts(id, page)
-);
-export const getGamesByGenreProcess = createAppAsyncThunk<IGameListResponse, { genreSlug: string, page: number }>(
-    'game/getGamesByGenreProcess',
-    ({ genreSlug, page }) => gameService.getGamesByGenre(genreSlug, page)
 );
