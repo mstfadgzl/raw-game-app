@@ -27,6 +27,14 @@ export interface IGenre {
     image_background: string;
     games_count: number;
 }
+export interface ITag {
+    id: number;
+    name: string;
+    slug: string;
+    language: string;
+    games_count: number;
+    image_background: string;
+}
 
 export interface IGame {
     id: number;
@@ -44,6 +52,20 @@ export interface IGame {
 
 export interface IGameDetail extends IGame {
     description_raw: string;
+    achievement_count: number;
+    reddit_url: string;
+    reddit_name: string;
+    reddit_description: string;
+    metacritic_url: string;
+    metacritic_platforms: {
+        metascore: number;
+        url: string,
+        platform: {
+            platform: number;
+            name: string;
+        };
+    }[];
+    tags:
     website: string;
     developers: {
         id: number;
