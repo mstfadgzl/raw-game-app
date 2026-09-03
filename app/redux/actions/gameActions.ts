@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { IGameDetail, IGameListResponse, IScreenshotResponse } from "@types";
+import { IGameDetail, IGameListResponse, IScreenshotResponse, ITrailerResponse } from "@types";
 import { gameService, screenshotService } from "@services";
 
 export const getGamesProcess = createAsyncThunk<IGameListResponse, { page: number }>(
@@ -45,3 +45,5 @@ export const getGameScreenshotsProcess = createAsyncThunk<IScreenshotResponse, n
         }
     }
 );
+
+export const getGameTrailers = createAsyncThunk<ITrailerResponse>

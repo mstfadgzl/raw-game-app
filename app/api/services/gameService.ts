@@ -58,5 +58,5 @@ export const gameService = {
             params: { page }
         });
         return response.data;
-    }
+    },
 };
