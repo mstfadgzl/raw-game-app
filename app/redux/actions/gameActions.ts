@@ -46,4 +46,13 @@ export const getGameScreenshotsProcess = createAsyncThunk<IScreenshotResponse, n
     }
 );
 
-export const getGameTrailers = createAsyncThunk<ITrailerResponse>
+export const getGameTrailersProcess = createAsyncThunk<ITrailerResponse, number>(
+    'game/getGameTrailerProcess',
+    async (id, { rejectWithValue }) => {
+        try {
+            return await gameService.getGameTrailers(id);
+        } catch (error: any) {
+            return rejectWithValue(error);
+        }
+    }
+)
