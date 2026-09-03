@@ -40,7 +40,7 @@ export const gameSlice = createSlice({
                 state.data['getGamesProcess'] = {
                     ...action.payload,
                     results: [
-                        ...(state.data['getGameProcess']?.results || []),
+                        ...(state.data['getGamesProcess']?.results || []),
                         ...action.payload.results
                     ]
                 };
