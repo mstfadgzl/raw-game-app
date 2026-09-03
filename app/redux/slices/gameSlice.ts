@@ -62,11 +62,26 @@ export const gameSlice = createSlice({
             state.error['getGamesProcess'] = action.payload || action.error;
         });
 
-        builder.addCase(getGamesByGenreProcess.pending, (state) => {
-            state.isLoading['getGamesByGenreProcess'] = true;
+
+        //// GENRES
+
+
+        builder.addCase(getGamesByGenreProcess.pending, (state, action) => {
+            const { page } = action.meta.arg;
+
+            if (page === 1) {
+                state.isLoading['getGamesByGenreProcess'] = true;
+            } else {
+                state.isLoading['getGamesByGenreProcess'] = false;
+                state.isLoading['getGamesByGenreMoreLoading'] = true;
+            }
+            state.error['getGamesByGenreProcess'] = undefined;
         });
+
         builder.addCase(getGamesByGenreProcess.fulfilled, (state, action) => {
             state.isLoading['getGamesByGenreProcess'] = false;
+            state.isLoading['getGamesByGenreMoreLoading'] = false;
+
             const { page } = action.meta.arg;
             if (page === 1) {
                 state.data['getGamesByGenreProcess'] = action.payload;
@@ -77,8 +92,10 @@ export const gameSlice = createSlice({
                 };
             }
         });
+
         builder.addCase(getGamesByGenreProcess.rejected, (state, action) => {
             state.isLoading['getGamesByGenreProcess'] = false;
+            state.isLoading['getGamesByGenreMoreLoading'] = false;
             state.error['getGamesByGenreProcess'] = action.payload || action.error;
         });
 
