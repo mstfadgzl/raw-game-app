@@ -16,7 +16,8 @@ import { styles } from './styles';
 import { colors } from '@theme';
 import { HomeScreenNavigationProp } from '@types';
 
-const HomeScreen = () => {
+
+export const HomeScreen = () => {
     const dispatch = useAppDispatch();
     const navigation = useNavigation<HomeScreenNavigationProp>();
     const [page, setPage] = useState(1);
@@ -53,7 +54,7 @@ const HomeScreen = () => {
         <View style={styles.header}>
             <View>
                 <AppText variant="caption">HOŞ GELDİN,</AppText>
-                <AppText variant="h1" color={colors.primary}>Kâşif Gamer</AppText>
+                <AppText variant="h1" color={colors.primary}>User</AppText>
             </View>
             <View style={styles.avatarPlaceholder} />
         </View>
@@ -122,4 +123,3 @@ const HomeScreen = () => {
     );
 };
 
-export default HomeScreen;

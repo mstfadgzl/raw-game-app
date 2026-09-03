@@ -2,39 +2,67 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
-// 1. Home sekmesi içindeki ekranlar
+/** 
+ * 1. PARAMETRE LİSTELERİ 
+ * Her bir stack'in içindeki ekranları ve bekledikleri dataları tanımlar.
+ */
+
 export type HomeStackParamList = {
     HomeScreen: undefined;
     GameDetail: { gameId: number; gameName: string };
 };
 
-// 2. Search sekmesi içindeki ekranlar
 export type SearchStackParamList = {
     SearchScreen: undefined;
     GameDetail: { gameId: number; gameName: string };
 };
 
-// 3. Alt Menü (Bottom Tab) Yapısı
+export type FavoritesStackParamList = {
+    FavoritesScreen: undefined;
+    GameDetail: { gameId: number; gameName: string };
+};
+
 export type BottomTabParamList = {
-    HomeTab: undefined; // HomeStack'i kapsar
+    HomeTab: undefined;   // HomeStack'i kapsar
     SearchTab: undefined; // SearchStack'i kapsar
     FavoritesTab: undefined;
 };
 
-// 4. En dıştaki Ana Yapı
 export type AppStackParamList = {
     Main: undefined; // BottomTabStack'i kapsar
     Auth: undefined;
 };
 
-// HomeScreen içinde kullanacağın navigasyon tipi
-export type HomeScreenNavigationProp = NativeStackNavigationProp<
-    HomeStackParamList,
-    'HomeScreen'
->;
+/** 
+ * 2. NAVİGASYON PROPS (useNavigation için)
+ * Ekranların içinde "navigation.navigate" dediğinde çıkan seçenekleri belirler.
+ */
 
-// Eğer hem HomeStack içinde gezip hem de sekmeler arası geçiş yapacaksan (Composite):
-export type HomeTabCompositeNavigationProp = CompositeNavigationProp<
-    NativeStackNavigationProp<HomeStackParamList>,
+// Genel/Ortak Navigasyon Tipi (Hangi stack'te olursan ol detaylara gitmeni sağlar)
+export type MainStackNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
+
+// HomeScreen için: Hem kendi stack'inde gezebilir hem Tab değiştirebilir
+export type HomeScreenNavigationProp = CompositeNavigationProp<
+    NativeStackNavigationProp<HomeStackParamList, 'HomeScreen'>,
     BottomTabNavigationProp<BottomTabParamList>
 >;
+
+// SearchScreen için:
+export type SearchScreenNavigationProp = CompositeNavigationProp<
+    NativeStackNavigationProp<SearchStackParamList, 'SearchScreen'>,
+    BottomTabNavigationProp<BottomTabParamList>
+>;
+
+// GameDetail için:
+export type GameDetailNavigationProp = NativeStackNavigationProp<
+    HomeStackParamList,
+    'GameDetail'
+>;
+
+/** 
+ * 3. ROUTE PROPS (useRoute için)
+ * Ekranlara gelen "params" değerlerini okumak için kullanılır.
+ */
+
+export type GameDetailRouteProp = RouteProp<HomeStackParamList, 'GameDetail'>;
+export type SearchScreenRouteProp = RouteProp<SearchStackParamList, 'SearchScreen'>;
