@@ -36,6 +36,7 @@ export interface IGame {
     background_image: string;
     rating: number;
     metacritic: number;
+    added: number;
     parent_platforms?: IParentPlatform[];
     platforms?: IPlatform[];
     genres?: IGenre[];
@@ -88,10 +89,10 @@ export interface IGenreResponse {
 }
 
 export interface IGameState {
-  isLoading: {[key: string]: boolean};
-  data: {
-    getGamesProcess?: IGameListResponse;
-    getGameDetailProcess?: IGameDetail;
-  };
-  error: {[key: string]: any};
+    isLoading: { [key: string]: boolean };
+    data: {
+        getGamesProcess?: IGameListResponse;
+        getGameDetailProcess?: IGameDetail;
+    };
+    error: { [key: string]: any };
 }
