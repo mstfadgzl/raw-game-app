@@ -103,32 +103,36 @@ export const DetailScreen = () => {
 
             >
                 <View style={styles.modalOverlay}>
-                    <FlatList
-                        data={screenshots}
-                        horizontal
-                        pagingEnabled
-                        keyExtractor={(item) => item.id.toString()}
-                        initialScrollIndex={selectedImageIndex || 0}
-                        getItemLayout={(_, index) => ({
-                            length: width,
-                            offset: width * index,
-                            index,
-                        })}
-                        showsHorizontalScrollIndicator={false}
-                        renderItem={({ item, index }) => (
-                            <TouchableOpacity
-                                activeOpacity={1}
-                                style={{ width, height }}
-                                onPress={() => setSelectedImageIndex(null)} // Ekrana dokununca kapat (opsiyonel)
-                            >
-                                <Image
-                                    source={{ uri: item.image }}
-                                    style={styles.fullScreenImage}
-                                    resizeMode="contain"
-                                />
-                            </TouchableOpacity>
-                        )}
-                    />
+                    {/* KRİTİK DÜZELTME: Sadece index null değilse FlatList'i çiz */}
+                    {selectedImageIndex !== null && screenshots.length > 0 && (
+                        <FlatList
+                            data={screenshots}
+                            horizontal
+                            pagingEnabled
+                            keyExtractor={(item) => item.id.toString()}
+                            // initialScrollIndex'in null olmadığından emin oluyoruz
+                            initialScrollIndex={selectedImageIndex}
+                            getItemLayout={(_, index) => ({
+                                length: width,
+                                offset: width * index,
+                                index,
+                            })}
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    activeOpacity={1}
+                                    style={{ width, height }}
+                                    onPress={() => setSelectedImageIndex(null)}
+                                >
+                                    <Image
+                                        source={{ uri: item.image }}
+                                        style={styles.fullScreenImage}
+                                        resizeMode="contain"
+                                    />
+                                </TouchableOpacity>
+                            )}
+                        />
+                    )}
                 </View>
             </Modal>
         </Container>
