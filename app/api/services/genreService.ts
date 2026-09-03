@@ -1,4 +1,5 @@
-import apiClient from "@services/client";
+
+import apiClient from "../client";
 import { IGenreResponse } from "../../types";
 
 export const genreService = {

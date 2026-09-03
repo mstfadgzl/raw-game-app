@@ -1,4 +1,4 @@
-import apiClient from "@services/client";
+import apiClient from "../client";
 import { IScreenshotResponse } from "../../types";
 
 export const screenshotService = {
