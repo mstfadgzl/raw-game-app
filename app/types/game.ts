@@ -63,6 +63,7 @@ export interface IGameDetail extends IGame {
         platform: {
             platform: number;
             name: string;
+            slug: string;
         };
     }[];
     tags: ITag[];
