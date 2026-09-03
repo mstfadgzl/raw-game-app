@@ -1,7 +1,7 @@
 import { ICreatorResponse, IDeveloperResponse } from "@types";
 import apiClient from "../client"
 
-export const EntityService = {
+export const entityService = {
     getCreators: async (page: number = 1): Promise<ICreatorResponse> => {
         const response = await apiClient.get<ICreatorResponse>('/creators', {
             params: { page }
