@@ -105,8 +105,9 @@ export const DetailScreen = () => {
 
             >
                 <View style={styles.modalOverlay}>
-                    {selectedImageIndex !== null && screenshots.length > 0 && (
+                    {selectedImageIndex !== null && (
                         <FlatList
+                            key="fullscreen-galery"
                             data={screenshots}
                             horizontal
                             pagingEnabled
@@ -121,12 +122,12 @@ export const DetailScreen = () => {
                             renderItem={({ item }) => (
                                 <TouchableOpacity
                                     activeOpacity={1}
-                                    style={{ width, height }}
+                                    style={{ width: windowWidth, height: windowHeight }}
                                     onPress={() => setSelectedImageIndex(null)}
                                 >
                                     <Image
                                         source={{ uri: item.image }}
-                                        style={styles.fullScreenImage}
+                                        style={{ width: windowWidth, height: windowHeight }}
                                         resizeMode="contain"
                                     />
                                 </TouchableOpacity>
