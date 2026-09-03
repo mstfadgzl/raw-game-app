@@ -65,8 +65,9 @@ export interface IGameDetail extends IGame {
             name: string;
         };
     }[];
-    tags:
+    tags: ITag[];
     website: string;
+    playtime: number;
     developers: {
         id: number;
         name: string;
