@@ -71,4 +71,7 @@ export const getGameAdditionProcess = createAppAsyncThunk<IGameListResponse, num
     'game/getGameAdditionProcess',
     (id) => gameService.getGameSeries(id)
 );
-export const getGameRedditPostsProcess = createAppAsyncThunk<IRedditResponse, { id: number }>
+export const getGameRedditPostsProcess = createAppAsyncThunk<IRedditResponse, { id: number, page: number }>(
+    'game/getGameRedditPostsProcess',
+    ({ id, page }) => gameService.getGameRedditPosts(id, page)
+);

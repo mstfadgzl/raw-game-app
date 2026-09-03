@@ -6,7 +6,7 @@ export const createAppAsyncThunk = <Returned, ThunkArg = void>(
     asyncFn: (arg: ThunkArg) => Promise<Returned>) => {
     return createAsyncThunk<Returned, ThunkArg>(
         typePrefix,
-        async (arg, { rejectWithValue }) => {
+        async (arg: ThunkArg, { rejectWithValue }) => {
             try {
                 return await asyncFn(arg);
             } catch (error: any) {
