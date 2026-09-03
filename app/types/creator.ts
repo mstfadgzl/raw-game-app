@@ -1,3 +1,5 @@
+import { IPaginatedResponse } from "@types";
+
 export interface ICreatorPositions {
     id: number;
     name: string;
@@ -13,3 +15,5 @@ export interface ICreator {
     rating: string;
     positions: ICreatorPositions[];
 }
+
+export type ICreatorResponse = IPaginatedResponse<ICreator>;
