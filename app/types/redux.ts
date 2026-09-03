@@ -1,4 +1,4 @@
-import { IGameDetail, IGameListResponse } from "@types";
+import { IAchievementResponse, ICreatorResponse, IDeveloperResponse, IGameDetail, IGameListResponse, IGenreResponse, IRedditResponse, IScreenshotResponse, ITagResponse, ITrailerResponse } from "@types";
 
 export interface IBaseState<T = any> {
     isLoading: { [key: string]: boolean };
@@ -13,6 +13,15 @@ export interface IGameState {
     data: {
         getGamesProcess?: IGameListResponse;
         getGameDetailProcess?: IGameDetail;
+        getGameScreenshotsProcess?: IScreenshotResponse;
+        getGameTrailersProcess?: ITrailerResponse;
+        getGameAchievementsProcess?: IAchievementResponse;
+        getGameRedditPostsProcess?: IRedditResponse;
+        getGenresProcess?: IGenreResponse;
+        getTagsProcess?: ITagResponse;
+        getCreatorsProcess?: ICreatorResponse;
+        getDevelopersProcess?: IDeveloperResponse;
     };
     error: { [key: string]: any };
+    status: { [key: string]: string };
 }
