@@ -1,3 +1,5 @@
+import { IPaginatedResponse } from "@types";
+
 export interface IParentPlatform {
     platform: {
         id: number;
@@ -126,15 +128,12 @@ export interface ITrailerResponse {
     count: number;
     results: ITrailer[];
 }
-export interface IAchievements {
+export interface IAchievement {
     id: number;
     name: string;
     description: string;
     image: string;
+    precent: string;
 }
-export interface IAchievementsResponse {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: IAchievements[];
-}
+
+export type IAchievementResponse = IPaginatedResponse<IAchievement>;
