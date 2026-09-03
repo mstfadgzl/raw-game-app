@@ -120,7 +120,17 @@ export interface IGameState {
     error: { [key: string]: any };
 }
 export interface ITrailer {
-
+    id: number;
+    name: string;
+    preview: string;
+    data: {
+        480: string;
+        max: string;
+    };
+}
+export interface ITrailerResponse {
+    count: number;
+    results: ITrailer[];
 }
 export interface IAchievements {
     id: number;
