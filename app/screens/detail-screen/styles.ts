@@ -2,7 +2,7 @@ import { StyleSheet, Dimensions } from 'react-native';
 import { colors } from '@theme';
 import { spacing } from '@theme';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
     container: {
@@ -55,7 +55,7 @@ export const styles = StyleSheet.create({
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.95)', // Çok koyu siyah arka plan
+        backgroundColor: '#000',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -65,8 +65,8 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     fullScreenImage: {
-        width: '100%',
-        height: '100%',
+        width: width,
+        height: height,
     },
     closeButton: {
         position: 'absolute',

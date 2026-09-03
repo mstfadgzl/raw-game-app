@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Image, FlatList, Modal, TouchableOpacity, StatusBar } from 'react-native';
+import { ScrollView, View, Image, FlatList, Modal, TouchableOpacity, StatusBar, BackHandler, Dimensions } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '@hooks';
 import { getGameDetailProcess, getGameScreenshotsProcess } from '../../redux/actions/gameActions';
@@ -9,13 +9,15 @@ import { GameDetailRouteProp } from '@types'; // Doğru tip import edildi
 import { styles } from './styles';
 import { spacing, colors } from '@theme';
 
+const { width, height } = Dimensions.get('window');
+
 export const DetailScreen = () => {
     const dispatch = useAppDispatch();
     const route = useRoute<GameDetailRouteProp>();
     console.log("Gelen Parametreler:", route.params);
     const { gameId, gameName } = route.params;
 
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
     const { data, isLoading, error } = useAppSelector((state) => state.game);
     const detail = data.getGameDetailProcess;
@@ -28,10 +30,20 @@ export const DetailScreen = () => {
         dispatch(getGameDetailProcess(gameId));
         dispatch(getGameScreenshotsProcess(gameId));
 
+        const backAction = () => {
+            if (selectedImageIndex !== null) {
+                setSelectedImageIndex(null);
+                return true;
+            }
+            return false;
+        };
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
         return () => {
+            backHandler.remove();
             dispatch(resetGameDetail());
         };
-    }, [dispatch, gameId]);
+    }, [dispatch, gameId, selectedImageIndex]);
 
     if (isPageLoading) return <Container><Skeleton style={{ flex: 1, marginTop: 20 }} /></Container>;
     if (hasError) return <ErrorState onRetry={() => dispatch(getGameDetailProcess(gameId))} />;
@@ -68,8 +80,8 @@ export const DetailScreen = () => {
                         data={screenshots}
                         keyExtractor={(item) => item.id.toString()}
                         showsHorizontalScrollIndicator={false}
-                        renderItem={({ item }) => (
-                            <TouchableOpacity onPress={() => setSelectedImage(item.image)}>
+                        renderItem={({ item, index }) => (
+                            <TouchableOpacity onPress={() => setSelectedImageIndex(item)}>
                                 <Image source={{ uri: item.image }} style={styles.screenshot} />
                             </TouchableOpacity>
                         )}
@@ -84,31 +96,40 @@ export const DetailScreen = () => {
                 </View>
             </ScrollView>
             <Modal
-                visible={!!selectedImage}
+                visible={selectedImageIndex !== null}
                 transparent={true}
                 animationType="fade"
-                onRequestClose={() => setSelectedImage(null)}
+                onRequestClose={() => setSelectedImageIndex(null)}
+
             >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPress={() => setSelectedImage(null)}
-                >
-                    <StatusBar hidden={!!selectedImage} />
-                    <View style={styles.modalContent}>
-                        <Image
-                            source={{ uri: selectedImage || undefined }}
-                            style={styles.fullScreenImage}
-                            resizeMode="contain"
-                        />
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setSelectedImage(null)}
-                        >
-                            <AppText bold style={{ color: colors.primary }}>KAPAT</AppText>
-                        </TouchableOpacity>
-                    </View>
-                </TouchableOpacity>
+                <View style={styles.modalOverlay}>
+                    <FlatList
+                        data={screenshots}
+                        horizontal
+                        pagingEnabled
+                        keyExtractor={(item) => item.id.toString()}
+                        initialScrollIndex={selectedImageIndex || 0}
+                        getItemLayout={(_, index) => ({
+                            length: width,
+                            offset: width * index,
+                            index,
+                        })}
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={({ item, index }) => (
+                            <TouchableOpacity
+                                activeOpacity={1}
+                                style={{ width, height }}
+                                onPress={() => setSelectedImageIndex(null)} // Ekrana dokununca kapat (opsiyonel)
+                            >
+                                <Image
+                                    source={{ uri: item.image }}
+                                    style={styles.fullScreenImage}
+                                    resizeMode="contain"
+                                />
+                            </TouchableOpacity>
+                        )}
+                    />
+                </View>
             </Modal>
         </Container>
     );
