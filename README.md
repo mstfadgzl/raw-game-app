@@ -25,3 +25,4 @@ babel de anlaması için {npm i babel-plugin-module-resolver} kullanıyoruz sonr
 1.interface oluştur
 2.servisleri yaz
 3.action ları yaz ve actionları tekrar yazmamak için createAppAsyncThunk helperı yaz
+4. sliceları yaz ve store.ts içine aktar
