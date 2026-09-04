@@ -35,6 +35,9 @@
       "@redux": [
         "./app/redux"
       ],
+      "@actions": [
+        "./app/redux/actions"
+      ],
     }
   },
   "include": [
