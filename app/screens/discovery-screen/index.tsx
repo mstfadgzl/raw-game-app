@@ -2,7 +2,7 @@ import { getGamesProcess, getGenresProcess, getPlatformsProcess } from "@actions
 import { useAppDispatch, useAppSelector } from "@hooks"
 import { useNavigation } from "@react-navigation/native";
 import { MainStackNavigationProp } from "@types";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, RefreshControl, View, ActivityIndicator } from "react-native";
 import { styles } from "./styles";
 import { AppText, Container, GameCard, GenreChip, PlatformCard, SectionHeader, Skeleton } from "@components";
