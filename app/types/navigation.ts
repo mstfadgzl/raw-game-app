@@ -11,6 +11,10 @@ export type HomeStackParamList = {
     HomeScreen: undefined;
     GameDetail: { gameId: number; gameName: string };
 };
+export type DiscoveryStackParamList = {
+    DiscoveryScreen: undefined;
+
+}
 
 export type SearchStackParamList = {
     SearchScreen: undefined;
@@ -57,6 +61,11 @@ export type SearchScreenNavigationProp = CompositeNavigationProp<
 export type GameDetailNavigationProp = NativeStackNavigationProp<
     HomeStackParamList,
     'GameDetail'
+>;
+// DiscoveryScreen için:
+export type DiscoveryScreenNavigationProp = CompositeNavigationProp<
+    NativeStackNavigationProp<DiscoveryStackParamList, 'DiscoveryScreen'>,
+    BottomTabNavigationProp<BottomTabParamList>
 >;
 
 /** 
