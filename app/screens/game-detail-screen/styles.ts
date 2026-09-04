@@ -77,7 +77,6 @@ export const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         fontWeight: 'bold',
     },
-    // styles.ts içerisine eklenecek kısım
     favButton: {
         position: 'absolute',
         top: 20, // Telefonun üst barından (Safe Area) ne kadar aşağıda olacağı

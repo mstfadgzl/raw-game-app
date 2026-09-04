@@ -25,27 +25,24 @@ export const ExpansionsTab = () => {
 
     return (
         <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-            {/* 1. DLC & EK PAKETLER */}
             {dlcs.length > 0 && (
                 <View style={{ marginBottom: 20 }}>
                     <SectionHeader title="Ek Paketler (DLC)" />
-                    {dlcs.map(item => (
+                    {dlcs.map((item: any) => (
                         <CompactGameItem
-                            key={`dlc-${item.id}`} // Benzersiz prefix eklendi
+                            key={`dlc-${item.id}`}
                             game={item}
                             onPress={handleNavigate}
                         />
                     ))}
                 </View>
             )}
-
-            {/* 2. AYNI SERİDEKİ OYUNLAR */}
             {series.length > 0 && (
                 <View>
                     <SectionHeader title="Serinin Diğer Oyunları" />
-                    {series.map(item => (
+                    {series.map((item: any) => (
                         <CompactGameItem
-                            key={`series-${item.id}`} // Benzersiz prefix eklendi
+                            key={`series-${item.id}`}
                             game={item}
                             onPress={handleNavigate}
                         />
