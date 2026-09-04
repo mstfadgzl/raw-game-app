@@ -11,3 +11,5 @@ export * from './achievement-item';
 export * from './store-button';
 export * from './video-player';
 export * from './creator-card';
+export * from './reddit-post-item';
+export * from './compact-game-item';
