@@ -16,6 +16,7 @@ export type HomeStackParamList = {
 export type DiscoverStackParamList = {
     DiscoverMain: undefined;
     PlatformDetail: { id: number; name: string };
+    TagDetail: { slug: string; name: string };
     GenreDetail: { slug: string; name: string };
     CreatorDetail: { id: number; name: string };
     DeveloperDetail: { id: number; name: string };
@@ -79,6 +80,7 @@ export type GameDetailNavigationProp = NativeStackNavigationProp<HomeStackParamL
 /**
  * 5. ROUTE PROPS (PARAMETRE OKUMAK İÇİN)
 */
+export type TagDetailRouteProp = RouteProp<DiscoverStackParamList, 'TagDetail'>;
 export type DeveloperDetailRouteProp = RouteProp<DiscoverStackParamList, 'DeveloperDetail'>;
 export type GameDetailRouteProp = RouteProp<HomeStackParamList, 'GameDetail'>;
 export type PlatformDetailRouteProp = RouteProp<DiscoverStackParamList, 'PlatformDetail'>;

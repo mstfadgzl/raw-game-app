@@ -11,8 +11,11 @@ export const styles = StyleSheet.create({
         paddingBottom: spacing.md,
     },
     header: {
+        paddingHorizontal: spacing.md,
+        paddingVertical: spacing.lg,
+        color: colors.primary,
         textTransform: 'uppercase',
-        letterSpacing: 1,
+        letterSpacing: 2,
     },
     listContent: {
         paddingHorizontal: spacing.md,
