@@ -1,30 +1,50 @@
-import { getGamesProcess, getGenresProcess, getPlatformsProcess } from "@actions";
-import { useAppDispatch, useAppSelector } from "@hooks"
-import { useNavigation } from "@react-navigation/native";
-import { MainStackNavigationProp } from "@types";
-import { useCallback, useEffect } from "react";
-import { FlatList, RefreshControl, View } from "react-native";
-import { styles } from "./styles";
-import { AppText, Container, GameCard, GenreChip, PlatformCard, SectionHeader, Skeleton } from "@components";
-import { colors } from "@theme";
+import React, { useEffect, useCallback } from 'react';
+import { View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { useAppDispatch, useAppSelector } from '@hooks';
+import { useNavigation } from '@react-navigation/native';
+
+// Actions
+import { getGamesProcess } from '@actions';
+import { getPlatformsProcess } from '@actions';
+import { getGenresProcess } from '@actions';
+
+// Components
+import {
+    Container,
+    AppText,
+    GameCard,
+    PlatformCard,
+    GenreChip,
+    SectionHeader,
+    Skeleton
+} from '@components';
+
+// Types & Styles
+import { MainStackNavigationProp } from '@types';
+import { styles } from './styles';
+import { colors } from '@theme';
 
 export const DiscoveryScreen = () => {
     const dispatch = useAppDispatch();
     const navigation = useNavigation<MainStackNavigationProp>();
 
+    // Global State Seçimi (Multi-Slice)
     const gameStore = useAppSelector(state => state.game);
     const discoveryStore = useAppSelector(state => state.discovery);
     const genreStore = useAppSelector(state => state.genre);
 
+    // Verilerin Hazırlanması
     const platforms = discoveryStore.data.getPlatformsProcess?.results || [];
-    const genres = genreStore.data.getGenreProcess?.results || [];
+    const genres = genreStore.data.getGenresProcess?.results || [];
     const trendingGames = gameStore.data.getGamesProcess?.results || [];
 
+    // Yükleme Durumları
     const isInitialLoading =
         gameStore.isLoading['getGamesProcess'] ||
-        discoveryStore.isLoading['getPlatformProcess'];
+        discoveryStore.isLoading['getPlatformsProcess'];
 
     const fetchData = useCallback(() => {
+        // Tüm API isteklerini paralel başlat (Profesyonel Verimlilik)
         dispatch(getPlatformsProcess({ page: 1 }));
         dispatch(getGenresProcess());
         dispatch(getGamesProcess({ page: 1 }));
@@ -32,15 +52,17 @@ export const DiscoveryScreen = () => {
 
     useEffect(() => {
         fetchData();
-
     }, [fetchData]);
+
+    // --- RENDER FONKSİYONLARI (Alt Parçalar) ---
 
     const renderHeader = () => (
         <View style={styles.header}>
-            <AppText variant="caption" color={colors.primary} bold> OYUN ANSİKLOPEDİSİ</AppText>
-            <AppText variant="h1" style={styles.mainTitle}> Keşfetmeye Başla</AppText>
+            <AppText variant="caption" color={colors.primary} bold>OYUN ANSİKLOPEDİSİ</AppText>
+            <AppText variant="h1" style={styles.mainTitle}>Keşfetmeye Başla</AppText>
         </View>
     );
+
     const renderPlatforms = () => (
         <View style={styles.sectionMargin}>
             <SectionHeader title="Platformlar" onPressAll={() => console.log('Tüm Platformlar')} />
@@ -53,7 +75,7 @@ export const DiscoveryScreen = () => {
                 renderItem={({ item }) => (
                     <PlatformCard
                         name={item.name}
-                        image={item.image_backgorund}
+                        image={item.image_background}
                         gamesCount={item.games_count}
                         onPress={() => console.log(item.id)}
                     />
@@ -61,6 +83,7 @@ export const DiscoveryScreen = () => {
             />
         </View>
     );
+
     const renderGenres = () => (
         <View style={styles.sectionMargin}>
             <SectionHeader title="Popüler Türler" />
@@ -79,6 +102,9 @@ export const DiscoveryScreen = () => {
             />
         </View>
     );
+
+    // --- ANA EKRAN ÇIKTISI ---
+
     if (isInitialLoading && trendingGames.length === 0) {
         return (
             <Container>
@@ -90,6 +116,7 @@ export const DiscoveryScreen = () => {
             </Container>
         );
     }
+
     return (
         <Container style={styles.container}>
             <FlatList
