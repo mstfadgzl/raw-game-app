@@ -20,6 +20,8 @@ import { MediaTab } from './tabs/MediaTab';
 import { AchievementsTab } from './tabs/AchievementsTab';
 import { CommunityTab } from './tabs/CommunityTab';
 import { toggleFavorite } from '../../redux/slices/gameSlice';
+import { ExpansionsTab } from './tabs/ExpansionsTab';
+import { RedditTab } from './tabs/RedditTab';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -104,8 +106,10 @@ export const DetailScreen = () => {
             >
                 <Tab.Screen name="Hakkında" component={AboutTab} />
                 <Tab.Screen name="Medya" component={MediaTab} />
+                <Tab.Screen name="DLC & Seri" component={ExpansionsTab} />
                 <Tab.Screen name="Kupalar" component={AchievementsTab} />
                 <Tab.Screen name="Topluluk" component={CommunityTab} />
+                <Tab.Screen name="Reddit" component={RedditTab} />
             </Tab.Navigator>
         </Container>
     );
