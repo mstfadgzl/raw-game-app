@@ -4,3 +4,6 @@ export * from './skeleton';
 export * from './empty-state';
 export * from './error_state';
 export * from './app-text';
+export * from './platform-card';
+export * from './genre-chip';
+export * from './section-header';
