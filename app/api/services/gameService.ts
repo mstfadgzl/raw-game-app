@@ -2,12 +2,18 @@ import { IAchievementResponse, IGameDetail, IGameListResponse, IRedditResponse, 
 import apiClient from '../client';
 
 export const gameService = {
-    getGames: async (page: number = 1, pageSize: number = 20):
-        Promise<IGameListResponse> => {
+    getGames: async (
+        page: number = 1,
+        pageSize: number = 20,
+        platforms?: number,
+        genres?: string
+    ): Promise<IGameListResponse> => {
         const response = await apiClient.get<IGameListResponse>('/games', {
             params: {
                 page: page,
                 page_size: pageSize,
+                platforms: platforms,
+                genres: genres,
             },
         });
         return response.data;

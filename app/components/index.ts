@@ -7,3 +7,7 @@ export * from './app-text';
 export * from './platform-card';
 export * from './genre-chip';
 export * from './section-header';
+export * from './achievement-item';
+export * from './store-button';
+export * from './video-player';
+export * from './creator-card';

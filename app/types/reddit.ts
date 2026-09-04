@@ -1,3 +1,5 @@
+import { IPaginatedResponse } from "@types";
+
 export interface IRedditPost {
     id: number;
     name: string;

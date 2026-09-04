@@ -1,31 +1,34 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '@theme';
+import { colors, spacing } from '@theme';
 
 export const styles = StyleSheet.create({
     container: {
-        width: 150,
-        height: 100,
-        marginRight: 12,
-        borderRadius: 16,
+        width: 130,
+        height: 180,
+        marginRight: spacing.md,
+        borderRadius: 24,
+        backgroundColor: colors.surface,
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: colors.border,
     },
-    backgroundImage: {
-        flex: 1,
-        justifyContent: 'flex-end',
+    image: {
+        width: '100%',
+        height: '100%',
     },
     overlay: {
         ...StyleSheet.absoluteFill,
-        backgroundColor: 'rgba(0,0,0,0.4)', // Resmin üzerine hafif siyah perde
-        padding: 12,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: spacing.sm,
         justifyContent: 'flex-end',
     },
     name: {
-        color: colors.white,
         fontSize: 14,
+        color: colors.white,
+        marginBottom: 2,
     },
     count: {
-        color: colors.primary, // Neon renk
-        fontSize: 10,
-        marginTop: 2,
+        color: colors.primary,
+        fontWeight: 'bold',
     }
 });

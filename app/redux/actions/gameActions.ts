@@ -4,10 +4,24 @@ import { gameService, screenshotService } from "@services";
 import { createAppAsyncThunk } from "@utils";
 
 
-export const getGamesProcess = createAppAsyncThunk<IGameListResponse, { page: number }>(
-    'game/getGamesProcess',
-    ({ page }) => gameService.getGames(page)
-);
+export const getGamesProcess = createAsyncThunk<
+    IGameListResponse,
+    { page: number; platforms?: number; genres?: string }>(
+        'game/getGamesProcess',
+        async (params, { rejectWithValue }) => {
+            try {
+                // gameService.getGames'e tüm params objesini gönderiyoruz
+                return await gameService.getGames(
+                    params.page,
+                    20,
+                    params.platforms,
+                    params.genres
+                );
+            } catch (error: any) {
+                return rejectWithValue(error);
+            }
+        }
+    );
 
 export const getGameDetailProcess = createAsyncThunk<IGameDetail, number>(
     'game/getGameDetailProcess',

@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { getGenresProcess } from '../actions/genreActions';
 import { IBaseState } from '../../types/redux';
-import { handleAsyncAction } from '@utils/reduxHelper';
+import { handleAsyncAction } from '@utils';
 
 const initialState: IBaseState = {
     isLoading: {},

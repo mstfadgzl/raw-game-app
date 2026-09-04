@@ -1,7 +1,18 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { IBaseState } from "@types";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { IBaseState, IGame } from "@types";
 import { handleAsyncAction } from "@utils";
-import { getGameAchievementsProcess, getGameAdditionProcess, getGameDetailProcess, getGameRedditPostsProcess, getGamesByGenreProcess, getGameScreenshotsProcess, getGameSeriesProcess, getGamesProcess, getGameTrailersProcess, searchGamesProcess } from "../actions/gameActions";
+import {
+    getGameAchievementsProcess,
+    getGameAdditionProcess,
+    getGameDetailProcess,
+    getGameRedditPostsProcess,
+    getGamesByGenreProcess,
+    getGameScreenshotsProcess,
+    getGameSeriesProcess,
+    getGamesProcess,
+    getGameTrailersProcess,
+    searchGamesProcess
+} from "../actions/gameActions";
 
 const initialState: IBaseState = {
     isLoading: {},
@@ -23,6 +34,18 @@ export const gameSlice = createSlice({
         },
         resetSearch: (state) => {
             state.data.searchGamesProcess = undefined;
+        },
+        toggleFavorite: (state, action: PayloadAction<IGame>) => {
+            const game = action.payload;
+            if (!state.data.favorites) {
+                state.data.favorites = [];
+            }
+            const isFavorite = state.data.favorites.some((f: any) => f.id === game.id);
+            if (isFavorite) {
+                state.data.favorites = state.data.favorites.filter((f: any) => f.id !== game.id);
+            } else {
+                state.data.favorites.push(game);
+            }
         }
     },
     extraReducers: (builder) => {
@@ -111,5 +134,5 @@ export const gameSlice = createSlice({
     },
 });
 
-export const { resetGameDetail, resetSearch } = gameSlice.actions;
+export const { resetGameDetail, resetSearch, toggleFavorite } = gameSlice.actions;
 export default gameSlice.reducer;

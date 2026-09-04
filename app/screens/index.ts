@@ -1,5 +1,10 @@
-
 export * from './home-screen';
 export * from './search-screen';
 export * from './detail-screen';
 export * from './discovery-screen';
+export * from './creator-detail-screen';
+export * from './discover-main-screen';
+export * from './developer-detail-screen';
+export * from './library-screen';
+export * from './genre-detail-screen';
+export * from './platform-detail-screen';

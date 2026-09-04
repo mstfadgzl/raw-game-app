@@ -78,7 +78,8 @@ export type GameDetailNavigationProp = NativeStackNavigationProp<HomeStackParamL
 
 /**
  * 5. ROUTE PROPS (PARAMETRE OKUMAK İÇİN)
- */
+*/
+export type DeveloperDetailRouteProp = RouteProp<DiscoverStackParamList, 'DeveloperDetail'>;
 export type GameDetailRouteProp = RouteProp<HomeStackParamList, 'GameDetail'>;
 export type PlatformDetailRouteProp = RouteProp<DiscoverStackParamList, 'PlatformDetail'>;
 export type GenreDetailRouteProp = RouteProp<DiscoverStackParamList, 'GenreDetail'>;

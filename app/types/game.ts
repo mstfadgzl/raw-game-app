@@ -89,7 +89,7 @@ export interface IAchievement {
     name: string;
     description: string;
     image: string;
-    precent: string;
+    percent: string;
 }
 
 export type IAchievementResponse = IPaginatedResponse<IAchievement>;
@@ -98,4 +98,3 @@ export type IGameListResponse = IPaginatedResponse<IGame>;
 export type IScreenshotResponse = IPaginatedResponse<IScreenshot>;
 export type IGenreResponse = IPaginatedResponse<IGenre>;
 export type ITagResponse = IPaginatedResponse<ITag>;
-export type IDeveloperResponse = IPaginatedResponse<IDeveloper>;
