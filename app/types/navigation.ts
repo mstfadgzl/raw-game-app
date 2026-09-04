@@ -1,77 +1,85 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 
-/** 
- * 1. PARAMETRE LİSTELERİ 
- * Her bir stack'in içindeki ekranları ve bekledikleri dataları tanımlar.
+/**
+ * 1. INDIVIDUAL STACK PARAM LISTS
  */
 
+// Home Stack: Ana keşfet akışı
 export type HomeStackParamList = {
-    HomeScreen: undefined;
-    GameDetail: { gameId: number; gameName: string };
-};
-export type DiscoveryStackParamList = {
     DiscoveryScreen: undefined;
+    GameDetail: { gameId: number | string; gameName: string };
+};
 
-}
+// Discover Stack: Kategoriler, Platformlar, Yapımcılar
+export type DiscoverStackParamList = {
+    DiscoverMain: undefined;
+    PlatformDetail: { id: number; name: string };
+    GenreDetail: { slug: string; name: string };
+    CreatorDetail: { id: number; name: string };
+    DeveloperDetail: { id: number; name: string };
+    GameDetail: { gameId: number | string; gameName: string };
+};
 
+// Search Stack: Gelişmiş arama
 export type SearchStackParamList = {
     SearchScreen: undefined;
-    GameDetail: { gameId: number; gameName: string };
+    GameDetail: { gameId: number | string; gameName: string };
 };
 
-export type FavoritesStackParamList = {
-    FavoritesScreen: undefined;
-    GameDetail: { gameId: number; gameName: string };
+// Library Stack: Favoriler ve Koleksiyon
+export type LibraryStackParamList = {
+    LibraryScreen: undefined;
+    GameDetail: { gameId: number | string; gameName: string };
 };
 
+/**
+ * 2. BOTTOM TAB PARAM LIST
+ */
 export type BottomTabParamList = {
-    HomeTab: undefined;   // HomeStack'i kapsar
-    SearchTab: undefined; // SearchStack'i kapsar
-    FavoritesTab: undefined;
+    HomeTab: undefined;     // HomeStack'i barındırır
+    DiscoverTab: undefined; // DiscoverStack'i barındırır
+    SearchTab: undefined;   // SearchStack'i barındırır
+    LibraryTab: undefined;  // LibraryStack'i barındırır
 };
 
+/**
+ * 3. ROOT APP STACK (En Dış Kapsayıcı)
+ */
 export type AppStackParamList = {
-    Main: undefined; // BottomTabStack'i kapsar
-    Auth: undefined;
+    Main: undefined; // BottomTabStack'i barındırır
+    Auth: undefined; // Login/Register akışı gerekirse
 };
 
-/** 
- * 2. NAVİGASYON PROPS (useNavigation için)
- * Ekranların içinde "navigation.navigate" dediğinde çıkan seçenekleri belirler.
+/**
+ * 4. PROFESSIONAL NAVIGATION PROPS (HOOKLAR İÇİN)
+ * Bu tipler sayesinde 'navigation.navigate' dediğinde tüm uygulama haritası önünde olur.
  */
 
-// Genel/Ortak Navigasyon Tipi (Hangi stack'te olursan ol detaylara gitmeni sağlar)
-export type MainStackNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
-
-// HomeScreen için: Hem kendi stack'inde gezebilir hem Tab değiştirebilir
-export type HomeScreenNavigationProp = CompositeNavigationProp<
-    NativeStackNavigationProp<HomeStackParamList, 'HomeScreen'>,
+// Genel bir ekranın hem kendi stack'inde hem de tablar arasında gezebilmesini sağlar.
+export type GenericNavigationProp = CompositeNavigationProp<
+    NativeStackNavigationProp<HomeStackParamList & DiscoverStackParamList & SearchStackParamList & LibraryStackParamList>,
     BottomTabNavigationProp<BottomTabParamList>
 >;
 
-// SearchScreen için:
-export type SearchScreenNavigationProp = CompositeNavigationProp<
-    NativeStackNavigationProp<SearchStackParamList, 'SearchScreen'>,
-    BottomTabNavigationProp<BottomTabParamList>
->;
-
-// GameDetail için:
-export type GameDetailNavigationProp = NativeStackNavigationProp<
-    HomeStackParamList,
-    'GameDetail'
->;
-// DiscoveryScreen için:
+// Spesifik ekran navigasyon tipleri
 export type DiscoveryScreenNavigationProp = CompositeNavigationProp<
-    NativeStackNavigationProp<DiscoveryStackParamList, 'DiscoveryScreen'>,
+    NativeStackNavigationProp<HomeStackParamList, 'DiscoveryScreen'>,
     BottomTabNavigationProp<BottomTabParamList>
 >;
 
-/** 
- * 3. ROUTE PROPS (useRoute için)
- * Ekranlara gelen "params" değerlerini okumak için kullanılır.
- */
+export type DiscoverMainNavigationProp = CompositeNavigationProp<
+    NativeStackNavigationProp<DiscoverStackParamList, 'DiscoverMain'>,
+    BottomTabNavigationProp<BottomTabParamList>
+>;
 
+export type GameDetailNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'GameDetail'>;
+
+/**
+ * 5. ROUTE PROPS (PARAMETRE OKUMAK İÇİN)
+ */
 export type GameDetailRouteProp = RouteProp<HomeStackParamList, 'GameDetail'>;
-export type SearchScreenRouteProp = RouteProp<SearchStackParamList, 'SearchScreen'>;
+export type PlatformDetailRouteProp = RouteProp<DiscoverStackParamList, 'PlatformDetail'>;
+export type GenreDetailRouteProp = RouteProp<DiscoverStackParamList, 'GenreDetail'>;
+export type CreatorDetailRouteProp = RouteProp<DiscoverStackParamList, 'CreatorDetail'>;
