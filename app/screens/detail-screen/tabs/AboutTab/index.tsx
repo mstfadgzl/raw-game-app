@@ -6,7 +6,6 @@ import { translateText } from '@utils';
 import { styles as globalStyles } from '../../styles';
 import { colors, spacing } from '@theme';
 import { useNavigation } from '@react-navigation/native';
-import { DiscoverScreenNavigationProp } from '@types';
 
 export const AboutTab = () => {
     const navigation = useNavigation<any>();
@@ -38,14 +37,28 @@ export const AboutTab = () => {
         }
     }, [detail?.description_raw]);
 
+    // Web sitesi açılmama sorununu kesin çözen güvenli fonksiyon
     const handlePressWebsite = async (url: string) => {
+        if (!url) return;
+        let formattedUrl = url;
+        if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+            formattedUrl = `https://${formattedUrl}`;
+        }
+
         try {
-            const supported = await Linking.canOpenURL(url);
-            if (supported) {
-                await Linking.openURL(url);
-            }
+            await Linking.openURL(formattedUrl);
         } catch (error) {
-            console.error(error);
+            console.error('Web sitesi açılırken hata:', error);
+        }
+    };
+
+    // Etikete tıklandığında konsola basıp yönlendirmeyi zorlayan güvenli fonksiyon
+    const handleTagPress = (tagId: number | string, tagName: string) => {
+        console.log('Tıklanan Etiket ID:', tagId, 'İsim:', tagName);
+        try {
+            navigation.navigate('TagDetail', { id: tagId, name: tagName });
+        } catch (error) {
+            console.error('TagDetail yönlendirme hatası:', error);
         }
     };
 
@@ -96,7 +109,7 @@ export const AboutTab = () => {
                             <GenreChip
                                 key={`about-tag-${tag.id}`}
                                 name={tag.name}
-                                onPress={() => navigation.navigate('TagDetail', { id: tag.id, name: tag.name })}
+                                onPress={() => handleTagPress(tag.id, tag.name)}
                             />
                         ))}
                     </View>
