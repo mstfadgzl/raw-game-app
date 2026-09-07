@@ -54,4 +54,63 @@ export const styles = StyleSheet.create({
         paddingLeft: 16,
         marginBottom: 20,
     },
+    // styles.ts içerisine eklenecekler
+    modernChip: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20, // Tam yuvarlak köşeler
+        marginRight: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    activeChipFilled: {
+        backgroundColor: colors.primary, // Senin o güzel neon yeşilin
+        borderWidth: 0, // Kenarlığa veda
+    },
+    inactiveChipSoft: {
+        backgroundColor: '#2A2A2A', // Siyahın üzerinde sırıtmaması için mat koyu gri
+        borderWidth: 0,
+    },
+
+    // Filtre Başlık ve Sıralama
+    filterHeaderRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        marginBottom: 16,
+    },
+    dynamicHeaderTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: colors.white,
+    },
+    compactSortButton: {
+        backgroundColor: '#1E1E1E',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#333333',
+    },
+
+    // Yeni Sekme (Tab) Tasarımı
+    tabPadding: {
+        paddingHorizontal: 16,
+        paddingBottom: 10,
+    },
+    tabButton: {
+        marginRight: 24,
+        paddingBottom: 8,
+        position: 'relative',
+    },
+    tabIndicator: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 3,
+        backgroundColor: colors.primary,
+        borderRadius: 3,
+    },
 });
