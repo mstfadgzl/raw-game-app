@@ -197,7 +197,7 @@ export const DiscoveryScreen = () => {
     }
 
     return (
-        <Container style={styles.container}>
+        <Container style={{ paddingHorizontal: 0 }}>
             <FlatList
                 data={games}
                 numColumns={2}
@@ -205,9 +205,6 @@ export const DiscoveryScreen = () => {
                 columnWrapperStyle={{
                     justifyContent: 'space-between',
                     paddingHorizontal: 16
-                }}
-                contentContainerStyle={{
-                    paddingBottom: 40,
                 }}
                 showsVerticalScrollIndicator={false}
                 ListHeaderComponent={
