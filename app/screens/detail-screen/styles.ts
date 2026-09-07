@@ -2,7 +2,7 @@ import { StyleSheet, Dimensions, Platform } from 'react-native';
 import { colors, spacing } from '@theme';
 
 const { width, height } = Dimensions.get('window');
-const HEADER_HEIGHT = 350; // Resmin yüksekliği
+const HEADER_HEIGHT = 250; // Resmin yüksekliği
 
 export const styles = StyleSheet.create({
     container: {
