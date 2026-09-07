@@ -59,6 +59,12 @@ const FILTERS = [
         dates: `${currentYear}-01-01,${currentYear}-12-31`
     },
 ];
+const SORT_OPTIONS = [
+    { id: 'added', label: 'Popülerlik (İndirilme)', value: '-added' },
+    { id: 'rating', label: 'Puan (Yüksek)', value: '-rating' },
+    { id: 'released', label: 'Çıkış Tarihi (Yeni)', value: '-released' },
+    { id: 'name', label: 'İsim (A-Z)', value: 'name' },
+];
 
 export const DiscoveryScreen = () => {
     const dispatch = useAppDispatch();
