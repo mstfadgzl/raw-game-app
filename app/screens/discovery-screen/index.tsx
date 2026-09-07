@@ -189,16 +189,35 @@ export const DiscoveryScreen = () => {
     const renderFilterAndSort = () => (
         <View style={styles.sectionMargin}>
             <View style={styles.filterHeaderRow}>
-                <AppText variant="h2" style={styles.dynamicHeaderTitle}>
-                    {activeFilter.label}
-                </AppText>
+                {/* Sol Taraf: Başlık ve (Gerekirse) Yıl Butonu */}
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <AppText variant="h2" style={styles.dynamicHeaderTitle}>
+                        {activeFilter.label}
+                    </AppText>
 
+                    {/* EĞER "YILIN EN İYİLERİ" SEÇİLİYSE YIL SEÇME BUTONU ÇIKSIN */}
+                    {activeFilter.id === 'goty' && (
+                        <TouchableOpacity
+                            style={[
+                                styles.compactSortButton,
+                                { marginLeft: 10, borderColor: colors.primary, backgroundColor: 'rgba(100, 255, 218, 0.1)' }
+                            ]}
+                            onPress={() => setYearModalVisible(true)}
+                        >
+                            <AppText variant="caption" color={colors.primary} bold>
+                                {selectedYear} ?
+                            </AppText>
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                {/* Sağ Taraf: Sıralama Butonu */}
                 <TouchableOpacity
                     style={styles.compactSortButton}
                     onPress={() => setSortModalVisible(true)}
                 >
                     <AppText variant="caption" color={colors.primary}>
-                        {activeSort.label} ↕
+                        {activeSort.label} |
                     </AppText>
                 </TouchableOpacity>
             </View>
