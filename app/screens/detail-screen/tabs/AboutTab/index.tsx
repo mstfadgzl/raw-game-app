@@ -92,11 +92,11 @@ export const AboutTab = () => {
                 <>
                     <AppText variant="h2" style={{ marginTop: spacing.md, marginBottom: spacing.sm }}>Özellikler & Etiketler</AppText>
                     <View style={localStyles.tagsContainer}>
-                        {detail.tags.slice(0, 15).map((tag: any) => (
+                        {detail.tags.slice(0, 15).map((genre: any) => (
                             <GenreChip
-                                key={`about-tag-${tag.id}`}
-                                name={tag.name}
-                                onPress={() => navigation.navigate('GenreDetail', { slug: tag.slug, name: tag.name })}
+                                key={`about-tag-${genre.id}`}
+                                name={genre.name}
+                                onPress={() => navigation.navigate('GenreDetail', { slug: genre.slug, name: genre.name })}
                             />
                         ))}
                     </View>
