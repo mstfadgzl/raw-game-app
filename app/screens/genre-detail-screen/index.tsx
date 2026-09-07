@@ -55,8 +55,12 @@ export const GenreDetailScreen = () => {
         <Container style={styles.container}>
             <FlatList
                 data={games}
-                // index kullanmadan tamamen benzersiz ve güvenli bir anahtar üretiyoruz
+                numColumns={2}
                 keyExtractor={(item) => `genre-game-${item.id}`}
+                columnWrapperStyle={{
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 16,
+                }}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.listContent}
                 ListHeaderComponent={
