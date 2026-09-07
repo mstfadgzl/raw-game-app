@@ -92,6 +92,11 @@ export interface IAchievement {
     percent: string;
 }
 
+export interface AchievementParams {
+    id: number;
+    page: number;
+}
+
 export type IAchievementResponse = IPaginatedResponse<IAchievement>;
 export type ITrailerResponse = IPaginatedResponse<ITrailer>;
 export type IGameListResponse = IPaginatedResponse<IGame>;
