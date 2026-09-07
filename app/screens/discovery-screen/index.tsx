@@ -71,7 +71,7 @@ export const DiscoveryScreen = () => {
                 renderItem={({ item }) => (
                     <PlatformCard
                         name={item.name}
-                        image={item.image}
+                        image={item.image_background}
                         gamesCount={item.games_count}
                         onPress={() => console.log(item.id)}
                     />
