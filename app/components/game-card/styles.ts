@@ -3,13 +3,10 @@ import { colors, spacing } from '@theme';
 
 const { width } = Dimensions.get('window');
 
-// --- GRID HESAPLAMASI (Taşmayı Önleyen Formül) ---
-// 1. Ekranın sağ ve solundaki toplam boşluk: 16 + 16 = 32
-const TOTAL_HORIZONTAL_PADDING = 32;
-// 2. İki kartın arasındaki dikey boşluk (Gap): 12
-const COLUMN_GAP = 12;
-// 3. Net Kart Genişliği: (Ekran Genişliği - Kenar Boşlukları - Orta Boşluk) / 2
-const CARD_WIDTH = (width - TOTAL_HORIZONTAL_PADDING - COLUMN_GAP) / 2;
+const SCREEN_PADDING = 16; // Ekranın en sol ve en sağındaki boşluk
+const MIDDLE_GAP = 12;     // İki kartın tam ortasındaki boşluk
+// Formül: (Ekran Genişliği - (Sol Boşluk + Sağ Boşluk) - Orta Boşluk) / 2
+const CARD_WIDTH = (width - (SCREEN_PADDING * 2) - MIDDLE_GAP) / 2;
 
 export const styles = StyleSheet.create({
     container: {
@@ -45,7 +42,7 @@ export const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
         lineHeight: 18,
-        height: 36, // Kartların boyunun eşit kalması için 2 satırlık sabit yükseklik
+        height: 38, // Kartların boyunun eşit kalması için 2 satırlık sabit yükseklik
     },
     releaseDate: {
         color: colors.secondary,

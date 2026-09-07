@@ -201,11 +201,14 @@ export const DiscoveryScreen = () => {
             <FlatList
                 data={games}
                 numColumns={2}
+                keyExtractor={(item, index) => `game-${item.id}-${index}`}
                 columnWrapperStyle={{
                     justifyContent: 'space-between',
                     paddingHorizontal: 16
                 }}
-                keyExtractor={(item, index) => `game-${item.id}-${index}`}
+                contentContainerStyle={{
+                    paddingBottom: 40,
+                }}
                 showsVerticalScrollIndicator={false}
                 ListHeaderComponent={
                     <View>
