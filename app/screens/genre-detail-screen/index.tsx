@@ -69,13 +69,10 @@ export const GenreDetailScreen = () => {
                     </View>
                 }
                 renderItem={({ item }) => (
-                    // Kartların ekran kenarlarına yapışmaması için sarmaladık
-                    <View style={{ paddingHorizontal: spacing.md, paddingBottom: spacing.md }}>
-                        <GameCard
-                            game={item}
-                            onPress={(id, gname) => navigation.navigate('GameDetail', { gameId: id, gameName: gname })}
-                        />
-                    </View>
+                    <GameCard
+                        game={item}
+                        onPress={(id, gname) => navigation.navigate('GameDetail', { gameId: id, gameName: gname })}
+                    />
                 )}
                 onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
