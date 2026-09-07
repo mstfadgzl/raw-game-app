@@ -24,4 +24,15 @@
         </intent-filter>
       </activity>
     </application>
+
+    <queries>
+    <intent>
+        <action android:name="Intent.ACTION_VIEW" />
+        <data android:scheme="https" />
+    </intent>
+    <intent>
+        <action android:name="Intent.ACTION_VIEW" />
+        <data android:scheme="http" />
+    </intent>
+</queries>
 </manifest>
