@@ -8,6 +8,7 @@ export const gameService = {
         platforms?: number,
         genres?: string,
         ordering?: string,
+        dates?: string,
     }): Promise<IGameListResponse> => {
         const response = await apiClient.get<IGameListResponse>('/games', {
             params: {
@@ -16,6 +17,7 @@ export const gameService = {
                 platforms: params.platforms,
                 genres: params.genres,
                 ordering: params.ordering,
+                dates: params.dates,
             },
         });
         return response.data;
