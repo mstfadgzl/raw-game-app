@@ -57,6 +57,11 @@ export type DiscoveryScreenNavigationProp = CompositeNavigationProp<
     NativeStackNavigationProp<HomeStackParamList>,
     BottomTabNavigationProp<BottomTabParamList>
 >;
+// PlatformDetail ve benzeri keşfet ekranları için özel navigation prop
+export type DiscoverScreenNavigationProp = CompositeNavigationProp<
+    NativeStackNavigationProp<DiscoverStackParamList, 'PlatformDetail'>,
+    BottomTabNavigationProp<BottomTabParamList>
+>;
 
 // Diğer ekranlar için de benzer yapı:
 export type DiscoverMainNavigationProp = CompositeNavigationProp<

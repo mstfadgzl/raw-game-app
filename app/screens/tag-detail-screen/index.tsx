@@ -4,13 +4,13 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '@hooks';
 import { getGamesProcess } from '@actions';
 import { Container, AppText, GameCard, EmptyState } from '@components';
-import { TagDetailRouteProp, GenericNavigationProp } from '@types';
+import { TagDetailRouteProp, GenericNavigationProp, DiscoveryScreenNavigationProp } from '@types';
 import { colors } from '@theme';
 import { styles } from './styles';
 
 export const TagDetailScreen = () => {
     const route = useRoute<TagDetailRouteProp>();
-    const navigation = useNavigation<GenericNavigationProp>();
+    const navigation = useNavigation<DiscoveryScreenNavigationProp>();
     const { slug, name } = route.params;
     const dispatch = useAppDispatch();
     const [page, setPage] = useState(1);

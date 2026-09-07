@@ -4,13 +4,13 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '@hooks';
 import { getGamesProcess } from '@actions';
 import { Container, AppText, GameCard, EmptyState, Skeleton } from '@components';
-import { PlatformDetailRouteProp, GenericNavigationProp } from '@types';
+import { PlatformDetailRouteProp, GenericNavigationProp, DiscoverScreenNavigationProp } from '@types';
 import { colors } from '@theme';
 import { styles } from './styles';
 
 export const PlatformDetailScreen = () => {
     const route = useRoute<PlatformDetailRouteProp>();
-    const navigation = useNavigation<GenericNavigationProp>();
+    const navigation = useNavigation<DiscoverScreenNavigationProp>();
     const { id, name } = route.params;
     const dispatch = useAppDispatch();
 
