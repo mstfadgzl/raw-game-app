@@ -20,11 +20,6 @@ const App = () => {
     </Provider>
   );
 };
-//sasdasdasd
-//
-//saeee
-/////
-///
-////sadasd
+
 
 export default App;

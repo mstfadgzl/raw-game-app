@@ -9,7 +9,7 @@ import {
     getGameAchievementsProcess,
     getGameRedditPostsProcess,
     getGameSeriesProcess,
-    getGameScreenshotsProcess // 🌟 EKSİK OLAN BUYDU, EKLENDİ
+    getGameScreenshotsProcess
 } from '@actions';
 import { Container, AppText, Skeleton } from '@components';
 import { GameDetailRouteProp } from '@types';
@@ -20,7 +20,6 @@ import { toggleFavorite } from '../../redux/slices/gameSlice';
 import { AboutTab } from './tabs/AboutTab';
 import { MediaTab } from './tabs/MediaTab';
 import { AchievementsTab } from './tabs/AchievementsTab';
-import { CommunityTab } from './tabs/CommunityTab';
 import { ExpansionsTab } from './tabs/ExpansionsTab';
 import { RedditTab } from './tabs/RedditTab';
 
@@ -38,17 +37,16 @@ export const DetailScreen = () => {
 
     const detail = data.getGameDetailProcess;
     const isFav = favorites.some((f: any) => f.id === detail?.id);
-
     const isDataMatching = detail?.id === safeGameId;
     const isFetching = isLoading['getGameDetailProcess'];
 
     useEffect(() => {
         dispatch(getGameDetailProcess(safeGameId));
         dispatch(getGameTrailersProcess(safeGameId));
-        dispatch(getGameAchievementsProcess({ id: safeGameId, page: 1 })); // Sayfalama eklendi
+        dispatch(getGameAchievementsProcess({ id: safeGameId, page: 1 }));
         dispatch(getGameRedditPostsProcess({ id: safeGameId, page: 1 }));
         dispatch(getGameSeriesProcess(safeGameId));
-        dispatch(getGameScreenshotsProcess(safeGameId)); // 🌟 MEDYA ARTIK ÇALIŞACAK
+        dispatch(getGameScreenshotsProcess(safeGameId));
     }, [safeGameId, dispatch]);
 
     const handleFavorites = () => {
@@ -70,13 +68,11 @@ export const DetailScreen = () => {
 
     return (
         <Container style={{ flex: 1, backgroundColor: colors.background, paddingHorizontal: 0 }}>
-            {/* 🌟 SCROLLVIEW: Resmi yukarı kaydırmak için kullanıyoruz */}
             <ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
-                stickyHeaderIndices={[2]} // Tab bar'ın (3. eleman, index 2) ekranda asılı kalmasını sağlar
+                stickyHeaderIndices={[2]}
                 showsVerticalScrollIndicator={false}
             >
-                {/* 1. ELEMAN: Sadece Kapak Fotoğrafı ve Favori Butonu */}
                 <View style={styles.mediaContainer}>
                     <Image source={{ uri: detail?.background_image }} style={styles.heroImage} />
                     <TouchableOpacity
@@ -88,9 +84,15 @@ export const DetailScreen = () => {
                     </TouchableOpacity>
                 </View>
 
-                {/* 2. ELEMAN: Temel Bilgiler */}
                 <View style={styles.basicInfo}>
                     <AppText variant="h1" numberOfLines={2}>{detail?.name}</AppText>
+
+                    {detail?.developers && detail.developers.length > 0 && (
+                        <AppText color={colors.secondary} style={{ marginTop: 2, marginBottom: 6 }}>
+                            Geliştirici: {detail.developers[0].name}
+                        </AppText>
+                    )}
+
                     <View style={styles.metaRow}>
                         <AppText color={colors.primary} bold>★ {detail?.rating}</AppText>
                         <AppText color={colors.secondary}> | </AppText>
@@ -98,11 +100,11 @@ export const DetailScreen = () => {
                     </View>
                 </View>
 
-                {/* 3. ELEMAN: TAB NAVIGATOR (Ekran boyutu kadar alan kaplar ki rahatça kaysın) */}
-                <View style={{ height: height - 100 }}>
+                <View style={{ height: height - 120 }}>
                     <Tab.Navigator
                         screenOptions={{
                             lazy: true,
+                            swipeEnabled: false,
                             tabBarScrollEnabled: true,
                             tabBarActiveTintColor: colors.primary,
                             tabBarInactiveTintColor: colors.secondary,
@@ -111,11 +113,11 @@ export const DetailScreen = () => {
                             tabBarLabelStyle: { fontSize: 12, fontWeight: 'bold' },
                         }}
                     >
-                        <Tab.Screen name="Hakkında" component={AboutTab} />
-                        <Tab.Screen name="Medya" component={MediaTab} />
-                        <Tab.Screen name="DLC" component={ExpansionsTab} />
-                        <Tab.Screen name="Kupalar" component={AchievementsTab} />
-                        <Tab.Screen name="Reddit" component={RedditTab} />
+                        <Tab.Screen name="Hakkında" component={AboutTab} initialParams={{ gameId: safeGameId }} />
+                        <Tab.Screen name="Medya" component={MediaTab} initialParams={{ gameId: safeGameId }} />
+                        <Tab.Screen name="DLC" component={ExpansionsTab} initialParams={{ gameId: safeGameId }} />
+                        <Tab.Screen name="Kupalar" component={AchievementsTab} initialParams={{ gameId: safeGameId }} />
+                        <Tab.Screen name="Reddit" component={RedditTab} initialParams={{ gameId: safeGameId }} />
                     </Tab.Navigator>
                 </View>
             </ScrollView>
