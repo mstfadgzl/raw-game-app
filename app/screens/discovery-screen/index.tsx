@@ -27,10 +27,22 @@ const getDates = (daysAgo: number) => {
 };
 const FILTERS = [
     {
-        id: 'trending',
-        label: 'Haftanın Trendleri',
+        id: 'daily',
+        label: 'Günün Trendleri',
         ordering: '-added',
-        dates: getDates(60),
+        dates: getDates(1), // Son 24 saat
+    },
+    {
+        id: 'weekly',
+        label: 'Haftalık Trendler',
+        ordering: '-added',
+        dates: getDates(7), // Son 7 gün
+    },
+    {
+        id: 'monthly',
+        label: 'Aylık Trendler',
+        ordering: '-added',
+        dates: getDates(30), // Son 30 gün
     },
     {
         id: 'popular',
@@ -40,9 +52,9 @@ const FILTERS = [
     },
     {
         id: 'goty',
-        label: 'Yılın En İyileri',
+        label: `${currentYear} En İyileri`, // Dinamik yıl (Örn: 2026 En İyileri)
         ordering: '-rating',
-        dates: '2024-01-01,2024-12-31'
+        dates: `${currentYear}-01-01,${currentYear}-12-31`
     },
 ];
 
