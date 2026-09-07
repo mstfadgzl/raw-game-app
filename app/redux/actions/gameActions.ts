@@ -10,17 +10,13 @@ export const getGamesProcess = createAsyncThunk<
         page: number;
         ordering?: string;
         platforms?: number;
-        genres?: string
+        genres?: string;
+        dates?: string;
     }>(
         'game/getGamesProcess',
         async (params, { rejectWithValue }) => {
             try {
-                return await gameService.getGames(
-                    params.page,
-                    20,
-                    params.platforms,
-                    params.genres
-                );
+                return await gameService.getGames(params);
             } catch (error: any) {
                 return rejectWithValue(error);
             }
