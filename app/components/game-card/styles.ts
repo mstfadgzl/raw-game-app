@@ -3,74 +3,76 @@ import { colors, spacing } from '@theme';
 
 const { width } = Dimensions.get('window');
 
-const SCREEN_PADDING = 16; // FlatList'in kenar boşluğu
-const GAP = 12;            // İki kart arasındaki boşluk
-
-// Toplam boşluğu çıkarıp ikiye bölüyoruz ve 1 piksel emniyet payı bırakıyoruz
+const SCREEN_PADDING = 16;
+const GAP = 12;
 const CARD_WIDTH = Math.floor((width - (SCREEN_PADDING * 2) - GAP) / 2) - 1;
 
 export const styles = StyleSheet.create({
     container: {
         width: CARD_WIDTH,
-        backgroundColor: colors.surface,
+        backgroundColor: '#151515', // Premium mat siyah/gri zemin
         borderRadius: 16,
         marginBottom: spacing.md,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: colors.border,
-        // Hafif bir derinlik hissi için gölge (opsiyonel)
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 3,
+        borderColor: '#2A2A2A', // Kenarları belli eden incecik zarif bir çizgi
+    },
+    // Görseli saran kapsayıcı
+    imageContainer: {
+        position: 'relative',
+        width: '100%',
+        height: 140, // Oyun sanat tasarımlarını biraz daha büyüttük
     },
     image: {
         width: '100%',
-        height: 125, // Kart küçüldüğü için yüksekliği optimize ettik
-        backgroundColor: colors.border,
+        height: '100%',
+        backgroundColor: '#222', // Görsel yüklenene kadar duracak renk
     },
+    // 🔥 Puanlamanın sihirli olduğu yer
+    floatingRating: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: 'rgba(0, 0, 0, 0.75)', // Arkasını hafif gösteren sinematik karanlık
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12, // Tam bir hap (pill) tasarımı
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)', // Cama benzer yansıma efekti
+    },
+    starIcon: {
+        color: colors.primary, // Senin markanın neon rengi buraya çok yakışacak
+        fontSize: 12,
+        marginRight: 4,
+    },
+    ratingText: {
+        color: '#FFFFFF',
+        fontSize: 11,
+        fontWeight: 'bold',
+    },
+    // Alt içerik alanı
     content: {
-        padding: 10,
+        padding: 12,
         justifyContent: 'space-between',
         flex: 1,
-    },
-    textContainer: {
-        marginBottom: 8,
+        minHeight: 76, // 2 satır başlık için sabit alan (Kartların eşit olmasını zorunlu kılar)
     },
     title: {
-        color: colors.text,
+        color: '#FFFFFF',
         fontSize: 13,
         fontWeight: 'bold',
         lineHeight: 18,
-        height: 38, // Kartların boyunun eşit kalması için 2 satırlık sabit yükseklik
-    },
-    releaseDate: {
-        color: colors.secondary,
-        fontSize: 11,
-        marginTop: 2,
+        marginBottom: 8,
     },
     footer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 4,
     },
-    ratingBadge: {
-        backgroundColor: 'rgba(100, 255, 218, 0.1)', // Neon rengin %10 opak hali
-        paddingHorizontal: 6,
-        paddingVertical: 3,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: colors.primary,
-    },
-    ratingText: {
-        color: colors.primary,
-        fontWeight: 'bold',
-        fontSize: 12,
-    },
-    playtime: {
-        color: colors.secondary,
-        fontSize: 10,
+    releaseDate: {
+        color: '#888888', // Göz yormayan ikincil gri renk
+        fontSize: 11,
+        fontWeight: '500',
     }
 });
