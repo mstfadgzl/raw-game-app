@@ -59,7 +59,7 @@ export const DiscoveryScreen = () => {
     const [activeSort, setActiveSort] = useState(SORT_OPTIONS[0]);
     const [sortModalVisible, setSortModalVisible] = useState(false);
     const [page, setPage] = useState(1);
-    const [selectedYear, setSelectedYEar] = useState(currentYear);
+    const [selectedYear, setSelectedYear] = useState(currentYear);
     const [yearModalVisible, setYearModalVisible] = useState(false);
 
     const gameStore = useAppSelector(state => state.game);
@@ -104,6 +104,11 @@ export const DiscoveryScreen = () => {
         setSortModalVisible(false);
         fetchData(activeFilter, sortOption, selectedYear, 1);
     };
+    const handleYearChange = (year: number) => {
+        setSelectedYear(year);
+        setYearModalVisible(false);
+        fetchData(activeFilter, activeSort, year, 1);
+    }
 
     const handleLoadMore = () => {
         const hasNextPage = gameStore.data['getGamesProcess']?.next;
@@ -111,6 +116,11 @@ export const DiscoveryScreen = () => {
 
         const nextPage = page + 1;
         setPage(nextPage);
+
+        let finalDates = activeFilter.dates;
+        if (activeFilter.id === 'goty') {
+            finalDates = `${selectedYear}-01-01,${selectedYear}-12-31`;
+        }
         dispatch(getGamesProcess({
             page: nextPage,
             dates: activeFilter.dates,
