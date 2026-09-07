@@ -20,17 +20,17 @@ import { styles } from "./styles";
 import { colors } from "@theme";
 import { DiscoveryScreenNavigationProp } from "@types";
 
-const getLastWeekDate = () => {
+const getDates = (daysAgo: number) => {
     const today = new Date();
-    const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-    return `${lastWeek.toISOString().split('T')[0]},${today.toISOString().split('T')[0]}`;
+    const pastDate = new Date(today.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+    return `${pastDate.toISOString().split('T')[0]},${today.toISOString().split('T')[0]}`;
 };
 const FILTERS = [
     {
         id: 'trending',
         label: 'Haftanın Trendleri',
-        ordering: '-relevance',
-        dates: getLastWeekDate() // Sadece son 7 günü kapsar
+        ordering: '-added',
+        dates: getDates(30),
     },
     {
         id: 'popular',
