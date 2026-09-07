@@ -14,7 +14,7 @@ export const PlatformCard: React.FC<PlatformCardProps> = memo(({ name, image, ga
     <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={onPress}>
         <ImageBackground
             source={{ uri: image }}
-            style={styles.backgroundImage}
+            style={styles.image}
             imageStyle={{ borderRadius: 16 }}
         >
             <View style={styles.overlay}>
