@@ -73,7 +73,11 @@ export const PlatformDetailScreen = () => {
         <Container style={styles.container}>
             <FlatList
                 data={games}
-                // Index kaldırıldı, tamamen benzersiz ve güvenli
+                numColumns={2}
+                columnWrapperStyle={{
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 16
+                }}
                 keyExtractor={(item) => `plt-game-${item.id}`}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
