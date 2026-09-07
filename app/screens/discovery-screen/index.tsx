@@ -29,12 +29,6 @@ const currentYear = new Date().getFullYear();
 
 const FILTERS = [
     {
-        id: 'daily',
-        label: 'Günün Trendleri',
-        ordering: '-added',
-        dates: getDates(1),
-    },
-    {
         id: 'weekly',
         label: 'Haftalık Trendler',
         ordering: '-added',
@@ -95,18 +89,16 @@ export const DiscoveryScreen = () => {
      * @param filterObj - Seçili filtre
      * @param pageNum - Sayfa numarası
      */
-    const fetchData = useCallback((filterObj = activeFilter, pageNum = 1) => {
+    const fetchData = useCallback((filterObj = activeFilter, sortObj = activeSort, pageNum = 1) => {
         if (pageNum === 1) setPage(1);
 
-        // Platform ve Türleri sadece ilk açılışta veya refresh'te çek
         dispatch(getPlatformsProcess({ page: 1 }));
         dispatch(getGenresProcess());
 
-        // Oyunları aktif filtreye göre çek
         dispatch(getGamesProcess({
             page: pageNum,
-            ordering: filterObj.ordering,
-            dates: filterObj.dates
+            dates: filterObj.dates,
+            ordering: sortObj.value,
         }));
     }, [dispatch, activeFilter]);
 
@@ -117,10 +109,13 @@ export const DiscoveryScreen = () => {
 
     const handleFilterChange = (filter: typeof FILTERS[0]) => {
         setActiveFilter(filter);
-        fetchData(filter, 1);
+        fetchData(filter, activeSort, 1);
+    };
+    const handleSortChange = (sortOption: typeof SORT_OPTIONS[0]) => {
+        setActiveSort(sortOption);
+        fetchData(activeFilter, sortOption, 1);
     };
 
-    // Sonsuz Kaydırma
     const handleLoadMore = () => {
         const hasNextPage = gameStore.data['getGamesProcess']?.next;
         if (gameStore.isLoading['getGamesProcess'] || isMoreLoading || !hasNextPage) return;
@@ -129,8 +124,8 @@ export const DiscoveryScreen = () => {
         setPage(nextPage);
         dispatch(getGamesProcess({
             page: nextPage,
-            ordering: activeFilter.ordering,
-            dates: activeFilter.dates
+            dates: activeFilter.dates,
+            ordering: activeSort.value
         }));
     };
 
@@ -201,6 +196,20 @@ export const DiscoveryScreen = () => {
             </ScrollView>
         </View>
     );
+    const renderSortSelector = () => (
+        <View style={[styles.sectionMargin, { marginTop: 0 }]}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListPadding}>
+                {SORT_OPTIONS.map((sort) => (
+                    <GenreChip
+                        key={sort.id}
+                        name={sort.label}
+                        isSelected={activeSort.id === sort.id}
+                        onPress={() => handleSortChange(sort)}
+                    />
+                ))}
+            </ScrollView>
+        </View>
+    );
 
     // --- MAIN RENDER ---
 
@@ -234,6 +243,7 @@ export const DiscoveryScreen = () => {
                         {renderPlatforms()}
                         {renderGenres()}
                         {renderFilterSelector()}
+                        {renderSortSelector()}
                     </View>
                 }
                 renderItem={({ item }) => (
@@ -245,7 +255,7 @@ export const DiscoveryScreen = () => {
                 refreshControl={
                     <RefreshControl
                         refreshing={isRefreshing}
-                        onRefresh={() => fetchData(activeFilter, 1)}
+                        onRefresh={() => fetchData(activeFilter, activeSort, 1)}
                         tintColor={colors.primary}
                     />
                 }
