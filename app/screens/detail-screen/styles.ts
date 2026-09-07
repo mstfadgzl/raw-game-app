@@ -79,5 +79,10 @@ export const styles = StyleSheet.create({
         backgroundColor: colors.background,
         overflow: 'hidden',
         paddingTop: 10,
-    }
+    },
+    tabContent: {
+        flex: 1,
+        backgroundColor: colors.background,
+        padding: spacing.md,
+    },
 });
