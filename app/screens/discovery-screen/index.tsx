@@ -18,30 +18,10 @@ const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: 100 }, (_, i) => currentYear - i);
 
 const FILTERS = [
-    {
-        id: 'weekly',
-        label: 'Haftalık Trendler',
-        ordering: '-added',
-        dates: getDates(7),
-    },
-    {
-        id: 'monthly',
-        label: 'Aylık Trendler',
-        ordering: '-added',
-        dates: getDates(30),
-    },
-    {
-        id: 'popular',
-        label: 'En Çok İndirilenler',
-        ordering: '-added',
-        dates: undefined
-    },
-    {
-        id: 'goty',
-        label: `${currentYear} En İyileri`,
-        ordering: '-rating',
-        dates: undefined,
-    },
+    { id: 'weekly', label: 'Haftalık Trendler', ordering: '-added', dates: getDates(7) },
+    { id: 'monthly', label: 'Aylık Trendler', ordering: '-added', dates: getDates(30) },
+    { id: 'popular', label: 'En Çok İndirilenler', ordering: '-added', dates: undefined },
+    { id: 'goty', label: 'Yılın En İyileri', ordering: '-rating', dates: undefined },
 ];
 
 const SORT_OPTIONS = [
@@ -79,13 +59,15 @@ export const DiscoveryScreen = () => {
 
         dispatch(getPlatformsProcess({ page: 1 }));
         dispatch(getGenresProcess());
+
         let finalDates = filterObj.dates;
         if (filterObj.id === 'goty') {
             finalDates = `${year}-01-01,${year}-12-31`;
         }
+
         dispatch(getGamesProcess({
             page: pageNum,
-            dates: filterObj.dates,
+            dates: finalDates,
             ordering: sortObj.value,
         }));
     }, [dispatch, activeFilter, activeSort, selectedYear]);
@@ -104,6 +86,7 @@ export const DiscoveryScreen = () => {
         setSortModalVisible(false);
         fetchData(activeFilter, sortOption, selectedYear, 1);
     };
+
     const handleYearChange = (year: number) => {
         setSelectedYear(year);
         setYearModalVisible(false);
@@ -121,9 +104,10 @@ export const DiscoveryScreen = () => {
         if (activeFilter.id === 'goty') {
             finalDates = `${selectedYear}-01-01,${selectedYear}-12-31`;
         }
+
         dispatch(getGamesProcess({
             page: nextPage,
-            dates: activeFilter.dates,
+            dates: finalDates,
             ordering: activeSort.value
         }));
     };
@@ -189,13 +173,11 @@ export const DiscoveryScreen = () => {
     const renderFilterAndSort = () => (
         <View style={styles.sectionMargin}>
             <View style={styles.filterHeaderRow}>
-                {/* Sol Taraf: Başlık ve (Gerekirse) Yıl Butonu */}
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <AppText variant="h2" style={styles.dynamicHeaderTitle}>
-                        {activeFilter.label}
+                        {activeFilter.id === 'goty' ? `${selectedYear} En İyileri` : activeFilter.label}
                     </AppText>
 
-                    {/* EĞER "YILIN EN İYİLERİ" SEÇİLİYSE YIL SEÇME BUTONU ÇIKSIN */}
                     {activeFilter.id === 'goty' && (
                         <TouchableOpacity
                             style={[
@@ -205,19 +187,18 @@ export const DiscoveryScreen = () => {
                             onPress={() => setYearModalVisible(true)}
                         >
                             <AppText variant="caption" color={colors.primary} bold>
-                                {selectedYear} ?
+                                {selectedYear} ▾
                             </AppText>
                         </TouchableOpacity>
                     )}
                 </View>
 
-                {/* Sağ Taraf: Sıralama Butonu */}
                 <TouchableOpacity
                     style={styles.compactSortButton}
                     onPress={() => setSortModalVisible(true)}
                 >
                     <AppText variant="caption" color={colors.primary}>
-                        {activeSort.label} |
+                        {activeSort.label} ↕
                     </AppText>
                 </TouchableOpacity>
             </View>
@@ -236,7 +217,7 @@ export const DiscoveryScreen = () => {
                                 color={isActive ? colors.white : colors.gray}
                                 bold={isActive}
                             >
-                                {filter.label.replace('Trendler', '').trim()}
+                                {filter.label.replace('Trendler', '').replace(`${currentYear} En İyileri`, 'Yılın En İyileri').trim()}
                             </AppText>
                             {isActive && <View style={styles.tabIndicator} />}
                         </TouchableOpacity>
@@ -287,7 +268,7 @@ export const DiscoveryScreen = () => {
                 refreshControl={
                     <RefreshControl
                         refreshing={isRefreshing}
-                        onRefresh={() => fetchData(activeFilter, activeSort, 1)}
+                        onRefresh={() => fetchData(activeFilter, activeSort, selectedYear, 1)}
                         tintColor={colors.primary}
                     />
                 }
@@ -333,6 +314,45 @@ export const DiscoveryScreen = () => {
                                 </TouchableOpacity>
                             );
                         })}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            <Modal
+                visible={yearModalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setYearModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPressOut={() => setYearModalVisible(false)}
+                >
+                    <View style={[styles.modalContent, { maxHeight: '60%' }]}>
+                        <AppText variant="h2" style={styles.modalTitle}>Yıl Seçin</AppText>
+
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            {YEARS.map((year) => {
+                                const isSelected = selectedYear === year;
+                                return (
+                                    <TouchableOpacity
+                                        key={`year-${year}`}
+                                        style={styles.modalOption}
+                                        onPress={() => handleYearChange(year)}
+                                    >
+                                        <AppText
+                                            variant="body"
+                                            color={isSelected ? colors.primary : colors.white}
+                                            bold={isSelected}
+                                        >
+                                            {year.toString()}
+                                        </AppText>
+                                        {isSelected && <AppText variant="body" color={colors.primary}>✓</AppText>}
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </ScrollView>
                     </View>
                 </TouchableOpacity>
             </Modal>
