@@ -15,6 +15,7 @@ const getDates = (daysAgo: number) => {
 };
 
 const currentYear = new Date().getFullYear();
+const YEARS = Array.from({ length: 100 }, (_, i) => currentYear - i);
 
 const FILTERS = [
     {
@@ -39,7 +40,7 @@ const FILTERS = [
         id: 'goty',
         label: `${currentYear} En İyileri`,
         ordering: '-rating',
-        dates: `${currentYear}-01-01,${currentYear}-12-31`
+        dates: undefined,
     },
 ];
 
@@ -58,6 +59,8 @@ export const DiscoveryScreen = () => {
     const [activeSort, setActiveSort] = useState(SORT_OPTIONS[0]);
     const [sortModalVisible, setSortModalVisible] = useState(false);
     const [page, setPage] = useState(1);
+    const [selectedYear, setSelectedYEar] = useState(currentYear);
+    const [yearModalVisible, setYearModalVisible] = useState(false);
 
     const gameStore = useAppSelector(state => state.game);
     const discoveryStore = useAppSelector(state => state.discovery);
@@ -71,18 +74,21 @@ export const DiscoveryScreen = () => {
     const isMoreLoading = gameStore.isLoading['getGamesMoreLoading'];
     const isRefreshing = gameStore.status['getGamesProcess'] === 'loading' && page === 1;
 
-    const fetchData = useCallback((filterObj = activeFilter, sortObj = activeSort, pageNum = 1) => {
+    const fetchData = useCallback((filterObj = activeFilter, sortObj = activeSort, year = selectedYear, pageNum = 1) => {
         if (pageNum === 1) setPage(1);
 
         dispatch(getPlatformsProcess({ page: 1 }));
         dispatch(getGenresProcess());
-
+        let finalDates = filterObj.dates;
+        if (filterObj.id === 'goty') {
+            finalDates = `${year}-01-01,${year}-12-31`;
+        }
         dispatch(getGamesProcess({
             page: pageNum,
             dates: filterObj.dates,
             ordering: sortObj.value,
         }));
-    }, [dispatch, activeFilter, activeSort]);
+    }, [dispatch, activeFilter, activeSort, selectedYear]);
 
     useEffect(() => {
         fetchData();
@@ -96,7 +102,7 @@ export const DiscoveryScreen = () => {
     const handleSortChange = (sortOption: typeof SORT_OPTIONS[0]) => {
         setActiveSort(sortOption);
         setSortModalVisible(false);
-        fetchData(activeFilter, sortOption, 1);
+        fetchData(activeFilter, sortOption, selectedYear, 1);
     };
 
     const handleLoadMore = () => {
