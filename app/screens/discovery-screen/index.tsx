@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, RefreshControl, View, ActivityIndicator, ScrollView } from "react-native";
+import { FlatList, RefreshControl, View, ActivityIndicator, ScrollView, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "@hooks";
 import { getGamesProcess, getGenresProcess, getPlatformsProcess } from "@actions";
@@ -162,6 +162,7 @@ export const DiscoveryScreen = () => {
         </View>
     );
 
+    // 1. Popüler Türler (Daha temiz ve emojili)
     const renderGenres = () => (
         <View style={styles.sectionMargin}>
             <SectionHeader title="Popüler Türler" />
@@ -172,41 +173,65 @@ export const DiscoveryScreen = () => {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.horizontalListPadding}
                 renderItem={({ item }) => (
-                    <GenreChip
-                        name={item.name}
+                    <TouchableOpacity
+                        // Sadece şık mat tasarımı veriyoruz
+                        style={[styles.modernChip, styles.inactiveChipSoft]}
                         onPress={() => navigation.navigate('GenreDetail', { slug: item.slug, name: item.name })}
-                    />
+                    >
+                        <AppText
+                            variant="body"
+                            color={colors.white}
+                            bold
+                        >
+                            {item.name.toUpperCase()}
+                        </AppText>
+                    </TouchableOpacity>
                 )}
             />
         </View>
     );
 
-    const renderFilterSelector = () => (
+    // 2. Trendler ve Sıralama (Birleştirilmiş Premium Başlık)
+    const renderFilterAndSort = () => (
         <View style={styles.sectionMargin}>
-            <SectionHeader title={activeFilter.label} />
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListPadding}>
-                {FILTERS.map((filter) => (
-                    <GenreChip
-                        key={filter.id}
-                        name={filter.label}
-                        isSelected={activeFilter.id === filter.id}
-                        onPress={() => handleFilterChange(filter)}
-                    />
-                ))}
-            </ScrollView>
-        </View>
-    );
-    const renderSortSelector = () => (
-        <View style={[styles.sectionMargin, { marginTop: 0 }]}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalListPadding}>
-                {SORT_OPTIONS.map((sort) => (
-                    <GenreChip
-                        key={sort.id}
-                        name={sort.label}
-                        isSelected={activeSort.id === sort.id}
-                        onPress={() => handleSortChange(sort)}
-                    />
-                ))}
+            {/* ÜST KISIM: Dinamik Başlık ve Kompakt Sıralama Butonu */}
+            <View style={styles.filterHeaderRow}>
+                <AppText variant="h2" style={styles.dynamicHeaderTitle}>
+                    {activeFilter.label} {/* Örn: "Haftalık Trendler" yazacak */}
+                </AppText>
+
+                <TouchableOpacity
+                    style={styles.compactSortButton}
+                // Tıklayınca sıralama seçeneklerini açan bir modal tetikleyebilirsin
+                >
+                    <AppText variant="caption" color={colors.primary}>
+                        {activeSort.label} ↕
+                    </AppText>
+                </TouchableOpacity>
+            </View>
+
+            {/* ALT KISIM: Zaman Sekmeleri (Hap buton yerine zarif altı çizgili tablar) */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabPadding}>
+                {FILTERS.map((filter) => {
+                    const isActive = activeFilter.id === filter.id;
+                    return (
+                        <TouchableOpacity
+                            key={filter.id}
+                            style={styles.tabButton}
+                            onPress={() => handleFilterChange(filter)}
+                        >
+                            <AppText
+                                variant="body"
+                                color={isActive ? colors.white : colors.gray}
+                                bold={isActive}
+                            >
+                                {filter.label.replace('Trendler', '').trim()} {/* "Haftalık Trendler" yerine sadece "Haftalık" yazar */}
+                            </AppText>
+                            {/* Aktif olanın altına şık bir çizgi (Indicator) */}
+                            {isActive && <View style={styles.tabIndicator} />}
+                        </TouchableOpacity>
+                    );
+                })}
             </ScrollView>
         </View>
     );
@@ -242,8 +267,7 @@ export const DiscoveryScreen = () => {
                         {renderHeader()}
                         {renderPlatforms()}
                         {renderGenres()}
-                        {renderFilterSelector()}
-                        {renderSortSelector()}
+                        {renderFilterAndSort()}
                     </View>
                 }
                 renderItem={({ item }) => (
