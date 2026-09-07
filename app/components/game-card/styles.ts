@@ -3,10 +3,11 @@ import { colors, spacing } from '@theme';
 
 const { width } = Dimensions.get('window');
 
-const SCREEN_PADDING = 8; // Ekranın en sol ve en sağındaki boşluk
-const MIDDLE_GAP = 10;     // İki kartın tam ortasındaki boşluk
-// Formül: (Ekran Genişliği - (Sol Boşluk + Sağ Boşluk) - Orta Boşluk) / 2
-const CARD_WIDTH = (width - (SCREEN_PADDING * 2) - MIDDLE_GAP) / 2;
+const SCREEN_PADDING = 16; // FlatList'in kenar boşluğu
+const GAP = 12;            // İki kart arasındaki boşluk
+
+// Toplam boşluğu çıkarıp ikiye bölüyoruz ve 1 piksel emniyet payı bırakıyoruz
+const CARD_WIDTH = Math.floor((width - (SCREEN_PADDING * 2) - GAP) / 2) - 1;
 
 export const styles = StyleSheet.create({
     container: {
@@ -39,7 +40,7 @@ export const styles = StyleSheet.create({
     },
     title: {
         color: colors.text,
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: 'bold',
         lineHeight: 18,
         height: 38, // Kartların boyunun eşit kalması için 2 satırlık sabit yükseklik
