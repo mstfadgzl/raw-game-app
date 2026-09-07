@@ -66,45 +66,56 @@ export const DetailScreen = () => {
     }
 
     return (
-        <Container style={{ flex: 1, backgroundColor: colors.background, paddingHorizontal: 0 }}>
-            <View style={styles.mediaContainer}>
+        <View style={styles.container}>
+            {/* ÜST KISIM: Büyük Görsel ve Başlık */}
+            <View style={styles.headerContainer}>
                 <Image source={{ uri: detail?.background_image }} style={styles.heroImage} />
-                <TouchableOpacity
-                    style={styles.favButton}
-                    onPress={handleFavorites}
-                    activeOpacity={0.7}
-                >
+                <View style={styles.imageOverlay} />
+
+                {/* Favori Butonu */}
+                <TouchableOpacity style={styles.favButton} onPress={handleFavorites}>
                     <AppText style={{ fontSize: 24 }}>{isFav ? '❤️' : '🤍'}</AppText>
                 </TouchableOpacity>
-            </View>
 
-            <View style={styles.basicInfo}>
-                <AppText variant="h1" numberOfLines={2}>{detail?.name}</AppText>
+                {/* Resmin üzerindeki büyük bilgiler */}
+                <View style={styles.absoluteInfo}>
+                    <AppText style={styles.gameTitle} numberOfLines={2}>{detail?.name}</AppText>
 
-                {detail?.developers && detail.developers.length > 0 && (
-                    <AppText color={colors.secondary} style={{ marginTop: 2, marginBottom: 6 }}>
-                        Geliştirici: {detail.developers[0].name}
-                    </AppText>
-                )}
-
-                <View style={styles.metaRow}>
-                    <AppText color={colors.primary} bold>★ {detail?.rating}</AppText>
-                    <AppText color={colors.secondary}> | </AppText>
-                    <AppText color={colors.secondary}>{detail?.released?.split('-')[0]}</AppText>
+                    <View style={styles.metaContainer}>
+                        <View style={styles.metaBox}>
+                            <AppText variant="caption" bold color={colors.primary}>★ {detail?.rating}</AppText>
+                        </View>
+                        <View style={styles.metaBox}>
+                            <AppText variant="caption" bold>{detail?.released?.split('-')[0]}</AppText>
+                        </View>
+                        {detail?.playtime > 0 && (
+                            <View style={styles.metaBox}>
+                                <AppText variant="caption" bold>{detail.playtime} SAAT</AppText>
+                            </View>
+                        )}
+                    </View>
                 </View>
             </View>
 
-            <View style={{ flex: 1 }}>
+            {/* ALT KISIM: Sekmeler (Tabs) */}
+            <View style={styles.tabWrapper}>
                 <Tab.Navigator
                     screenOptions={{
                         lazy: true,
-                        swipeEnabled: false,
                         tabBarScrollEnabled: true,
                         tabBarActiveTintColor: colors.primary,
                         tabBarInactiveTintColor: colors.secondary,
-                        tabBarStyle: { backgroundColor: colors.background },
-                        tabBarIndicatorStyle: { backgroundColor: colors.primary },
-                        tabBarLabelStyle: { fontSize: 12, fontWeight: 'bold' },
+                        tabBarStyle: {
+                            backgroundColor: 'transparent',
+                            elevation: 0,
+                            shadowOpacity: 0
+                        },
+                        tabBarIndicatorStyle: {
+                            backgroundColor: colors.primary,
+                            height: 3,
+                            borderRadius: 3
+                        },
+                        tabBarLabelStyle: { fontSize: 13, fontWeight: 'bold' },
                     }}
                 >
                     <Tab.Screen name="Hakkında" component={AboutTab} initialParams={{ gameId: safeGameId }} />
@@ -114,6 +125,6 @@ export const DetailScreen = () => {
                     <Tab.Screen name="Reddit" component={RedditTab} initialParams={{ gameId: safeGameId }} />
                 </Tab.Navigator>
             </View>
-        </Container>
+        </View>
     );
 };
