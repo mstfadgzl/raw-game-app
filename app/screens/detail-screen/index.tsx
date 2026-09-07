@@ -87,7 +87,7 @@ export const DetailScreen = () => {
                         </View>
                         {detail?.playtime > 0 && (
                             <View style={styles.metaBox}>
-                                <AppText variant="caption" bold>{detail.playtime} SAAT</AppText>
+                                <AppText variant="caption" bold>{detail.playtime} Oynanış Süresi</AppText>
                             </View>
                         )}
                     </View>
