@@ -51,8 +51,8 @@ export const AboutTab = () => {
     return (
         <ScrollView
             style={globalStyles.tabContent}
+            contentContainerStyle={{ paddingBottom: 100 }}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
         >
             <AppText variant="h2" style={{ marginBottom: spacing.sm }}>Oyun Hikayesi</AppText>
             <AppText style={localStyles.description}>
