@@ -39,7 +39,12 @@ export const AboutTab = () => {
     if (!detail) return null;
 
     return (
-        <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16 }}>
+        <ScrollView
+            style={styles.tabContent}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ padding: 16 }}
+            nestedScrollEnabled={true}
+        >
             <AppText variant="h2" style={{ marginBottom: spacing.sm }}>Oyun Hikayesi</AppText>
             <AppText style={styles.description}>
                 {!detail.description_raw
@@ -91,7 +96,7 @@ export const AboutTab = () => {
                     Resmi Web Sitesini Ziyaret Et
                 </AppText>
             )}
-            <View style={{ height: 50 }} />
+            <View style={{ height: 100 }} />
         </ScrollView>
     );
 };
