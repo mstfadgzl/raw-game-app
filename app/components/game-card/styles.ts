@@ -3,8 +3,8 @@ import { colors, spacing } from '@theme';
 
 const { width } = Dimensions.get('window');
 
-const SCREEN_PADDING = 16; // Ekranın en sol ve en sağındaki boşluk
-const MIDDLE_GAP = 12;     // İki kartın tam ortasındaki boşluk
+const SCREEN_PADDING = 8; // Ekranın en sol ve en sağındaki boşluk
+const MIDDLE_GAP = 10;     // İki kartın tam ortasındaki boşluk
 // Formül: (Ekran Genişliği - (Sol Boşluk + Sağ Boşluk) - Orta Boşluk) / 2
 const CARD_WIDTH = (width - (SCREEN_PADDING * 2) - MIDDLE_GAP) / 2;
 
