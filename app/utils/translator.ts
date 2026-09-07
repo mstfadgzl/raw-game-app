@@ -1,32 +1,47 @@
 import axios from 'axios';
 
+const translationCache: { [key: string]: string } = {};
+
 export const translateText = async (text: string): Promise<string> => {
     if (!text) return '';
 
+    if (translationCache[text]) {
+        return translationCache[text];
+    }
+
     try {
-        // Örnek ücretsiz çeviri isteği (Senin projendeki endpoint buradadır)
-        const response = await axios.get('https://api.mymemory.translated.net/get', {
+        // Google'ın mobil/tarayıcılar için kullandığı güvenli public çeviri API'si
+        const response = await axios.get('https://translate.googleapis.com/translate_a/single', {
             params: {
-                q: text.slice(0, 500), // API limitlerine takılmamak için metni ilk 500 karakterle sınırlandırıyoruz
-                langpair: 'en|tr',
+                client: 'gtx',
+                sl: 'en',
+                tl: 'tr',
+                dt: 't',
+                q: text,
             },
+            timeout: 8000,
         });
 
-        const translated = response.data?.responseData?.translatedText;
+        // Google'ın döndürdüğü karmaşık dizi yapısından çevrilen metni güvenle çekiyoruz
+        if (response.data && response.data[0]) {
+            const translatedArray = response.data[0];
+            let fullTranslation = '';
 
-        // Eğer API 429 veya boş dönerse orijinal metni ver
-        if (!translated || response.data.responseStatus === 429) {
-            return text;
+            translatedArray.forEach((item: any) => {
+                if (item[0]) {
+                    fullTranslation += item[0];
+                }
+            });
+
+            if (fullTranslation.trim().length > 0) {
+                translationCache[text] = fullTranslation;
+                return fullTranslation;
+            }
         }
 
-        return translated;
+        return text;
     } catch (error: any) {
-        // 429 (Too Many Requests) veya başka bir ağ hatası aldığında sessizce orijinal metni döndür (Çöküşü engeller)
-        if (error.response?.status === 429) {
-            console.warn('Çeviri limiti aşıldı (429). Orijinal metin gösteriliyor.');
-        } else {
-            console.error('Çeviri hatası:', error.message);
-        }
+        console.warn('Çeviri yapılırken hata oluştu, orijinal metin gösteriliyor:', error.message);
         return text;
     }
 };
