@@ -67,17 +67,14 @@ export const DetailScreen = () => {
 
     return (
         <View style={styles.container}>
-            {/* ÜST KISIM: Büyük Görsel ve Başlık */}
             <View style={styles.headerContainer}>
                 <Image source={{ uri: detail?.background_image }} style={styles.heroImage} />
                 <View style={styles.imageOverlay} />
 
-                {/* Favori Butonu */}
                 <TouchableOpacity style={styles.favButton} onPress={handleFavorites}>
                     <AppText style={{ fontSize: 24 }}>{isFav ? '❤️' : '🤍'}</AppText>
                 </TouchableOpacity>
 
-                {/* Resmin üzerindeki büyük bilgiler */}
                 <View style={styles.absoluteInfo}>
                     <AppText style={styles.gameTitle} numberOfLines={2}>{detail?.name}</AppText>
 
@@ -97,11 +94,11 @@ export const DetailScreen = () => {
                 </View>
             </View>
 
-            {/* ALT KISIM: Sekmeler (Tabs) */}
-            <View style={styles.tabWrapper}>
+            <View style={[styles.tabWrapper, { flex: 1 }]}>
                 <Tab.Navigator
                     screenOptions={{
                         lazy: true,
+                        swipeEnabled: false,
                         tabBarScrollEnabled: true,
                         tabBarActiveTintColor: colors.primary,
                         tabBarInactiveTintColor: colors.secondary,
