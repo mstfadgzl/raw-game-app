@@ -10,19 +10,25 @@ interface PlatformCardProps {
     onPress: () => void;
 }
 
-export const PlatformCard: React.FC<PlatformCardProps> = memo(({ name, image, gamesCount, onPress }) => (
-    <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={onPress}>
-        <ImageBackground
-            source={{ uri: image }}
-            style={styles.image}
-            imageStyle={{ borderRadius: 16 }}
-        >
-            <View style={styles.overlay}>
-                <AppText variant="h2" style={styles.name}>{name}</AppText>
-                {gamesCount && (
-                    <AppText variant="caption" style={styles.count}>{gamesCount.toLocaleString()} Oyun</AppText>
-                )}
-            </View>
-        </ImageBackground>
-    </TouchableOpacity>
-));
+export const PlatformCard: React.FC<PlatformCardProps> = memo(({ name, image, gamesCount, onPress }) => {
+    return (
+        <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={onPress}>
+            <ImageBackground
+                source={{ uri: image }}
+                style={styles.image}
+                imageStyle={{ borderRadius: 16 }}
+            >
+                <View style={styles.overlay}>
+                    <AppText variant="h2" style={styles.name} numberOfLines={1}>
+                        {name}
+                    </AppText>
+                    {gamesCount && (
+                        <AppText variant="caption" style={styles.count}>
+                            {gamesCount.toLocaleString()} Oyun
+                        </AppText>
+                    )}
+                </View>
+            </ImageBackground>
+        </TouchableOpacity>
+    );
+});
