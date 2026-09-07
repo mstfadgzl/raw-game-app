@@ -14,8 +14,7 @@ export const styles = StyleSheet.create({
         color: colors.primary, // Neon rengimiz
     },
     listContent: {
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.xl,
+        paddingVertical: 16
     },
     loader: {
         marginVertical: spacing.lg,

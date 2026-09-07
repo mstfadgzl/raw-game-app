@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
         letterSpacing: 2,
     },
     listContent: {
-        paddingHorizontal: spacing.md,
+        paddingVertical: 16
     },
     loader: {
         marginVertical: spacing.lg,

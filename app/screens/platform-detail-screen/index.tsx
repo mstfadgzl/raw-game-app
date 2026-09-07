@@ -74,11 +74,11 @@ export const PlatformDetailScreen = () => {
             <FlatList
                 data={games}
                 numColumns={2}
+                keyExtractor={(item) => `plt-game-${item.id}`}
                 columnWrapperStyle={{
                     justifyContent: 'space-between',
                     paddingHorizontal: 16
                 }}
-                keyExtractor={(item) => `plt-game-${item.id}`}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
                 ListHeaderComponent={
