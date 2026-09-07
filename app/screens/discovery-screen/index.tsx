@@ -72,6 +72,7 @@ export const DiscoveryScreen = () => {
 
     // Local State
     const [activeFilter, setActiveFilter] = useState(FILTERS[0]);
+    const [activeSort, setActiveSort] = useState(SORT_OPTIONS[0]);
     const [page, setPage] = useState(1);
 
     // Redux State
