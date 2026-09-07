@@ -216,12 +216,10 @@ export const DiscoveryScreen = () => {
                     </View>
                 }
                 renderItem={({ item }) => (
-                    <View style={styles.gameCardWrapper}>
-                        <GameCard
-                            game={item}
-                            onPress={(id, name) => navigation.navigate('GameDetail', { gameId: id, gameName: name })}
-                        />
-                    </View>
+                    <GameCard
+                        game={item}
+                        onPress={(id, name) => navigation.navigate('GameDetail', { gameId: id, gameName: name })}
+                    />
                 )}
                 refreshControl={
                     <RefreshControl
