@@ -1,16 +1,16 @@
 import { getGamesProcess, getGenresProcess, getPlatformsProcess } from "@actions";
 import { useAppDispatch, useAppSelector } from "@hooks"
 import { useNavigation } from "@react-navigation/native";
-import { MainStackNavigationProp } from "@types";
 import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, RefreshControl, View, ActivityIndicator } from "react-native";
 import { styles } from "./styles";
 import { AppText, Container, GameCard, GenreChip, PlatformCard, SectionHeader, Skeleton } from "@components";
 import { colors } from "@theme";
+import { DiscoveryScreenNavigationProp } from "@types";
 
 export const DiscoveryScreen = () => {
     const dispatch = useAppDispatch();
-    const navigation = useNavigation<MainStackNavigationProp>();
+    const navigation = useNavigation<DiscoveryScreenNavigationProp>();
 
     // Sayfalama için state
     const [page, setPage] = useState(1);
