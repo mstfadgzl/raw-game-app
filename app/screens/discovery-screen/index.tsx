@@ -30,7 +30,7 @@ const FILTERS = [
         id: 'trending',
         label: 'Haftanın Trendleri',
         ordering: '-added',
-        dates: getDates(30),
+        dates: getDates(60),
     },
     {
         id: 'popular',
