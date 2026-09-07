@@ -70,7 +70,7 @@ export const PlatformDetailScreen = () => {
     }
 
     return (
-        <Container style={styles.container}>
+        <Container style={{ paddingHorizontal: 0 }}>
             <FlatList
                 data={games}
                 numColumns={2}
