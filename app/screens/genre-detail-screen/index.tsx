@@ -4,13 +4,13 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '@hooks';
 import { getGamesByGenreProcess } from '@actions';
 import { Container, AppText, GameCard, EmptyState, Skeleton } from '@components';
-import { GenreDetailRouteProp, GenericNavigationProp } from '@types';
+import { GenreDetailRouteProp, GenericNavigationProp, DiscoverScreenNavigationProp } from '@types';
 import { colors, spacing } from '@theme';
 import { styles } from './style';
 
 export const GenreDetailScreen = () => {
     const route = useRoute<GenreDetailRouteProp>();
-    const navigation = useNavigation<GenericNavigationProp>();
+    const navigation = useNavigation<DiscoverScreenNavigationProp>();
     const { slug, name } = route.params;
     const dispatch = useAppDispatch();
 
