@@ -9,6 +9,8 @@ export const styles = StyleSheet.create({
         paddingHorizontal: spacing.md,
         paddingTop: spacing.lg,
         marginBottom: spacing.md,
+        padding: 16,
+        marginTop: 10,
     },
     mainTitle: {
         fontSize: 28,
@@ -43,5 +45,13 @@ export const styles = StyleSheet.create({
         width: '100%',
         height: 200,
         borderRadius: 16,
-    }
+    },
+    filterScroll: {
+        paddingLeft: 16,
+        marginBottom: 20,
+    },
+    genreScroll: {
+        paddingLeft: 16,
+        marginBottom: 20,
+    },
 });

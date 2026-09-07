@@ -1,18 +1,20 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
+import { NavigatorScreenParams } from '@react-navigation/native';
 
 /**
- * 1. INDIVIDUAL STACK PARAM LISTS
+ * 1. PARAMETRE LİSTELERİ
  */
 
-// Home Stack: Ana keşfet akışı
 export type HomeStackParamList = {
     DiscoveryScreen: undefined;
     GameDetail: { gameId: number | string; gameName: string };
+    PlatformDetail: { id: number; name: string };
+    DiscoverMain: { id: number; name: string };
+    GenreDetail: { slug: string; name: string; };
 };
 
-// Discover Stack: Kategoriler, Platformlar, Yapımcılar
 export type DiscoverStackParamList = {
     DiscoverMain: undefined;
     PlatformDetail: { id: number; name: string };
@@ -23,63 +25,54 @@ export type DiscoverStackParamList = {
     GameDetail: { gameId: number | string; gameName: string };
 };
 
-// Search Stack: Gelişmiş arama
 export type SearchStackParamList = {
     SearchScreen: undefined;
     GameDetail: { gameId: number | string; gameName: string };
 };
 
-// Library Stack: Favoriler ve Koleksiyon
 export type LibraryStackParamList = {
     LibraryScreen: undefined;
     GameDetail: { gameId: number | string; gameName: string };
 };
 
-/**
- * 2. BOTTOM TAB PARAM LIST
- */
 export type BottomTabParamList = {
-    HomeTab: undefined;     // HomeStack'i barındırır
-    DiscoverTab: undefined; // DiscoverStack'i barındırır
-    SearchTab: undefined;   // SearchStack'i barındırır
-    LibraryTab: undefined;  // LibraryStack'i barındırır
+    HomeTab: NavigatorScreenParams<HomeStackParamList>;
+    DiscoverTab: NavigatorScreenParams<DiscoverStackParamList>;
+    SearchTab: NavigatorScreenParams<SearchStackParamList>;
+    LibraryTab: NavigatorScreenParams<LibraryStackParamList>;
 };
 
-/**
- * 3. ROOT APP STACK (En Dış Kapsayıcı)
- */
 export type AppStackParamList = {
-    Main: undefined; // BottomTabStack'i barındırır
-    Auth: undefined; // Login/Register akışı gerekirse
+    Main: undefined; // BottomTab'ı kapsar
+    Auth: undefined;
 };
 
 /**
- * 4. PROFESSIONAL NAVIGATION PROPS (HOOKLAR İÇİN)
- * Bu tipler sayesinde 'navigation.navigate' dediğinde tüm uygulama haritası önünde olur.
+ * 2. PROFESYONEL NAVİGASYON PROPS (Burası Hatayı Çözer)
  */
 
-// Genel bir ekranın hem kendi stack'inde hem de tablar arasında gezebilmesini sağlar.
+// DiscoveryScreen içinde kullanılacak en güçlü navigasyon tipi
+// Bu tip sayesinde hem Home içindeki ekranları hem de diğer Tab'leri görebilirsin.
+export type DiscoveryScreenNavigationProp = CompositeNavigationProp<
+    NativeStackNavigationProp<HomeStackParamList>,
+    BottomTabNavigationProp<BottomTabParamList>
+>;
+
+// Diğer ekranlar için de benzer yapı:
+export type DiscoverMainNavigationProp = CompositeNavigationProp<
+    NativeStackNavigationProp<DiscoverStackParamList>,
+    BottomTabNavigationProp<BottomTabParamList>
+>;
+
+// Herhangi bir ekranda her yere gitme yetkisi veren genel tip
 export type GenericNavigationProp = CompositeNavigationProp<
     NativeStackNavigationProp<HomeStackParamList & DiscoverStackParamList & SearchStackParamList & LibraryStackParamList>,
     BottomTabNavigationProp<BottomTabParamList>
 >;
 
-// Spesifik ekran navigasyon tipleri
-export type DiscoveryScreenNavigationProp = CompositeNavigationProp<
-    NativeStackNavigationProp<HomeStackParamList, 'DiscoveryScreen'>,
-    BottomTabNavigationProp<BottomTabParamList>
->;
-
-export type DiscoverMainNavigationProp = CompositeNavigationProp<
-    NativeStackNavigationProp<DiscoverStackParamList, 'DiscoverMain'>,
-    BottomTabNavigationProp<BottomTabParamList>
->;
-
-export type GameDetailNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'GameDetail'>;
-
 /**
- * 5. ROUTE PROPS (PARAMETRE OKUMAK İÇİN)
-*/
+ * 3. ROUTE PROPS
+ */
 export type TagDetailRouteProp = RouteProp<DiscoverStackParamList, 'TagDetail'>;
 export type DeveloperDetailRouteProp = RouteProp<DiscoverStackParamList, 'DeveloperDetail'>;
 export type GameDetailRouteProp = RouteProp<HomeStackParamList, 'GameDetail'>;
