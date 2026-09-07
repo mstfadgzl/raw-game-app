@@ -200,6 +200,7 @@ export const DiscoveryScreen = () => {
         <Container style={styles.container}>
             <FlatList
                 data={games}
+                numColumns={2}
                 keyExtractor={(item, index) => `game-${item.id}-${index}`}
                 showsVerticalScrollIndicator={false}
                 ListHeaderComponent={
