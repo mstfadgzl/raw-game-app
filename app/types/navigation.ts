@@ -13,6 +13,7 @@ export type HomeStackParamList = {
     PlatformDetail: { id: number; name: string };
     DiscoverMain: { id: number; name: string };
     GenreDetail: { slug: string; name: string; };
+    TagDetail: { id: number; name: string };
 };
 
 export type DiscoverStackParamList = {

@@ -8,3 +8,4 @@ export * from './developer-detail-screen';
 export * from './library-screen';
 export * from './genre-detail-screen';
 export * from './platform-detail-screen';
+export * from './tag-detail-screen';
