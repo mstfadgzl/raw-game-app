@@ -6,11 +6,15 @@ import { createAppAsyncThunk } from "@utils";
 
 export const getGamesProcess = createAsyncThunk<
     IGameListResponse,
-    { page: number; platforms?: number; genres?: string }>(
+    {
+        page: number;
+        ordering?: string;
+        platforms?: number;
+        genres?: string
+    }>(
         'game/getGamesProcess',
         async (params, { rejectWithValue }) => {
             try {
-                // gameService.getGames'e tüm params objesini gönderiyoruz
                 return await gameService.getGames(
                     params.page,
                     20,
