@@ -20,12 +20,30 @@ import { styles } from "./styles";
 import { colors } from "@theme";
 import { DiscoveryScreenNavigationProp } from "@types";
 
-// Profesyonel Filtre Sabitleri
+const getLastWeekDate = () => {
+    const today = new Date();
+    const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return `${lastWeek.toISOString().split('T')[0]},${today.toISOString().split('T')[0]}`;
+};
 const FILTERS = [
-    { id: 'trending', label: 'Haftanın Trendleri', ordering: '-relevance' },
-    { id: 'popular', label: 'En Çok İndirilenler', ordering: '-added' },
-    { id: 'goty', label: 'Yılın En İyileri', ordering: '-rating', dates: '2023-01-01,2024-12-31' },
-    { id: 'new', label: 'Yeni Çıkanlar', ordering: '-released' },
+    {
+        id: 'trending',
+        label: 'Haftanın Trendleri',
+        ordering: '-relevance',
+        dates: getLastWeekDate() // Sadece son 7 günü kapsar
+    },
+    {
+        id: 'popular',
+        label: 'En Çok İndirilenler',
+        ordering: '-added',
+        dates: undefined // Tüm zamanlar
+    },
+    {
+        id: 'goty',
+        label: 'Yılın En İyileri',
+        ordering: '-rating',
+        dates: '2024-01-01,2024-12-31'
+    },
 ];
 
 export const DiscoveryScreen = () => {
