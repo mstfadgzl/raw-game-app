@@ -25,10 +25,10 @@ const FILTERS = [
 ];
 
 const SORT_OPTIONS = [
-    { id: 'added', label: 'Popülerlik (İndirilme)', value: '-added' },
-    { id: 'rating', label: 'Puan (Yüksek)', value: '-rating' },
-    { id: 'released', label: 'Çıkış Tarihi (Yeni)', value: '-released' },
-    { id: 'name', label: 'İsim (A-Z)', value: 'name' },
+    { id: 'added', shortLabel: 'Popülerlik (İndirilme)', value: '-added' },
+    { id: 'rating', shortLabel: 'Puan (Yüksek)', value: '-rating' },
+    { id: 'released', shortLabel: 'Çıkış Tarihi (Yeni)', value: '-released' },
+    { id: 'name', shortLabel: 'İsim (A-Z)', value: 'name' },
 ];
 
 export const DiscoveryScreen = () => {
@@ -173,16 +173,23 @@ export const DiscoveryScreen = () => {
     const renderFilterAndSort = () => (
         <View style={styles.sectionMargin}>
             <View style={styles.filterHeaderRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <AppText variant="h2" style={styles.dynamicHeaderTitle}>
+
+                {/* SOL TARAF: Dinamik Başlık (Alan yetmezse otomatik küçülür) */}
+                <View style={{ flex: 1, marginRight: 8 }}>
+                    <AppText variant="h2" style={styles.dynamicHeaderTitle} numberOfLines={1}>
                         {activeFilter.id === 'goty' ? `${selectedYear} En İyileri` : activeFilter.label}
                     </AppText>
+                </View>
 
+                {/* SAĞ TARAF: Butonlar (Yıl ve Sıralama yan yana gruplandı) */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 0 }}>
+
+                    {/* EĞER "YILIN EN İYİLERİ" SEÇİLİYSE YIL SEÇME BUTONU */}
                     {activeFilter.id === 'goty' && (
                         <TouchableOpacity
                             style={[
                                 styles.compactSortButton,
-                                { marginLeft: 10, borderColor: colors.primary, backgroundColor: 'rgba(100, 255, 218, 0.1)' }
+                                { marginRight: 8, borderColor: colors.primary, backgroundColor: 'rgba(100, 255, 218, 0.1)' }
                             ]}
                             onPress={() => setYearModalVisible(true)}
                         >
@@ -191,18 +198,21 @@ export const DiscoveryScreen = () => {
                             </AppText>
                         </TouchableOpacity>
                     )}
-                </View>
 
-                <TouchableOpacity
-                    style={styles.compactSortButton}
-                    onPress={() => setSortModalVisible(true)}
-                >
-                    <AppText variant="caption" color={colors.primary}>
-                        {activeSort.label} ↕
-                    </AppText>
-                </TouchableOpacity>
+                    {/* SIRALAMA BUTONU (Artık 'shortLabel' kullanıyoruz) */}
+                    <TouchableOpacity
+                        style={styles.compactSortButton}
+                        onPress={() => setSortModalVisible(true)}
+                    >
+                        <AppText variant="caption" color={colors.primary}>
+                            {activeSort.shortLabel} ↕
+                        </AppText>
+                    </TouchableOpacity>
+
+                </View>
             </View>
 
+            {/* ZAMAN SEKMELERİ */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabPadding}>
                 {FILTERS.map((filter) => {
                     const isActive = activeFilter.id === filter.id;
@@ -308,7 +318,7 @@ export const DiscoveryScreen = () => {
                                         color={isSelected ? colors.primary : colors.white}
                                         bold={isSelected}
                                     >
-                                        {sort.label}
+                                        {sort.shortLabel}
                                     </AppText>
                                     {isSelected && <AppText variant="body" color={colors.primary}>✓</AppText>}
                                 </TouchableOpacity>
