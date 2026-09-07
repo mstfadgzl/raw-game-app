@@ -96,7 +96,7 @@ export const DiscoveryScreen = () => {
 
     const handleFilterChange = (filter: typeof FILTERS[0]) => {
         setActiveFilter(filter);
-        fetchData(filter, activeSort, 1);
+        fetchData(filter, activeSort, selectedYear, 1);
     };
 
     const handleSortChange = (sortOption: typeof SORT_OPTIONS[0]) => {
