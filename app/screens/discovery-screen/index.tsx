@@ -75,10 +75,10 @@ export const DiscoveryScreen = () => {
         fetchData();
     }, []);
 
-    // Filtre Değiştirme
+
     const handleFilterChange = (filter: typeof FILTERS[0]) => {
         setActiveFilter(filter);
-        fetchData(filter, 1); // Filtre değişince 1. sayfadan başlat
+        fetchData(filter, 1);
     };
 
     // Sonsuz Kaydırma
