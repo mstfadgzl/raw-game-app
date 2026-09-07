@@ -2,8 +2,9 @@ import { StyleSheet } from 'react-native';
 import { colors, spacing } from '@theme';
 
 export const styles = StyleSheet.create({
+    // Temel Yerleşim
     container: {
-        paddingHorizontal: 0, // ListHeader bileşenleri kendi paddinglerini yönetecek
+        paddingHorizontal: 0,
     },
     header: {
         paddingHorizontal: spacing.md,
@@ -15,6 +16,7 @@ export const styles = StyleSheet.create({
     mainTitle: {
         fontSize: 28,
         marginTop: 4,
+        color: colors.white,
     },
     sectionMargin: {
         marginBottom: spacing.lg,
@@ -26,7 +28,8 @@ export const styles = StyleSheet.create({
     gameCardWrapper: {
         paddingHorizontal: spacing.md,
     },
-    // Skeleton Loader Stilleri
+
+    // Skeleton Yükleme Ekranı
     skeletonContainer: {
         padding: spacing.md,
     },
@@ -46,33 +49,26 @@ export const styles = StyleSheet.create({
         height: 200,
         borderRadius: 16,
     },
-    filterScroll: {
-        paddingLeft: 16,
-        marginBottom: 20,
-    },
-    genreScroll: {
-        paddingLeft: 16,
-        marginBottom: 20,
-    },
-    // styles.ts içerisine eklenecekler
+
+    // Modern Buton (Chip) Tasarımları
     modernChip: {
         paddingHorizontal: 20,
         paddingVertical: 10,
-        borderRadius: 20, // Tam yuvarlak köşeler
+        borderRadius: 20,
         marginRight: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
     activeChipFilled: {
-        backgroundColor: colors.primary, // Senin o güzel neon yeşilin
-        borderWidth: 0, // Kenarlığa veda
+        backgroundColor: colors.primary,
+        borderWidth: 0,
     },
     inactiveChipSoft: {
-        backgroundColor: '#2A2A2A', // Siyahın üzerinde sırıtmaması için mat koyu gri
+        backgroundColor: '#2A2A2A',
         borderWidth: 0,
     },
 
-    // Filtre Başlık ve Sıralama
+    // Filtre Başlık ve Kompakt Sıralama Butonu
     filterHeaderRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -94,7 +90,7 @@ export const styles = StyleSheet.create({
         borderColor: '#333333',
     },
 
-    // Yeni Sekme (Tab) Tasarımı
+    // Altı Çizgili Modern Sekme (Tab) Tasarımı
     tabPadding: {
         paddingHorizontal: 16,
         paddingBottom: 10,
@@ -112,5 +108,34 @@ export const styles = StyleSheet.create({
         height: 3,
         backgroundColor: colors.primary,
         borderRadius: 3,
+    },
+
+    // Alttan Açılan Sıralama Modalı (Bottom Sheet)
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: '#1A1A1A',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        padding: 24,
+        paddingBottom: 40,
+    },
+    modalTitle: {
+        marginBottom: 20,
+        textAlign: 'center',
+        color: colors.white,
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    modalOption: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#2A2A2A',
     },
 });

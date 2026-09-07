@@ -1,21 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, RefreshControl, View, ActivityIndicator, ScrollView, TouchableOpacity } from "react-native";
+import { FlatList, RefreshControl, View, ActivityIndicator, ScrollView, TouchableOpacity, Modal } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAppDispatch, useAppSelector } from "@hooks";
 import { getGamesProcess, getGenresProcess, getPlatformsProcess } from "@actions";
-
-// Components
-import {
-    AppText,
-    Container,
-    GameCard,
-    GenreChip,
-    PlatformCard,
-    SectionHeader,
-    Skeleton
-} from "@components";
-
-import { DiscoverMainScreen } from "@screens";
+import { AppText, Container, GameCard, PlatformCard, SectionHeader, Skeleton } from "@components";
 import { styles } from "./styles";
 import { colors } from "@theme";
 import { DiscoveryScreenNavigationProp } from "@types";
@@ -25,6 +13,7 @@ const getDates = (daysAgo: number) => {
     const pastDate = new Date(today.getTime() - daysAgo * 24 * 60 * 60 * 1000);
     return `${pastDate.toISOString().split('T')[0]},${today.toISOString().split('T')[0]}`;
 };
+
 const currentYear = new Date().getFullYear();
 
 const FILTERS = [
@@ -53,6 +42,7 @@ const FILTERS = [
         dates: `${currentYear}-01-01,${currentYear}-12-31`
     },
 ];
+
 const SORT_OPTIONS = [
     { id: 'added', label: 'Popülerlik (İndirilme)', value: '-added' },
     { id: 'rating', label: 'Puan (Yüksek)', value: '-rating' },
@@ -64,32 +54,23 @@ export const DiscoveryScreen = () => {
     const dispatch = useAppDispatch();
     const navigation = useNavigation<DiscoveryScreenNavigationProp>();
 
-    // Local State
     const [activeFilter, setActiveFilter] = useState(FILTERS[0]);
     const [activeSort, setActiveSort] = useState(SORT_OPTIONS[0]);
     const [sortModalVisible, setSortModalVisible] = useState(false);
     const [page, setPage] = useState(1);
 
-    // Redux State
     const gameStore = useAppSelector(state => state.game);
     const discoveryStore = useAppSelector(state => state.discovery);
     const genreStore = useAppSelector(state => state.genre);
 
-    // Veri Atamaları
     const platforms = discoveryStore.data.getPlatformsProcess?.results || [];
     const genres = genreStore.data.getGenresProcess?.results || [];
     const games = gameStore.data.getGamesProcess?.results || [];
 
-    // Loading Durumları
     const isInitialLoading = gameStore.isLoading['getGamesProcess'] && page === 1;
     const isMoreLoading = gameStore.isLoading['getGamesMoreLoading'];
     const isRefreshing = gameStore.status['getGamesProcess'] === 'loading' && page === 1;
 
-    /**
-     * Veri Çekme Fonksiyonu
-     * @param filterObj - Seçili filtre
-     * @param pageNum - Sayfa numarası
-     */
     const fetchData = useCallback((filterObj = activeFilter, sortObj = activeSort, pageNum = 1) => {
         if (pageNum === 1) setPage(1);
 
@@ -101,19 +82,20 @@ export const DiscoveryScreen = () => {
             dates: filterObj.dates,
             ordering: sortObj.value,
         }));
-    }, [dispatch, activeFilter]);
+    }, [dispatch, activeFilter, activeSort]);
 
     useEffect(() => {
         fetchData();
-    }, []);
-
+    }, [fetchData]);
 
     const handleFilterChange = (filter: typeof FILTERS[0]) => {
         setActiveFilter(filter);
         fetchData(filter, activeSort, 1);
     };
+
     const handleSortChange = (sortOption: typeof SORT_OPTIONS[0]) => {
         setActiveSort(sortOption);
+        setSortModalVisible(false);
         fetchData(activeFilter, sortOption, 1);
     };
 
@@ -129,8 +111,6 @@ export const DiscoveryScreen = () => {
             ordering: activeSort.value
         }));
     };
-
-    // --- RENDER BÖLÜMLERİ ---
 
     const renderHeader = () => (
         <View style={styles.header}>
@@ -154,7 +134,7 @@ export const DiscoveryScreen = () => {
                 renderItem={({ item }) => (
                     <PlatformCard
                         name={item.name}
-                        image={item.image_background} // Resim hatası düzeltildi
+                        image={item.image_background}
                         gamesCount={item.games_count}
                         onPress={() => navigation.navigate('PlatformDetail', { id: item.id, name: item.name })}
                     />
@@ -163,7 +143,6 @@ export const DiscoveryScreen = () => {
         </View>
     );
 
-    // 1. Popüler Türler (Daha temiz ve emojili)
     const renderGenres = () => (
         <View style={styles.sectionMargin}>
             <SectionHeader title="Popüler Türler" />
@@ -175,7 +154,6 @@ export const DiscoveryScreen = () => {
                 contentContainerStyle={styles.horizontalListPadding}
                 renderItem={({ item }) => (
                     <TouchableOpacity
-                        // Sadece şık mat tasarımı veriyoruz
                         style={[styles.modernChip, styles.inactiveChipSoft]}
                         onPress={() => navigation.navigate('GenreDetail', { slug: item.slug, name: item.name })}
                     >
@@ -192,18 +170,16 @@ export const DiscoveryScreen = () => {
         </View>
     );
 
-    // 2. Trendler ve Sıralama (Birleştirilmiş Premium Başlık)
     const renderFilterAndSort = () => (
         <View style={styles.sectionMargin}>
-            {/* ÜST KISIM: Dinamik Başlık ve Kompakt Sıralama Butonu */}
             <View style={styles.filterHeaderRow}>
                 <AppText variant="h2" style={styles.dynamicHeaderTitle}>
-                    {activeFilter.label} {/* Örn: "Haftalık Trendler" yazacak */}
+                    {activeFilter.label}
                 </AppText>
 
                 <TouchableOpacity
                     style={styles.compactSortButton}
-                // Tıklayınca sıralama seçeneklerini açan bir modal tetikleyebilirsin
+                    onPress={() => setSortModalVisible(true)}
                 >
                     <AppText variant="caption" color={colors.primary}>
                         {activeSort.label} ↕
@@ -211,7 +187,6 @@ export const DiscoveryScreen = () => {
                 </TouchableOpacity>
             </View>
 
-            {/* ALT KISIM: Zaman Sekmeleri (Hap buton yerine zarif altı çizgili tablar) */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabPadding}>
                 {FILTERS.map((filter) => {
                     const isActive = activeFilter.id === filter.id;
@@ -226,9 +201,8 @@ export const DiscoveryScreen = () => {
                                 color={isActive ? colors.white : colors.gray}
                                 bold={isActive}
                             >
-                                {filter.label.replace('Trendler', '').trim()} {/* "Haftalık Trendler" yerine sadece "Haftalık" yazar */}
+                                {filter.label.replace('Trendler', '').trim()}
                             </AppText>
-                            {/* Aktif olanın altına şık bir çizgi (Indicator) */}
                             {isActive && <View style={styles.tabIndicator} />}
                         </TouchableOpacity>
                     );
@@ -236,8 +210,6 @@ export const DiscoveryScreen = () => {
             </ScrollView>
         </View>
     );
-
-    // --- MAIN RENDER ---
 
     if (isInitialLoading && games.length === 0) {
         return (
@@ -292,6 +264,43 @@ export const DiscoveryScreen = () => {
                     ) : <View style={{ height: 40 }} />
                 }
             />
+
+            <Modal
+                visible={sortModalVisible}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setSortModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPressOut={() => setSortModalVisible(false)}
+                >
+                    <View style={styles.modalContent}>
+                        <AppText variant="h2" style={styles.modalTitle}>Sıralama Ölçütü</AppText>
+
+                        {SORT_OPTIONS.map((sort) => {
+                            const isSelected = activeSort.id === sort.id;
+                            return (
+                                <TouchableOpacity
+                                    key={sort.id}
+                                    style={styles.modalOption}
+                                    onPress={() => handleSortChange(sort)}
+                                >
+                                    <AppText
+                                        variant="body"
+                                        color={isSelected ? colors.primary : colors.white}
+                                        bold={isSelected}
+                                    >
+                                        {sort.label}
+                                    </AppText>
+                                    {isSelected && <AppText variant="body" color={colors.primary}>✓</AppText>}
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </Container>
     );
 };
