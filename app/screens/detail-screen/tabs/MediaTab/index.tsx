@@ -8,10 +8,9 @@ const { width } = Dimensions.get('window');
 export const MediaTab = () => {
     const { data } = useAppSelector(state => state.game);
     const screenshots = data.getGameScreenshotsProcess?.results || [];
-    const trailer = data.getGameTrailersProcess?.results?.[0]; // Video eklendi
+    const trailer = data.getGameTrailersProcess?.results?.[0];
 
-    // Video ve Resimleri tek bir dizide birleştiriyoruz
-    const mediaItems = [];
+    const mediaItems: any[] = [];
     if (trailer) {
         mediaItems.push({ id: 'trailer', type: 'video', content: trailer });
     }
@@ -33,8 +32,9 @@ export const MediaTab = () => {
                 data={mediaItems}
                 keyExtractor={(item) => item.id}
                 horizontal
-                pagingEnabled // 🌟 Sağa sola kaydırırken tek tek geçmesini sağlar
+                pagingEnabled
                 showsHorizontalScrollIndicator={false}
+                removeClippedSubviews={false}
                 renderItem={({ item }) => (
                     <View style={localStyles.mediaItemContainer}>
                         {item.type === 'video' ? (
@@ -60,8 +60,8 @@ const localStyles = StyleSheet.create({
         padding: 20,
     },
     mediaItemContainer: {
-        width: width, // Tam ekran genişliği
-        height: 250, // İsteğe göre ayarlayabilirsin
+        width: width,
+        height: 250,
         justifyContent: 'center',
         alignItems: 'center',
     },

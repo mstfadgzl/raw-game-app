@@ -6,10 +6,9 @@ import { getGameAchievementsProcess } from '@actions';
 import { AchievementItem, AppText, EmptyState, Skeleton } from '@components';
 import { styles } from '../../styles';
 import { colors } from '@theme';
-import { GameDetailRouteProp } from '@types';
 
 export const AchievementsTab = () => {
-    const route = useRoute<GameDetailRouteProp>();
+    const route = useRoute<any>();
     const dispatch = useAppDispatch();
     const safeGameId = Number(route.params.gameId);
 
@@ -22,7 +21,6 @@ export const AchievementsTab = () => {
     const isFetching = !!isLoading['getGameAchievementsProcess'] && page === 1;
     const isMoreLoading = !!isLoading['getGameAchievementsProcess'] && page > 1;
 
-    // 🌟 AŞAĞI KAYDIRDIKÇA YENİLERİNİ ÇEKME FONKSİYONU
     const handleLoadMore = () => {
         if (achievementsData?.next && !isLoading['getGameAchievementsProcess']) {
             const nextPage = page + 1;
@@ -50,7 +48,7 @@ export const AchievementsTab = () => {
                     <AppText variant="h2" style={{ marginBottom: 15 }}>Başarımlar</AppText>
                 }
                 renderItem={({ item }) => <AchievementItem achievement={item} />}
-                onEndReached={handleLoadMore} // 🌟 SİHİR BURADA
+                onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.5}
                 ListEmptyComponent={achievements.length === 0 ? <EmptyState /> : undefined}
                 ListFooterComponent={

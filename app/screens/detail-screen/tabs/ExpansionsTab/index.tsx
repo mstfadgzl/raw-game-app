@@ -2,12 +2,14 @@ import React from 'react';
 import { ScrollView, View } from 'react-native';
 import { useAppSelector } from '@hooks';
 import { useNavigation } from '@react-navigation/native';
-import { AppText, CompactGameItem, SectionHeader, EmptyState } from '@components';
-import { GenericNavigationProp } from '@types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { CompactGameItem, SectionHeader, EmptyState } from '@components';
 import { styles } from '../../styles';
 
 export const ExpansionsTab = () => {
-    const navigation = useNavigation<GenericNavigationProp>();
+    // GenericNavigationProp yerine NativeStackNavigationProp<any> kullanarak 
+    // recursive (kendi kendini çağıran) push işlemlerindeki 'never' hatasını çözüyoruz.
+    const navigation = useNavigation<NativeStackNavigationProp<any>>();
     const { data } = useAppSelector(state => state.game);
 
     const dlcs = data.getGameAdditionProcess?.results || [];
@@ -20,11 +22,12 @@ export const ExpansionsTab = () => {
     }
 
     const handleNavigate = (id: number | string, name: string) => {
+        // push metodu artık güvenle GameDetail ekranını üst üste açabilecek
         navigation.push('GameDetail', { gameId: id, gameName: name });
     };
 
     return (
-        <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16 }}>
             {dlcs.length > 0 && (
                 <View style={{ marginBottom: 20 }}>
                     <SectionHeader title="Ek Paketler (DLC)" />
