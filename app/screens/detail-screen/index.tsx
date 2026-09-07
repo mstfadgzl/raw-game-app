@@ -100,7 +100,7 @@ export const DetailScreen = () => {
                     </View>
                 </View>
 
-                <View style={{ height: height - 120 }}>
+                <View style={{ height: height }}>
                     <Tab.Navigator
                         screenOptions={{
                             lazy: true,

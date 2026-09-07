@@ -7,8 +7,6 @@ import { CompactGameItem, SectionHeader, EmptyState } from '@components';
 import { styles } from '../../styles';
 
 export const ExpansionsTab = () => {
-    // GenericNavigationProp yerine NativeStackNavigationProp<any> kullanarak 
-    // recursive (kendi kendini çağıran) push işlemlerindeki 'never' hatasını çözüyoruz.
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
     const { data } = useAppSelector(state => state.game);
 
@@ -22,12 +20,16 @@ export const ExpansionsTab = () => {
     }
 
     const handleNavigate = (id: number | string, name: string) => {
-        // push metodu artık güvenle GameDetail ekranını üst üste açabilecek
         navigation.push('GameDetail', { gameId: id, gameName: name });
     };
 
     return (
-        <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16 }}>
+        <ScrollView
+            style={styles.tabContent}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ padding: 16 }}
+            nestedScrollEnabled={true}
+        >
             {dlcs.length > 0 && (
                 <View style={{ marginBottom: 20 }}>
                     <SectionHeader title="Ek Paketler (DLC)" />
@@ -52,7 +54,7 @@ export const ExpansionsTab = () => {
                     ))}
                 </View>
             )}
-            <View style={{ height: 50 }} />
+            <View style={{ height: 100 }} />
         </ScrollView>
     );
 };
