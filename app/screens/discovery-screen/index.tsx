@@ -25,34 +25,36 @@ const getDates = (daysAgo: number) => {
     const pastDate = new Date(today.getTime() - daysAgo * 24 * 60 * 60 * 1000);
     return `${pastDate.toISOString().split('T')[0]},${today.toISOString().split('T')[0]}`;
 };
+const currentYear = new Date().getFullYear();
+
 const FILTERS = [
     {
         id: 'daily',
         label: 'Günün Trendleri',
         ordering: '-added',
-        dates: getDates(1), // Son 24 saat
+        dates: getDates(1),
     },
     {
         id: 'weekly',
         label: 'Haftalık Trendler',
         ordering: '-added',
-        dates: getDates(7), // Son 7 gün
+        dates: getDates(7),
     },
     {
         id: 'monthly',
         label: 'Aylık Trendler',
         ordering: '-added',
-        dates: getDates(30), // Son 30 gün
+        dates: getDates(30),
     },
     {
         id: 'popular',
         label: 'En Çok İndirilenler',
         ordering: '-added',
-        dates: undefined // Tüm zamanlar
+        dates: undefined
     },
     {
         id: 'goty',
-        label: `${currentYear} En İyileri`, // Dinamik yıl (Örn: 2026 En İyileri)
+        label: `${currentYear} En İyileri`,
         ordering: '-rating',
         dates: `${currentYear}-01-01,${currentYear}-12-31`
     },
