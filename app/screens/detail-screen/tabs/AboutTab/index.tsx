@@ -5,8 +5,11 @@ import { AppText, GenreChip } from '@components';
 import { translateText } from '@utils';
 import { styles as globalStyles } from '../../styles';
 import { colors, spacing } from '@theme';
+import { useNavigation } from '@react-navigation/native';
+import { DiscoverScreenNavigationProp } from '@types';
 
 export const AboutTab = () => {
+    const navigation = useNavigation<DiscoverScreenNavigationProp>();
     const { data } = useAppSelector(state => state.game);
     const detail = data.getGameDetailProcess;
 
@@ -93,7 +96,7 @@ export const AboutTab = () => {
                             <GenreChip
                                 key={`about-tag-${tag.id}`}
                                 name={tag.name}
-                                onPress={() => { }}
+                                onPress={() => navigation.navigate('GenreDetail', { slug: tag.slug, name: tag.name })}
                             />
                         ))}
                     </View>
