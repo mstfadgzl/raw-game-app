@@ -49,9 +49,12 @@ export const gameService = {
         const response = await apiClient.get<ITrailerResponse>(`/games/${id}/movies`);
         return response.data;
     },
-    getGameAchievements: async (id: number, page: number = 1): Promise<IAchievementResponse> => {
-        const response = await apiClient.get<IAchievementResponse>(`/games/${id}/achievements`, {
-            params: { page }
+    etGameAchievements: async (id: number | string, page: number = 1, page_size?: number) => {
+        const response = await apiClient.get(`/games/${id}/achievements`, {
+            params: {
+                page,
+                page_size: page_size || 40, // RAWG API varsayılan veya tek seferde yüksek adet çekmek için
+            },
         });
         return response.data;
     },
