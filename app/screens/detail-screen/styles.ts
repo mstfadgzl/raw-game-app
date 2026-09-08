@@ -85,4 +85,76 @@ export const styles = StyleSheet.create({
         backgroundColor: colors.background,
         padding: spacing.md,
     },
+    bar: {
+        backgroundColor: 'transparent',
+        elevation: 0,
+        shadowOpacity: 0,
+        borderBottomWidth: 0,
+        marginHorizontal: 12,
+        marginTop: 12,
+        marginBottom: 8,
+    },
+    item: {
+        width: 'auto',
+        paddingHorizontal: 4,
+        paddingVertical: 0,
+    },
+    pill: {
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 14,
+        backgroundColor: '#191E2B',
+        borderWidth: 1,
+        borderColor: '#2A3040',
+    },
+    activePill: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
+    label: {
+        color: '#ADB5C9',
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    activeLabel: {
+        color: '#0B0D14',
+        fontWeight: '700',
+    },
+    tabStyles: {
+        bar: {
+            backgroundColor: 'transparent',
+            elevation: 0,
+            shadowOpacity: 0,
+            borderBottomWidth: 0,
+            paddingHorizontal: 8,
+            height: 60,
+        },
+        item: {
+            width: 'auto',
+            paddingHorizontal: 4,
+        },
+        pill: {
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 20,
+            backgroundColor: '#1E1E1E', // Pasif sekme arka planı (Koyu gri)
+            borderWidth: 1,
+            borderColor: '#2A2A2A',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        activePill: {
+            backgroundColor: colors.primary, // Aktif sekme arka planı (Tema rengin)
+            borderColor: colors.primary,
+        },
+        label: {
+            fontSize: 13,
+            fontWeight: '600',
+            color: colors.secondary, // Pasif yazı rengi
+        },
+        activeLabel: {
+            color: colors.background, // Aktif yazı rengi (Genellikle koyu/siyah veya beyaz)
+            fontWeight: 'bold',
+        },
+    },
 });

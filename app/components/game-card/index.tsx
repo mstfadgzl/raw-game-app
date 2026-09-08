@@ -14,7 +14,7 @@ export const GameCard: React.FC<GameCardProps> = memo(({ game, onPress }) => {
     const ratingDisplay = game.rating ? `${game.rating.toFixed(2)} / 5` : 'N/A';
 
     // "2024-05-12" gibi gelen tarihi sadece "2024" olarak almak tasarımı çok daha şık yapar.
-    const releaseYear = game.released ? game.released.substring(0, 4) : 'TBA';
+    const releaseYear = game.released ? game.released.substring(0, 20) : 'TBA';
 
     return (
         <TouchableOpacity

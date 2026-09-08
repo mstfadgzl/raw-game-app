@@ -96,30 +96,62 @@ export const DetailScreen = () => {
 
             <View style={[styles.tabWrapper, { flex: 1 }]}>
                 <Tab.Navigator
+                    key={safeGameId}
                     screenOptions={{
                         lazy: true,
+                        lazyPreloadDistance: 0,
                         swipeEnabled: false,
                         tabBarScrollEnabled: true,
-                        tabBarActiveTintColor: colors.primary,
-                        tabBarInactiveTintColor: colors.secondary,
-                        tabBarStyle: {
-                            backgroundColor: 'transparent',
-                            elevation: 0,
-                            shadowOpacity: 0
-                        },
-                        tabBarIndicatorStyle: {
-                            backgroundColor: colors.primary,
-                            height: 3,
-                            borderRadius: 3
-                        },
-                        tabBarLabelStyle: { fontSize: 13, fontWeight: 'bold' },
+                        tabBarStyle: styles.bar,
+                        tabBarItemStyle: styles.item,
+                        tabBarIndicatorStyle: { height: 0 },
+                        tabBarPressColor: 'transparent',
+                        tabBarLabel: ({ focused, children }) => (
+                            <View
+                                style={[
+                                    styles.pill,
+                                    focused ? styles.activePill : null,
+                                ]}
+                            >
+                                <AppText
+                                    style={[
+                                        styles.label,
+                                        focused ? styles.activeLabel : {},
+                                    ]}
+                                >
+                                    {children}
+                                </AppText>
+                            </View>
+                        ),
                     }}
                 >
-                    <Tab.Screen name="Hakkında" component={AboutTab} initialParams={{ gameId: safeGameId }} />
-                    <Tab.Screen name="Medya" component={MediaTab} initialParams={{ gameId: safeGameId }} />
-                    <Tab.Screen name="DLC" component={ExpansionsTab} initialParams={{ gameId: safeGameId }} />
-                    <Tab.Screen name="Kupalar" component={AchievementsTab} initialParams={{ gameId: safeGameId }} />
-                    <Tab.Screen name="Reddit" component={RedditTab} initialParams={{ gameId: safeGameId }} />
+                    <Tab.Screen
+                        name="Hakkında"
+                        component={AboutTab}
+                        initialParams={{ gameId: safeGameId }}
+                    />
+                    <Tab.Screen
+                        name="Medya"
+                        component={MediaTab}
+                        initialParams={{ gameId: safeGameId }}
+                    />
+                    <Tab.Screen
+                        name="DLC"
+                        options={{ title: 'Ek içerikler' }}
+                        component={ExpansionsTab}
+                        initialParams={{ gameId: safeGameId }}
+                    />
+                    <Tab.Screen
+                        name="Kupalar"
+                        component={AchievementsTab}
+                        initialParams={{ gameId: safeGameId }}
+                    />
+                    <Tab.Screen
+                        name="Reddit"
+                        options={{ title: 'Topluluk' }}
+                        component={RedditTab}
+                        initialParams={{ gameId: safeGameId }}
+                    />
                 </Tab.Navigator>
             </View>
         </View>
