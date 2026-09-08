@@ -54,10 +54,10 @@ export const styles = StyleSheet.create({
     },
     title: {
         color: '#FFFFFF',
-        fontSize: 34,
-        fontWeight: '800',
-        letterSpacing: -1,
-        marginBottom: 12,
+        fontSize: 24,
+        fontWeight: '700',
+        marginTop: 4,
+        marginBottom: 20,
     },
     hash: {
         color: colors.primary,

@@ -61,52 +61,12 @@ export const TagDetailScreen = () => {
                 contentContainerStyle={styles.content}
                 columnWrapperStyle={styles.row}
                 ListHeaderComponent={
-                    <View>
-                        <View style={styles.hero}>
-                            <View
-                                pointerEvents="none"
-                                style={styles.decorativeCircle}
-                            />
-
-                            <View style={styles.badge}>
-                                <View style={styles.dot} />
-                                <AppText style={styles.badgeText}>
-                                    OYUN KOLEKSİYONU
-                                </AppText>
-                            </View>
-
-                            <AppText style={styles.title}>
-                                <AppText style={styles.hash}>#</AppText>
-                                {name}
-                            </AppText>
-
-                            <AppText style={styles.subtitle}>
-                                Yeni dünyalar, yeni favoriler.
-                                {'\n'}Sıradaki oyununu keşfet.
-                            </AppText>
-
-                            <View style={styles.heroBottom}>
-                                <View style={styles.accentLine} />
-                                <AppText style={styles.heroCaption}>
-                                    KEŞFET • OYNA • TEKRARLA
-                                </AppText>
-                            </View>
-                        </View>
-
-                        <View style={styles.sectionHeader}>
-                            <AppText style={styles.sectionTitle}>
-                                Keşif listesi
-                            </AppText>
-
-                            <View style={styles.countBadge}>
-                                <AppText style={styles.countText}>
-                                    {games.length} oyun yüklendi
-                                </AppText>
-                            </View>
-                        </View>
-                    </View>
+                    <AppText style={styles.title}>
+                        <AppText style={styles.hash}>#</AppText>
+                        {name}
+                    </AppText>
                 }
-                renderItem={({ item, index }) => (
+                renderItem={({ item }) => (
                     <View style={styles.cardColumn}>
                         <View style={styles.cardShell}>
                             <GameCard
@@ -118,13 +78,6 @@ export const TagDetailScreen = () => {
                                     })
                                 }
                             />
-                        </View>
-
-                        <View style={styles.cardBottom}>
-                            <AppText style={styles.cardIndex}>
-                                {String(index + 1).padStart(2, '0')}
-                            </AppText>
-                            <View style={styles.cardLine} />
                         </View>
                     </View>
                 )}
