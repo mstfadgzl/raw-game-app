@@ -41,7 +41,7 @@ import type {
 } from '@types';
 
 import { colors } from '@theme';
-import { styles } from './style';
+import { styles } from './styles';
 
 type LoadMode = 'initial' | 'refresh' | 'more';
 
