@@ -34,7 +34,9 @@ export const MediaTab = () => {
                 horizontal
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}
-                removeClippedSubviews={false}
+                initialNumToRender={1}
+                maxToRenderPerBatch={2}
+                windowSize={3}
                 renderItem={({ item }) => (
                     <View style={localStyles.mediaItemContainer}>
                         {item.type === 'video' ? (
