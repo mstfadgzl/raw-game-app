@@ -11,7 +11,7 @@ interface AchievementItemProps {
 
 export const AchievementItem: React.FC<AchievementItemProps> = ({ achievement }) => {
     // Nadirlik kontrolü (Yüzde 5'ten az ise özel renk)
-    const isRare = parseFloat(achievement.percent) < 5;
+    const isRare = parseFloat(achievement.percent) < 1;
 
     return (
         <View style={styles.container}>
