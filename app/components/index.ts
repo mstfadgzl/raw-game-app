@@ -13,3 +13,15 @@ export * from './video-player';
 export * from './creator-card';
 export * from './reddit-post-item';
 export * from './compact-game-item';
+export {
+    GameSortFilter,
+    DEFAULT_GAME_FILTERS,
+    buildGameFilterQuery,
+} from './game-sort-filter';
+
+export type {
+    GameFilterValue,
+    GameFilterQuery,
+    GameOrdering,
+    ReleaseStatus,
+} from './game-sort-filter';

@@ -18,7 +18,7 @@ export const BottomTabStack = () => {
             }}
         >
             <Tab.Screen name="HomeTab" component={HomeStack} options={{ title: 'Ana Sayfa' }} />
-            <Tab.Screen name="DiscoverTab" component={DiscoverStack} options={{ title: 'Kategoriler' }} />
+            <Tab.Screen name="DiscoverTab" component={DiscoverStack} options={{ title: 'Keşfet' }} />
             <Tab.Screen name="SearchTab" component={SearchStack} options={{ title: 'Ara' }} />
             <Tab.Screen name="LibraryTab" component={LibraryStack} options={{ title: 'Kitaplık' }} />
         </Tab.Navigator>

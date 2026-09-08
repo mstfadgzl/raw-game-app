@@ -1,39 +1,74 @@
-import { StyleSheet, Dimensions } from 'react-native';
-import { colors, spacing } from '@theme';
-
-const { width } = Dimensions.get('window');
+import { StyleSheet } from 'react-native';
+import { colors } from '@theme';
 
 export const styles = StyleSheet.create({
     container: {
-        width: width * 0.7, // Yatay kaydırma için ideal genişlik
-        backgroundColor: colors.surface,
-        borderRadius: 20,
-        marginRight: spacing.md,
+        width: 142,
+        marginRight: 12,
+        borderRadius: 16,
         overflow: 'hidden',
+        backgroundColor: '#191E2B',
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: '#2C3545',
+        elevation: 0,
+        shadowOpacity: 0,
     },
+
+    imageContainer: {
+        width: '100%',
+        height: 128,
+        backgroundColor: '#252D3A',
+    },
+
     image: {
         width: '100%',
-        height: 150,
-        backgroundColor: colors.border,
+        height: '100%',
     },
-    content: {
-        padding: spacing.md,
-    },
-    gamesRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginTop: spacing.xs,
-        gap: 6,
-    },
-    gameTag: {
-        color: colors.secondary,
-        backgroundColor: colors.background,
+
+    imagePlaceholder: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
         paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 6,
+    },
+
+    placeholderIcon: {
+        color: colors.primary,
+        fontSize: 28,
+        marginBottom: 5,
+    },
+
+    placeholderText: {
+        color: '#AAB5C8',
         fontSize: 10,
-        overflow: 'hidden',
-    }
+        textAlign: 'center',
+    },
+
+    content: {
+        paddingHorizontal: 11,
+        paddingVertical: 11,
+        minHeight: 76,
+    },
+
+    name: {
+        color: '#F3F6FC',
+        fontSize: 13,
+        lineHeight: 18,
+    },
+
+    gamesContainer: {
+        marginTop: 7,
+    },
+
+    gameTag: {
+        color: '#9CA8BC',
+        fontSize: 10,
+        lineHeight: 15,
+    },
+
+    gamesCount: {
+        color: '#9CA8BC',
+        fontSize: 10,
+        marginTop: 7,
+    },
 });

@@ -1,150 +1,223 @@
 import { StyleSheet } from 'react-native';
-import { colors, spacing } from '@theme';
+import { colors } from '@theme';
 
 export const styles = StyleSheet.create({
-    // Temel Yerleşim
     container: {
+        flex: 1,
         paddingHorizontal: 0,
+        backgroundColor: colors.background,
     },
+
+    listContent: {
+        flexGrow: 1,
+        paddingBottom: 24,
+    },
+
     header: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.lg,
-        marginBottom: spacing.md,
-        padding: 16,
-        marginTop: 10,
-    },
-    mainTitle: {
-        fontSize: 28,
-        marginTop: 4,
-        color: colors.white,
-    },
-    sectionMargin: {
-        marginBottom: spacing.lg,
-    },
-    horizontalListPadding: {
-        paddingLeft: spacing.md,
-        paddingRight: spacing.xs,
-    },
-    gameCardWrapper: {
-        paddingHorizontal: spacing.md,
-    },
-
-    // Skeleton Yükleme Ekranı
-    skeletonContainer: {
-        padding: spacing.md,
-    },
-    skeletonTitle: {
-        width: '60%',
-        height: 30,
-        marginBottom: 20,
-    },
-    skeletonBanner: {
-        width: '100%',
-        height: 120,
-        borderRadius: 16,
-        marginBottom: 30,
-    },
-    skeletonCard: {
-        width: '100%',
-        height: 200,
-        borderRadius: 16,
-    },
-
-    // Modern Buton (Chip) Tasarımları
-    modernChip: {
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 20,
-        marginRight: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    activeChipFilled: {
-        backgroundColor: colors.primary,
-        borderWidth: 0,
-    },
-    inactiveChipSoft: {
-        backgroundColor: '#2A2A2A',
-        borderWidth: 0,
-    },
-
-    // Filtre Başlık ve Kompakt Sıralama Butonu
-    filterHeaderRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         paddingHorizontal: 16,
+        paddingTop: 20,
+        paddingBottom: 24,
+    },
+
+    mainTitle: {
+        color: colors.text,
+        fontSize: 25,
+        lineHeight: 32,
+        fontWeight: '700',
+    },
+
+    subtitle: {
+        color: colors.secondary,
+        fontSize: 13,
+        lineHeight: 20,
+        marginTop: 6,
+    },
+
+    section: {
+        marginBottom: 24,
+    },
+
+    sectionHeader: {
+        paddingHorizontal: 16,
+        marginBottom: 12,
+    },
+
+    sectionTitle: {
+        color: colors.text,
+        fontSize: 16,
+        fontWeight: '700',
+    },
+
+    horizontalContent: {
+        paddingHorizontal: 16,
+        gap: 10,
+    },
+
+    genreChip: {
+        minHeight: 44,
+        justifyContent: 'center',
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
+    },
+
+    genreText: {
+        color: colors.text,
+        fontSize: 12,
+        fontWeight: '500',
+    },
+
+    separator: {
+        height: 1,
+        marginHorizontal: 16,
+        marginBottom: 18,
+        backgroundColor: colors.border,
+    },
+
+    filterContent: {
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+        gap: 8,
+    },
+
+    filterChip: {
+        minHeight: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
+    },
+
+    selectedFilterChip: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
+
+    filterText: {
+        color: colors.text,
+        fontSize: 12,
+        fontWeight: '600',
+    },
+
+    selectedFilterText: {
+        color: '#081014',
+        fontWeight: '700',
+    },
+
+    gamesHeader: {
+        paddingHorizontal: 16,
+        paddingBottom: 4,
+    },
+
+    gamesTitle: {
+        color: colors.text,
+        fontSize: 18,
+        lineHeight: 25,
+        fontWeight: '700',
+    },
+
+    row: {
+        paddingHorizontal: 16,
+        justifyContent: 'space-between',
+    },
+
+    gameColumn: {
+        width: '48%',
+    },
+
+    skeletonGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+    },
+
+    skeletonColumn: {
+        width: '48%',
+        marginBottom: 24,
+    },
+
+    skeletonImage: {
+        width: '100%',
+        height: 140,
+        borderRadius: 14,
+        marginBottom: 12,
+    },
+
+    skeletonText: {
+        width: '85%',
+        height: 16,
+        borderRadius: 5,
+        marginBottom: 8,
+    },
+
+    skeletonSmallText: {
+        width: '55%',
+        height: 12,
+        borderRadius: 5,
+    },
+
+    feedback: {
+        alignItems: 'center',
+        paddingHorizontal: 24,
+        paddingVertical: 36,
+    },
+
+    feedbackTitle: {
+        color: colors.text,
+        fontSize: 16,
+        fontWeight: '700',
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+
+    feedbackText: {
+        color: colors.secondary,
+        fontSize: 13,
+        lineHeight: 20,
+        textAlign: 'center',
+    },
+
+    retryButton: {
+        minHeight: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 16,
+        paddingHorizontal: 18,
+        paddingVertical: 10,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
+    },
+
+    retryText: {
+        color: colors.primary,
+        fontSize: 13,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+
+    footerLoader: {
+        marginVertical: 24,
+    },
+
+    footerRetry: {
+        minHeight: 48,
+        justifyContent: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 16,
         marginBottom: 16,
     },
-    dynamicHeaderTitle: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: colors.white,
-    },
-    compactSortButton: {
-        backgroundColor: '#1E1E1E',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#333333',
-    },
 
-    // Altı Çizgili Modern Sekme (Tab) Tasarımı
-    tabPadding: {
-        paddingHorizontal: 16,
-        paddingBottom: 10,
-    },
-    tabButton: {
-        marginRight: 24,
-        paddingBottom: 8,
-        position: 'relative',
-    },
-    tabIndicator: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 3,
-        backgroundColor: colors.primary,
-        borderRadius: 3,
-    },
-
-    // Alttan Açılan Sıralama Modalı (Bottom Sheet)
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        justifyContent: 'flex-end',
-    },
-    modalContent: {
-        backgroundColor: '#1A1A1A',
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        padding: 24,
-        paddingBottom: 40,
-    },
-    modalTitle: {
-        marginBottom: 20,
-        textAlign: 'center',
-        color: colors.white,
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    modalOption: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#2A2A2A',
-    },
-    row: {
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-    },
-
-    cardColumn: {
-        width: '48%',
-        marginBottom: 12,
+    footerSpace: {
+        height: 24,
     },
 });

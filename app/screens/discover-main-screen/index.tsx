@@ -1,122 +1,667 @@
-import { getCreatorsProcess, getPlatformsProcess, getTagsProcess } from "@actions";
-import { useAppDispatch, useAppSelector } from "@hooks"
-import { useNavigation } from "@react-navigation/native";
-import { DiscoverMainNavigationProp } from "@types";
-import { useCallback, useEffect } from "react";
-import { FlatList, RefreshControl, ScrollView, View } from "react-native";
-import { styles } from "./styles";
-import { AppText, Container, CreatorCard, GenreChip, PlatformCard, SectionHeader, Skeleton } from "@components";
-import { colors } from "@theme";
+import React, {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
+
+import {
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
+
+import {
+    getCreatorsProcess,
+    getTagsProcess,
+} from '@actions';
+
+import { useAppDispatch } from '@hooks';
+
+import {
+    AppText,
+    Container,
+    CreatorCard,
+    Skeleton,
+} from '@components';
+
+import { DiscoverMainNavigationProp } from '@types';
+import { colors } from '@theme';
+
+import { styles } from './styles';
+
+type RawgTag = {
+    id: number;
+    name: string;
+    slug: string;
+    games_count?: number;
+};
+
+type CreatorItem = {
+    id: number;
+    name: string;
+    image?: string | null;
+    image_background?: string | null;
+    games?: {
+        id: number;
+        name: string;
+        slug?: string;
+    }[];
+    games_count?: number;
+};
+
+const normalizeTags = (
+    items: RawgTag[],
+): RawgTag[] => {
+    const uniqueTags = new Map<string, RawgTag>();
+
+    items.forEach(tag => {
+        if (!tag?.id || !tag?.slug || !tag?.name) {
+            return;
+        }
+
+        uniqueTags.set(tag.slug, tag);
+    });
+
+    return [...uniqueTags.values()].sort(
+        (first, second) =>
+            (second.games_count || 0) -
+            (first.games_count || 0),
+    );
+};
+
+const formatCount = (value?: number) => {
+    if (
+        typeof value !== 'number' ||
+        !Number.isFinite(value)
+    ) {
+        return '';
+    }
+
+    return Math.trunc(value)
+        .toString()
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
 
 export const DiscoverMainScreen = () => {
     const dispatch = useAppDispatch();
-    const navigation = useNavigation<DiscoverMainNavigationProp>();
 
-    const { data: discData, isLoading: discLoading } = useAppSelector(state => state.discovery);
-    const { data: entData, isLoading: entLoading } = useAppSelector(state => state.entity);
+    const navigation =
+        useNavigation<DiscoverMainNavigationProp>();
 
-    const platforms = discData.getPlatformsProcess?.results || [];
-    const tags = discData.getTagsProcess?.results || [];
-    const creators = entData.getCreatorsProcess?.results || [];
+    const [tags, setTags] = useState<RawgTag[]>([]);
+    const [creators, setCreators] =
+        useState<CreatorItem[]>([]);
 
-    // Yenileme durumunu kontrol etme (İlk iskelet yüklemesinde dönmemesi için)
-    const isRefreshing = !!discLoading['getPlatformsProcess'] && platforms.length > 0;
+    const [tagsLoading, setTagsLoading] = useState(false);
+    const [creatorLoading, setCreatorLoading] =
+        useState(false);
 
-    const fetchData = useCallback(() => {
-        dispatch(getPlatformsProcess({ page: 1 }));
-        dispatch(getTagsProcess({ page: 1 }));
-        dispatch(getCreatorsProcess({ page: 1 }));
-    }, [dispatch]);
+    const [creatorMoreLoading, setCreatorMoreLoading] =
+        useState(false);
+
+    const [tagsError, setTagsError] = useState(false);
+    const [creatorError, setCreatorError] =
+        useState(false);
+
+    const [refreshing, setRefreshing] =
+        useState(false);
+
+    const tagsPage = useRef(0);
+    const tagsHasNext = useRef(false);
+    const tagsRequestLock = useRef(false);
+    const tagsGeneration = useRef(0);
+
+    const creatorsPage = useRef(0);
+    const creatorsHasNext = useRef(false);
+    const creatorsRequestLock = useRef(false);
+    const creatorsGeneration = useRef(0);
+
+    const refreshLock = useRef(false);
+
+    const fetchTags = useCallback(
+        async (
+            page: number,
+            reset: boolean = false,
+        ) => {
+            if (tagsRequestLock.current) {
+                return;
+            }
+
+            if (
+                !reset &&
+                !tagsHasNext.current
+            ) {
+                return;
+            }
+
+            if (reset) {
+                tagsGeneration.current += 1;
+                tagsPage.current = 0;
+                tagsHasNext.current = false;
+                setTags([]);
+            }
+
+            const currentGeneration =
+                tagsGeneration.current;
+
+            tagsRequestLock.current = true;
+            setTagsLoading(true);
+            setTagsError(false);
+
+            try {
+                const response = await dispatch(
+                    getTagsProcess({
+                        page,
+                        pageSize: 40,
+                    } as any),
+                ).unwrap();
+
+                if (
+                    currentGeneration !==
+                    tagsGeneration.current
+                ) {
+                    return;
+                }
+
+                const newTags: RawgTag[] =
+                    Array.isArray(response?.results)
+                        ? response.results
+                        : [];
+
+                setTags(previous =>
+                    normalizeTags(
+                        reset
+                            ? newTags
+                            : [
+                                ...previous,
+                                ...newTags,
+                            ],
+                    ),
+                );
+
+                tagsPage.current = page;
+                tagsHasNext.current = Boolean(
+                    response?.next,
+                );
+            } catch {
+                if (
+                    currentGeneration ===
+                    tagsGeneration.current
+                ) {
+                    setTagsError(true);
+                }
+            } finally {
+                if (
+                    currentGeneration ===
+                    tagsGeneration.current
+                ) {
+                    tagsRequestLock.current = false;
+                    setTagsLoading(false);
+                }
+            }
+        },
+        [dispatch],
+    );
+
+    const fetchCreators = useCallback(
+        async (
+            page: number,
+            reset: boolean = false,
+        ) => {
+            if (creatorsRequestLock.current) {
+                return;
+            }
+
+            if (
+                !reset &&
+                !creatorsHasNext.current
+            ) {
+                return;
+            }
+
+            if (reset) {
+                creatorsGeneration.current += 1;
+                creatorsPage.current = 0;
+                creatorsHasNext.current = false;
+                setCreators([]);
+                setCreatorLoading(true);
+            } else {
+                setCreatorMoreLoading(true);
+            }
+
+            const currentGeneration =
+                creatorsGeneration.current;
+
+            creatorsRequestLock.current = true;
+            setCreatorError(false);
+
+            try {
+                const response = await dispatch(
+                    getCreatorsProcess({
+                        page,
+                        pageSize: 40,
+                    } as any),
+                ).unwrap();
+
+                if (
+                    currentGeneration !==
+                    creatorsGeneration.current
+                ) {
+                    return;
+                }
+
+                const newCreators: CreatorItem[] =
+                    Array.isArray(response?.results)
+                        ? response.results
+                        : [];
+
+                setCreators(previous => {
+                    const creatorMap = new Map<
+                        number,
+                        CreatorItem
+                    >();
+
+                    const allCreators = reset
+                        ? newCreators
+                        : [
+                            ...previous,
+                            ...newCreators,
+                        ];
+
+                    allCreators.forEach(creator => {
+                        if (
+                            creator?.id &&
+                            creator?.name
+                        ) {
+                            creatorMap.set(
+                                creator.id,
+                                creator,
+                            );
+                        }
+                    });
+
+                    return [...creatorMap.values()];
+                });
+
+                creatorsPage.current = page;
+                creatorsHasNext.current = Boolean(
+                    response?.next,
+                );
+            } catch {
+                if (
+                    currentGeneration ===
+                    creatorsGeneration.current
+                ) {
+                    setCreatorError(true);
+                }
+            } finally {
+                if (
+                    currentGeneration ===
+                    creatorsGeneration.current
+                ) {
+                    creatorsRequestLock.current = false;
+                    setCreatorLoading(false);
+                    setCreatorMoreLoading(false);
+                }
+            }
+        },
+        [dispatch],
+    );
+
+    const fetchData = useCallback(async () => {
+        await Promise.allSettled([
+            fetchTags(1, true),
+            fetchCreators(1, true),
+        ]);
+    }, [fetchTags, fetchCreators]);
 
     useEffect(() => {
-        fetchData();
+        void fetchData();
+
+        return () => {
+            tagsGeneration.current += 1;
+            creatorsGeneration.current += 1;
+        };
     }, [fetchData]);
 
-    const renderPlatforms = () => (
-        <View style={styles.section}>
-            <SectionHeader title="Oyun Platformları" />
-            <FlatList
-                horizontal
-                data={platforms} // Güvenli data
-                keyExtractor={(item) => `plt-${item.id}`}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalPadding}
-                renderItem={({ item }) => (
-                    <PlatformCard
-                        name={item.name}
-                        image={item.image_background}
-                        gamesCount={item.games_count}
-                        onPress={() => console.log("Platform ID:", item.id)}
-                    />
-                )}
-            />
-        </View>
-    );
+    const handleRefresh = async () => {
+        if (refreshLock.current) {
+            return;
+        }
 
-    const renderCreators = () => (
-        <View style={styles.section}>
-            <SectionHeader title="Yapımcılar" />
-            <FlatList
-                horizontal
-                data={creators} // Güvenli data
-                keyExtractor={(item) => `cre-${item.id}`}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalPadding}
-                renderItem={({ item }) => (
-                    <CreatorCard
-                        creator={item}
-                        onPress={() => navigation.navigate('CreatorDetail', { id: item.id, name: item.name })}
-                    />
-                )}
-            />
-        </View>
-    );
+        refreshLock.current = true;
+        setRefreshing(true);
 
-    const renderTags = () => (
-        <View style={styles.section}>
-            <SectionHeader title="Popüler Etiketler" />
-            <View style={styles.tagsWrapper}>
-                {/* Güvenli slice ve map kullanımı */}
-                {tags.slice(0, 15).map((tag: any) => (
-                    <GenreChip
-                        key={`tag-${tag.id}`}
-                        name={tag.name}
-                        onPress={() => console.log("Tag:", tag.slug)}
+        try {
+            await fetchData();
+        } finally {
+            refreshLock.current = false;
+            setRefreshing(false);
+        }
+    };
+
+    const renderHeader = () => (
+        <View>
+            <View style={styles.header}>
+                <AppText style={styles.eyebrow}>
+                    OYUN DÜNYASI
+                </AppText>
+
+                <AppText style={styles.mainTitle}>
+                    Keşfetmenin başka yolları.
+                </AppText>
+
+                <AppText style={styles.subtitle}>
+                    Etiketleri incele, oyunların arkasındaki isimleri keşfet.
+                </AppText>
+            </View>
+
+            <View style={styles.creatorSection}>
+                <View style={styles.sectionHeader}>
+                    <View>
+                        <AppText style={styles.sectionTitle}>
+                            Oyunların arkasındaki isimler
+                        </AppText>
+
+                        <AppText style={styles.sectionSubtitle}>
+                            Sevdiğin oyunları geliştiren kişileri keşfet.
+                        </AppText>
+                    </View>
+                </View>
+
+                {creatorLoading && creators.length === 0 ? (
+                    <View style={styles.creatorLoading}>
+                        <ActivityIndicator
+                            color={colors.primary}
+                        />
+                    </View>
+                ) : creatorError &&
+                    creators.length === 0 ? (
+                    <TouchableOpacity
+                        style={styles.retryButton}
+                        onPress={() =>
+                            void fetchCreators(1, true)
+                        }
+                    >
+                        <AppText style={styles.retryText}>
+                            Yaratıcıları tekrar yükle
+                        </AppText>
+                    </TouchableOpacity>
+                ) : creators.length > 0 ? (
+                    <FlatList
+                        horizontal
+                        data={creators}
+                        keyExtractor={item =>
+                            `creator-${item.id}`
+                        }
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={
+                            styles.horizontalPadding
+                        }
+                        initialNumToRender={4}
+                        maxToRenderPerBatch={4}
+                        windowSize={5}
+                        removeClippedSubviews={false}
+                        onEndReached={() => {
+                            if (
+                                !creatorMoreLoading &&
+                                creatorsHasNext.current
+                            ) {
+                                void fetchCreators(
+                                    creatorsPage.current + 1,
+                                );
+                            }
+                        }}
+                        onEndReachedThreshold={0.5}
+                        renderItem={({ item }) => (
+                            <CreatorCard
+                                creator={item as any}
+                                onPress={() =>
+                                    navigation.navigate(
+                                        'CreatorDetail',
+                                        {
+                                            id: item.id,
+                                            name: item.name,
+                                        },
+                                    )
+                                }
+                            />
+                        )}
+                        ListFooterComponent={
+                            creatorMoreLoading ? (
+                                <View
+                                    style={
+                                        styles.creatorFooter
+                                    }
+                                >
+                                    <ActivityIndicator
+                                        color={colors.primary}
+                                    />
+                                </View>
+                            ) : creatorError ? (
+                                <TouchableOpacity
+                                    style={
+                                        styles.creatorRetry
+                                    }
+                                    onPress={() =>
+                                        void fetchCreators(
+                                            creatorsPage.current + 1,
+                                        )
+                                    }
+                                >
+                                    <AppText
+                                        style={
+                                            styles.retryText
+                                        }
+                                    >
+                                        Tekrar dene
+                                    </AppText>
+                                </TouchableOpacity>
+                            ) : undefined
+                        }
                     />
-                ))}
+                ) : null}
+            </View>
+
+            <View style={styles.tagHeader}>
+                <AppText style={styles.sectionTitle}>
+                    Tüm etiketler
+                </AppText>
+
+                <AppText style={styles.sectionSubtitle}>
+                    Bir etikete dokunarak ilgili oyunları görüntüle.
+                </AppText>
             </View>
         </View>
     );
 
-    // İlk yükleme anında iskelet ekranı göster
-    if (discLoading['getPlatformsProcess'] && platforms.length === 0) {
-        return <Container><Skeleton style={styles.fullSkeleton} /></Container>;
+    const renderEmpty = () => {
+        if (
+            tagsLoading &&
+            tags.length === 0
+        ) {
+            return (
+                <View style={styles.tagSkeletonGrid}>
+                    {[0, 1, 2, 3, 4, 5].map(item => (
+                        <View
+                            key={item}
+                            style={styles.tagColumn}
+                        >
+                            <Skeleton
+                                style={styles.tagSkeleton}
+                            />
+                        </View>
+                    ))}
+                </View>
+            );
+        }
+
+        if (
+            tagsError &&
+            tags.length === 0
+        ) {
+            return (
+                <View style={styles.feedback}>
+                    <AppText style={styles.feedbackTitle}>
+                        Etiketler yüklenemedi.
+                    </AppText>
+
+                    <TouchableOpacity
+                        style={styles.retryButton}
+                        onPress={() =>
+                            void fetchTags(1, true)
+                        }
+                    >
+                        <AppText style={styles.retryText}>
+                            Tekrar dene
+                        </AppText>
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+
+        return (
+            <View style={styles.feedback}>
+                <AppText style={styles.feedbackTitle}>
+                    Etiket bulunamadı.
+                </AppText>
+            </View>
+        );
+    };
+
+    const isInitialLoading =
+        tagsLoading && tags.length === 0;
+
+    if (isInitialLoading) {
+        return (
+            <Container style={styles.container}>
+                <View style={styles.loadingContainer}>
+                    <Skeleton style={styles.fullSkeleton} />
+                    <Skeleton style={styles.fullSkeleton} />
+                </View>
+            </Container>
+        );
     }
 
     return (
         <Container style={styles.container}>
-            <ScrollView
+            <FlatList
+                key="all-tags-grid"
+                data={tags}
+                numColumns={2}
+                keyExtractor={item =>
+                    `tag-${item.id}-${item.slug}`
+                }
+                columnWrapperStyle={styles.tagRow}
+                contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
-                // Artık dinamik bir yenileme döngüsü var
+                initialNumToRender={20}
+                maxToRenderPerBatch={20}
+                windowSize={7}
+                keyboardShouldPersistTaps="handled"
+                ListHeaderComponent={renderHeader()}
+                renderItem={({ item }) => (
+                    <View style={styles.tagColumn}>
+                        <TouchableOpacity
+                            style={styles.tagCard}
+                            activeOpacity={0.8}
+                            accessibilityRole="button"
+                            accessibilityLabel={`${item.name} etiketini aç`}
+                            onPress={() =>
+                                navigation.navigate(
+                                    'TagDetail',
+                                    {
+                                        slug: item.slug,
+                                        name: item.name,
+                                    },
+                                )
+                            }
+                        >
+                            <View style={styles.tagIcon}>
+                                <AppText
+                                    style={styles.tagIconText}
+                                >
+                                    #
+                                </AppText>
+                            </View>
+
+                            <View style={styles.tagTextContainer}>
+                                <AppText
+                                    style={styles.tagName}
+                                    numberOfLines={2}
+                                >
+                                    {item.name}
+                                </AppText>
+
+                                {!!item.games_count && (
+                                    <AppText
+                                        style={styles.tagGameCount}
+                                    >
+                                        {formatCount(
+                                            item.games_count,
+                                        )}{' '}
+                                        oyun
+                                    </AppText>
+                                )}
+                            </View>
+
+                            <AppText style={styles.tagArrow}>
+                                ›
+                            </AppText>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                ListEmptyComponent={renderEmpty()}
+                onEndReached={() => {
+                    if (
+                        !tagsLoading &&
+                        tagsHasNext.current
+                    ) {
+                        void fetchTags(
+                            tagsPage.current + 1,
+                        );
+                    }
+                }}
+                onEndReachedThreshold={0.4}
                 refreshControl={
                     <RefreshControl
-                        refreshing={isRefreshing}
-                        onRefresh={fetchData}
+                        refreshing={refreshing}
+                        onRefresh={handleRefresh}
                         tintColor={colors.primary}
+                        colors={[colors.primary]}
                     />
                 }
-            >
-                <View style={styles.header}>
-                    <AppText variant="h1" color={colors.primary}>KEŞFET</AppText>
-                    <AppText variant="caption">Oyun dünyasının tüm katmanlarını incele</AppText>
-                </View>
-
-                {renderPlatforms()}
-                {renderTags()}
-                {renderCreators()}
-
-                <View style={{ height: 100 }} />
-            </ScrollView>
+                ListFooterComponent={
+                    tagsLoading &&
+                        tags.length > 0 ? (
+                        <ActivityIndicator
+                            color={colors.primary}
+                            style={styles.footerLoader}
+                        />
+                    ) : tagsError &&
+                        tags.length > 0 ? (
+                        <TouchableOpacity
+                            style={styles.footerRetry}
+                            onPress={() =>
+                                void fetchTags(
+                                    tagsPage.current + 1,
+                                )
+                            }
+                        >
+                            <AppText style={styles.retryText}>
+                                Daha fazla etiket yüklenemedi. Tekrar dene
+                            </AppText>
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={styles.bottomSpace} />
+                    )
+                }
+            />
         </Container>
     );
 };

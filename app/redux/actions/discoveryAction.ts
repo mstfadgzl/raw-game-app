@@ -16,9 +16,9 @@ export const getStoresProcess = createAppAsyncThunk<IStoreResponse, { page: numb
     'discovery/getStoresProcess',
     ({ page }) => discoveryService.getStores(page)
 );
-export const getTagsProcess = createAppAsyncThunk<ITagResponse, { page: number }>(
+export const getTagsProcess = createAppAsyncThunk<ITagResponse, { page: number; pageSize?: number }>(
     'discovery/getTagsProcess',
-    ({ page }) => discoveryService.getTags(page)
+    params => discoveryService.getTags(params)
 );
 export const getTagDetailProcess = createAppAsyncThunk<ITagResponse, number>(
     'discovery/getTagDetailProcess',

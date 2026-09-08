@@ -63,6 +63,15 @@ export type DiscoverScreenNavigationProp = CompositeNavigationProp<
     NativeStackNavigationProp<DiscoverStackParamList, 'PlatformDetail'>,
     BottomTabNavigationProp<BottomTabParamList>
 >;
+// Arama ekranı için özel navigation prop (Bunu eklemelisin!)
+export type SearchScreenNavigationProp = CompositeNavigationProp<
+    NativeStackNavigationProp<SearchStackParamList, 'SearchScreen'>,
+    BottomTabNavigationProp<BottomTabParamList>
+>;
+export type LibraryScreenNavigationProp = CompositeNavigationProp<
+    NativeStackNavigationProp<LibraryStackParamList, 'LibraryScreen'>,
+    BottomTabNavigationProp<BottomTabParamList>
+>;
 
 // Diğer ekranlar için de benzer yapı:
 export type DiscoverMainNavigationProp = CompositeNavigationProp<

@@ -1,22 +1,86 @@
 import { StyleSheet } from 'react-native';
-import { colors, spacing } from '@theme';
+import { colors } from '@theme';
 
 export const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: 0, // FlatList'in tam genişlikte olması için
+        flex: 1,
+        paddingHorizontal: 0,
+        backgroundColor: colors.background,
     },
-    header: {
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.lg,
-        paddingBottom: spacing.sm,
-        textTransform: 'uppercase',
-        letterSpacing: 2,
-        color: colors.primary, // Neon rengimiz
-    },
+
     listContent: {
-        paddingVertical: 16
+        flexGrow: 1,
+        paddingBottom: 24,
     },
+
+    headerContainer: {
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 4,
+    },
+
+    header: {
+        color: colors.text,
+        fontSize: 26,
+        lineHeight: 32,
+        fontWeight: '700',
+        marginBottom: 4,
+    },
+
+    row: {
+        paddingHorizontal: 16,
+        justifyContent: 'space-between',
+    },
+
+    cardColumn: {
+        width: '48%',
+    },
+
+    skeletonGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+    },
+
+    skeletonCard: {
+        width: '48%',
+        height: 230,
+        borderRadius: 16,
+        marginBottom: 16,
+    },
+
     loader: {
-        marginVertical: spacing.lg,
-    }
+        marginVertical: 28,
+    },
+
+    footerSpace: {
+        height: 24,
+    },
+
+    feedback: {
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 28,
+    },
+
+    feedbackText: {
+        color: colors.secondary,
+        fontSize: 13,
+        lineHeight: 20,
+        textAlign: 'center',
+        marginBottom: 12,
+    },
+
+    retryButton: {
+        minHeight: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 18,
+        paddingVertical: 10,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.surface,
+    },
 });

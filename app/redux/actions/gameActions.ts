@@ -8,20 +8,30 @@ export const getGamesProcess = createAsyncThunk<
     IGameListResponse,
     {
         page: number;
+        pageSize?: number;
         ordering?: string;
         platforms?: number;
         genres?: string;
+        tags?: string;
         dates?: string;
-    }>(
-        'game/getGamesProcess',
-        async (params, { rejectWithValue }) => {
-            try {
-                return await gameService.getGames(params);
-            } catch (error: any) {
-                return rejectWithValue(error);
-            }
+        forceRefresh?: boolean;
+        metacritic?: string;
+    },
+    {
+        rejectValue: string;
+    }
+>(
+    'game/getGamesProcess',
+    async (params, { rejectWithValue }) => {
+        try {
+            return await gameService.getGames(params);
+        } catch {
+            return rejectWithValue(
+                'Oyunlar yüklenemedi. Lütfen tekrar deneyin.',
+            );
         }
-    );
+    },
+);
 
 export const getGameDetailProcess = createAsyncThunk<IGameDetail, number>(
     'game/getGameDetailProcess',
@@ -87,7 +97,7 @@ export const getGameSeriesProcess = createAppAsyncThunk<IGameListResponse, numbe
 );
 export const getGameAdditionProcess = createAppAsyncThunk<IGameListResponse, number>(
     'game/getGameAdditionProcess',
-    (id) => gameService.getGameSeries(id)
+    id => gameService.getGameAddition(id)
 );
 export const getGameRedditPostsProcess = createAppAsyncThunk<IRedditResponse, { id: number, page: number }>(
     'game/getGameRedditPostsProcess',

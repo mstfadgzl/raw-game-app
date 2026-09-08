@@ -21,7 +21,7 @@ module.exports = {
           '@navigators': './app/navigators',
           '@utils': './app/utils',
           '@hooks': './app/hooks',
-          '@types': '.app/types',
+          '@types': './app/types',
           '@api': './app/services',
           '@theme': './app/theme',
           '@redux': './app/redux',

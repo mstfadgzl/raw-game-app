@@ -60,16 +60,14 @@ export const GameCard = memo(function GameCard({
     const hasImage = Boolean(
         imageUri && imageUri !== failedImageUri,
     );
+    const hasMetacritic =
+        typeof game.metacritic === 'number' &&
+        game.metacritic > 0;
 
-    const hasRating =
-        typeof game.rating === 'number' &&
-        Number.isFinite(game.rating) &&
-        game.rating > 0 &&
-        game.rating <= 5;
-
-    const ratingDisplay = hasRating
-        ? game.rating.toFixed(2)
+    const metacriticDisplay = hasMetacritic
+        ? game.metacritic.toString()
         : '—';
+
 
     const releaseDate = formatReleaseDate(game.released);
 
@@ -98,8 +96,8 @@ export const GameCard = memo(function GameCard({
             accessibilityRole="button"
             accessibilityLabel={[
                 game.name,
-                hasRating
-                    ? `Puan: ${ratingDisplay} / 5`
+                hasMetacritic
+                    ? `Puan: ${metacriticDisplay} / 5`
                     : 'Henüz puanlanmadı',
                 `Çıkış tarihi: ${releaseDate}`,
                 downloadDisplay !== null
@@ -136,12 +134,12 @@ export const GameCard = memo(function GameCard({
                     <Text style={styles.starIcon}>★</Text>
 
                     <Text style={styles.ratingText}>
-                        {ratingDisplay}
+                        {metacriticDisplay}
                     </Text>
 
-                    {hasRating && (
+                    {hasMetacritic && (
                         <Text style={styles.ratingLimit}>
-                            / 5
+                            / 100
                         </Text>
                     )}
                 </View>

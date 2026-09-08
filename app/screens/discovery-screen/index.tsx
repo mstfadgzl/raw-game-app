@@ -1,371 +1,705 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { FlatList, RefreshControl, View, ActivityIndicator, ScrollView, TouchableOpacity, Modal } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { useAppDispatch, useAppSelector } from "@hooks";
-import { getGamesProcess, getGenresProcess, getPlatformsProcess } from "@actions";
-import { AppText, Container, GameCard, PlatformCard, SectionHeader, Skeleton } from "@components";
-import { styles } from "./styles";
-import { colors } from "@theme";
-import { DiscoveryScreenNavigationProp } from "@types";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
-const getDates = (daysAgo: number) => {
-    const today = new Date();
-    const pastDate = new Date(today.getTime() - daysAgo * 24 * 60 * 60 * 1000);
-    return `${pastDate.toISOString().split('T')[0]},${today.toISOString().split('T')[0]}`;
+import {
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    ScrollView,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
+
+import { useAppDispatch, useAppSelector } from '@hooks';
+
+import {
+    getGamesProcess,
+    getGenresProcess,
+    getPlatformsProcess,
+} from '@actions';
+
+import {
+    AppText,
+    Container,
+    DEFAULT_GAME_FILTERS,
+    GameCard,
+    GameSortFilter,
+    PlatformCard,
+    Skeleton,
+    buildGameFilterQuery,
+} from '@components';
+
+import type { GameFilterValue } from '@components';
+
+import type {
+    DiscoveryScreenNavigationProp,
+    IGame,
+} from '@types';
+
+import { colors } from '@theme';
+import { styles } from './styles';
+
+type PresetId =
+    | 'weekly'
+    | 'monthly'
+    | 'popular'
+    | 'year'
+    | 'upcoming'
+    | 'custom';
+
+type RequestMode = 'initial' | 'refresh' | 'more';
+
+interface Selection {
+    preset: PresetId;
+    filters: GameFilterValue;
+}
+
+interface FailedRequest {
+    page: number;
+    mode: RequestMode;
+}
+
+const PRESETS: ReadonlyArray<{
+    id: Exclude<PresetId, 'custom'>;
+    label: string;
+}> = [
+        { id: 'weekly', label: 'Son 7 gün' },
+        { id: 'monthly', label: 'Son 30 gün' },
+        { id: 'popular', label: 'Popüler' },
+        { id: 'year', label: 'Bu yıl' },
+        { id: 'upcoming', label: 'Yakında' },
+    ];
+
+const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
 };
 
-const currentYear = new Date().getFullYear();
-const YEARS = Array.from({ length: 100 }, (_, i) => currentYear - i);
+const createPreset = (
+    preset: Exclude<PresetId, 'custom'>,
+): Selection => {
+    const filters: GameFilterValue = {
+        ...DEFAULT_GAME_FILTERS,
+    };
 
-const FILTERS = [
-    { id: 'weekly', label: 'Haftalık Trendler', ordering: '-added', dates: getDates(7) },
-    { id: 'monthly', label: 'Aylık Trendler', ordering: '-added', dates: getDates(30) },
-    { id: 'popular', label: 'En Çok İndirilenler', ordering: '-added', dates: undefined },
-    { id: 'goty', label: 'Yılın En İyileri', ordering: '-rating', dates: undefined },
-];
+    if (preset === 'year') {
+        const year = new Date().getFullYear();
 
-const SORT_OPTIONS = [
-    { id: 'added', shortLabel: 'Popülerlik (İndirilme)', value: '-added' },
-    { id: 'rating', shortLabel: 'Puan (Yüksek)', value: '-rating' },
-    { id: 'released', shortLabel: 'Çıkış Tarihi (Yeni)', value: '-released' },
-    { id: 'name', shortLabel: 'İsim (A-Z)', value: 'name' },
-];
+        filters.ordering = '-metacritic';
+        filters.startYear = year;
+        filters.endYear = year;
+    }
+
+    if (preset === 'upcoming') {
+        filters.releaseStatus = 'upcoming';
+    }
+
+    return { preset, filters };
+};
+
+const buildDiscoveryQuery = (
+    selection: Selection,
+    now: Date = new Date(),
+) => {
+    const query = buildGameFilterQuery(
+        selection.filters,
+        now,
+    );
+
+    // Bu hazır seçimler yıl yerine gün hassasiyetinde çalışır.
+    if (
+        selection.preset === 'weekly' ||
+        selection.preset === 'monthly'
+    ) {
+        const numberOfDays =
+            selection.preset === 'weekly' ? 7 : 30;
+
+        const start = new Date(now);
+
+        // Bugün dahil toplam 7 veya 30 takvim günü.
+        start.setDate(start.getDate() - (numberOfDays - 1));
+
+        query.dates = `${formatDate(start)},${formatDate(now)}`;
+    }
+
+    return query;
+};
+
+const mergeGames = (
+    previous: IGame[],
+    incoming: IGame[],
+): IGame[] => {
+    const unique = new Map<number, IGame>();
+
+    for (const game of previous) {
+        unique.set(game.id, game);
+    }
+
+    for (const game of incoming) {
+        unique.set(game.id, game);
+    }
+
+    return Array.from(unique.values());
+};
 
 export const DiscoveryScreen = () => {
     const dispatch = useAppDispatch();
-    const navigation = useNavigation<DiscoveryScreenNavigationProp>();
 
-    const [activeFilter, setActiveFilter] = useState(FILTERS[0]);
-    const [activeSort, setActiveSort] = useState(SORT_OPTIONS[0]);
-    const [sortModalVisible, setSortModalVisible] = useState(false);
-    const [page, setPage] = useState(1);
-    const [selectedYear, setSelectedYear] = useState(currentYear);
-    const [yearModalVisible, setYearModalVisible] = useState(false);
+    const navigation =
+        useNavigation<DiscoveryScreenNavigationProp>();
 
-    const gameStore = useAppSelector(state => state.game);
-    const discoveryStore = useAppSelector(state => state.discovery);
-    const genreStore = useAppSelector(state => state.genre);
+    const platforms = useAppSelector(
+        state =>
+            state.discovery.data.getPlatformsProcess?.results,
+    );
 
-    const platforms = discoveryStore.data.getPlatformsProcess?.results || [];
-    const genres = genreStore.data.getGenresProcess?.results || [];
-    const games = gameStore.data.getGamesProcess?.results || [];
+    const genres = useAppSelector(
+        state => state.genre.data.getGenresProcess?.results,
+    );
 
-    const isInitialLoading = gameStore.isLoading['getGamesProcess'] && page === 1;
-    const isMoreLoading = gameStore.isLoading['getGamesMoreLoading'];
-    const isRefreshing = gameStore.status['getGamesProcess'] === 'loading' && page === 1;
+    const [selection, setSelection] = useState<Selection>(
+        () => createPreset('weekly'),
+    );
 
-    const fetchData = useCallback((filterObj = activeFilter, sortObj = activeSort, year = selectedYear, pageNum = 1) => {
-        if (pageNum === 1) setPage(1);
+    const [games, setGames] = useState<IGame[]>([]);
+    const [loading, setLoading] =
+        useState<RequestMode | null>('initial');
 
+    const [failedRequest, setFailedRequest] =
+        useState<FailedRequest | null>(null);
+
+    const pageRef = useRef(0);
+    const hasNextRef = useRef(false);
+    const requestLockRef = useRef(false);
+    const generationRef = useRef(0);
+
+    // Aynı listenin bütün sayfalarında aynı tarih aralığı kullanılır.
+    // Yenileme veya filtre değişiminde yeniden oluşturulur.
+    const queryRef = useRef<
+        ReturnType<typeof buildDiscoveryQuery> | null
+    >(null);
+
+    const sectionTitle = useMemo(() => {
+        const { preset, filters } = selection;
+
+        if (preset === 'weekly') {
+            return 'Son 7 günde çıkanlar';
+        }
+
+        if (preset === 'monthly') {
+            return 'Son 30 günde çıkanlar';
+        }
+
+        if (preset === 'year') {
+            return `${filters.startYear} oyunları`;
+        }
+
+        if (preset === 'upcoming') {
+            return 'Yakında çıkacak oyunlar';
+        }
+
+        if (
+            preset === 'popular' &&
+            filters.ordering === '-added'
+        ) {
+            return 'Popüler oyunlar';
+        }
+
+        return 'Oyunlar';
+    }, [selection]);
+
+    // Oyun filtreleri değişince bu istekler tekrarlanmaz.
+    useEffect(() => {
         dispatch(getPlatformsProcess({ page: 1 }));
         dispatch(getGenresProcess());
+    }, [dispatch]);
 
-        let finalDates = filterObj.dates;
-        if (filterObj.id === 'goty') {
-            finalDates = `${year}-01-01,${year}-12-31`;
-        }
+    const fetchGames = useCallback(
+        async (
+            requestedPage: number,
+            mode: RequestMode,
+        ) => {
+            if (
+                mode !== 'initial' &&
+                requestLockRef.current
+            ) {
+                return;
+            }
 
-        dispatch(getGamesProcess({
-            page: pageNum,
-            dates: finalDates,
-            ordering: sortObj.value,
-        }));
-    }, [dispatch, activeFilter, activeSort, selectedYear]);
+            if (
+                mode === 'more' &&
+                (
+                    !hasNextRef.current ||
+                    pageRef.current === 0
+                )
+            ) {
+                return;
+            }
+
+            requestLockRef.current = true;
+
+            const generation = ++generationRef.current;
+
+            setLoading(mode);
+            setFailedRequest(null);
+
+            if (mode === 'initial') {
+                pageRef.current = 0;
+                hasNextRef.current = false;
+                queryRef.current = null;
+                setGames([]);
+            }
+
+            try {
+                const query =
+                    requestedPage === 1
+                        ? buildDiscoveryQuery(selection)
+                        : queryRef.current;
+
+                if (!query) {
+                    throw new Error('Liste filtresi bulunamadı.');
+                }
+
+                const response = await dispatch(
+                    getGamesProcess({
+                        page: requestedPage,
+                        ...query,
+                        forceRefresh: mode === 'refresh',
+                    }),
+                ).unwrap();
+
+                if (generation !== generationRef.current) {
+                    return;
+                }
+
+                if (!Array.isArray(response.results)) {
+                    throw new Error('Geçersiz oyun listesi.');
+                }
+
+                setGames(previous =>
+                    requestedPage === 1
+                        ? mergeGames([], response.results)
+                        : mergeGames(
+                            previous,
+                            response.results,
+                        ),
+                );
+
+                queryRef.current = query;
+                pageRef.current = requestedPage;
+                hasNextRef.current = Boolean(response.next);
+            } catch {
+                if (generation === generationRef.current) {
+                    setFailedRequest({
+                        page: requestedPage,
+                        mode,
+                    });
+                }
+            } finally {
+                if (generation === generationRef.current) {
+                    requestLockRef.current = false;
+                    setLoading(null);
+                }
+            }
+        },
+        [dispatch, selection],
+    );
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        void fetchGames(1, 'initial');
 
-    const handleFilterChange = (filter: typeof FILTERS[0]) => {
-        setActiveFilter(filter);
-        fetchData(filter, activeSort, selectedYear, 1);
+        return () => {
+            generationRef.current += 1;
+        };
+    }, [fetchGames]);
+
+    const applySelection = useCallback(
+        (nextSelection: Selection) => {
+            // Yeni effect başlamadan eski istekleri geçersiz kıl.
+            generationRef.current += 1;
+            requestLockRef.current = true;
+
+            pageRef.current = 0;
+            hasNextRef.current = false;
+            queryRef.current = null;
+
+            setGames([]);
+            setFailedRequest(null);
+            setLoading('initial');
+            setSelection(nextSelection);
+        },
+        [],
+    );
+
+    const handlePresetChange = (
+        preset: Exclude<PresetId, 'custom'>,
+    ) => {
+        const next = createPreset(preset);
+        const currentFilters = selection.filters;
+        const nextFilters = next.filters;
+
+        const unchanged =
+            selection.preset === next.preset &&
+            currentFilters.ordering === nextFilters.ordering &&
+            currentFilters.releaseStatus ===
+            nextFilters.releaseStatus &&
+            currentFilters.startYear === nextFilters.startYear &&
+            currentFilters.endYear === nextFilters.endYear &&
+            currentFilters.minMetacritic ===
+            nextFilters.minMetacritic;
+
+        if (!unchanged) {
+            applySelection(next);
+        }
     };
 
-    const handleSortChange = (sortOption: typeof SORT_OPTIONS[0]) => {
-        setActiveSort(sortOption);
-        setSortModalVisible(false);
-        fetchData(activeFilter, sortOption, selectedYear, 1);
+    const handleFilterChange = (
+        nextFilters: GameFilterValue,
+    ) => {
+        const previous = selection.filters;
+
+        const dateFilterChanged =
+            previous.releaseStatus !==
+            nextFilters.releaseStatus ||
+            previous.startYear !== nextFilters.startYear ||
+            previous.endYear !== nextFilters.endYear;
+
+        // Tarih/çıkış durumu değişirse hazır dönemi bırak.
+        // Yalnızca sıralama veya puan değişirse dönemi koru.
+        const preset: PresetId = dateFilterChanged
+            ? 'custom'
+            : selection.preset === 'popular' &&
+                nextFilters.ordering !== '-added'
+                ? 'custom'
+                : selection.preset;
+
+        applySelection({
+            preset,
+            filters: nextFilters,
+        });
     };
 
-    const handleYearChange = (year: number) => {
-        setSelectedYear(year);
-        setYearModalVisible(false);
-        fetchData(activeFilter, activeSort, year, 1);
-    }
-
-    const handleLoadMore = () => {
-        const hasNextPage = gameStore.data['getGamesProcess']?.next;
-        if (gameStore.isLoading['getGamesProcess'] || isMoreLoading || !hasNextPage) return;
-
-        const nextPage = page + 1;
-        setPage(nextPage);
-
-        let finalDates = activeFilter.dates;
-        if (activeFilter.id === 'goty') {
-            finalDates = `${selectedYear}-01-01,${selectedYear}-12-31`;
+    const handleLoadMore = useCallback(() => {
+        if (failedRequest) {
+            return;
         }
 
-        dispatch(getGamesProcess({
-            page: nextPage,
-            dates: finalDates,
-            ordering: activeSort.value
-        }));
-    };
+        void fetchGames(pageRef.current + 1, 'more');
+    }, [failedRequest, fetchGames]);
+
+    const handleRefresh = useCallback(() => {
+        void fetchGames(1, 'refresh');
+    }, [fetchGames]);
+
+    const handleRetry = useCallback(() => {
+        if (!failedRequest) {
+            return;
+        }
+
+        void fetchGames(
+            failedRequest.page,
+            failedRequest.mode,
+        );
+    }, [failedRequest, fetchGames]);
+
+    const handleGamePress = useCallback(
+        (gameId: number, gameName: string) => {
+            navigation.navigate('GameDetail', {
+                gameId,
+                gameName,
+            });
+        },
+        [navigation],
+    );
 
     const renderHeader = () => (
-        <View style={styles.header}>
-            <AppText variant="caption" color={colors.primary} bold>OYUN ANSİKLOPEDİSİ</AppText>
-            <AppText variant="h1" style={styles.mainTitle}>Keşfetmeye Başla</AppText>
-        </View>
-    );
+        <View>
+            <View style={styles.header}>
+                <AppText style={styles.mainTitle}>
+                    Sıradaki oyununu bul.
+                </AppText>
 
-    const renderPlatforms = () => (
-        <View style={styles.sectionMargin}>
-            <SectionHeader
-                title="Platformlar"
-                onPressAll={() => navigation.navigate('DiscoverTab', { screen: 'DiscoverMain' })}
-            />
-            <FlatList
-                horizontal
-                data={platforms}
-                keyExtractor={(item) => `plt-${item.id}`}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalListPadding}
-                renderItem={({ item }) => (
-                    <PlatformCard
-                        name={item.name}
-                        image={item.image_background}
-                        gamesCount={item.games_count}
-                        onPress={() => navigation.navigate('PlatformDetail', { id: item.id, name: item.name })}
-                    />
-                )}
-            />
-        </View>
-    );
-
-    const renderGenres = () => (
-        <View style={styles.sectionMargin}>
-            <SectionHeader title="Popüler Türler" />
-            <FlatList
-                horizontal
-                data={genres}
-                keyExtractor={(item) => `genre-${item.id}`}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalListPadding}
-                renderItem={({ item }) => (
-                    <TouchableOpacity
-                        style={[styles.modernChip, styles.inactiveChipSoft]}
-                        onPress={() => navigation.navigate('GenreDetail', { slug: item.slug, name: item.name })}
-                    >
-                        <AppText
-                            variant="body"
-                            color={colors.white}
-                            bold
-                        >
-                            {item.name.toUpperCase()}
-                        </AppText>
-                    </TouchableOpacity>
-                )}
-            />
-        </View>
-    );
-
-    const renderFilterAndSort = () => (
-        <View style={styles.sectionMargin}>
-            <View style={styles.filterHeaderRow}>
-
-                {/* SOL TARAF: Dinamik Başlık (Alan yetmezse otomatik küçülür) */}
-                <View style={{ flex: 1, marginRight: 8 }}>
-                    <AppText variant="h2" style={styles.dynamicHeaderTitle} numberOfLines={1}>
-                        {activeFilter.id === 'goty' ? `${selectedYear} En İyileri` : activeFilter.label}
-                    </AppText>
-                </View>
-
-                {/* SAĞ TARAF: Butonlar (Yıl ve Sıralama yan yana gruplandı) */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', flexShrink: 0 }}>
-
-                    {/* EĞER "YILIN EN İYİLERİ" SEÇİLİYSE YIL SEÇME BUTONU */}
-                    {activeFilter.id === 'goty' && (
-                        <TouchableOpacity
-                            style={[
-                                styles.compactSortButton,
-                                { marginRight: 8, borderColor: colors.primary, backgroundColor: 'rgba(100, 255, 218, 0.1)' }
-                            ]}
-                            onPress={() => setYearModalVisible(true)}
-                        >
-                            <AppText variant="caption" color={colors.primary} bold>
-                                {selectedYear} ▾
-                            </AppText>
-                        </TouchableOpacity>
-                    )}
-
-                    {/* SIRALAMA BUTONU (Artık 'shortLabel' kullanıyoruz) */}
-                    <TouchableOpacity
-                        style={styles.compactSortButton}
-                        onPress={() => setSortModalVisible(true)}
-                    >
-                        <AppText variant="caption" color={colors.primary}>
-                            {activeSort.shortLabel} ↕
-                        </AppText>
-                    </TouchableOpacity>
-
-                </View>
+                <AppText style={styles.subtitle}>
+                    Platformları ve oyun türlerini keşfet.
+                </AppText>
             </View>
 
-            {/* ZAMAN SEKMELERİ */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabPadding}>
-                {FILTERS.map((filter) => {
-                    const isActive = activeFilter.id === filter.id;
+            {!!platforms?.length && (
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <AppText style={styles.sectionTitle}>
+                            Platformlar
+                        </AppText>
+                    </View>
+
+                    <FlatList
+                        horizontal
+                        data={platforms}
+                        keyExtractor={item =>
+                            `platform-${item.id}`
+                        }
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={
+                            styles.horizontalContent
+                        }
+                        renderItem={({ item }) => (
+                            <PlatformCard
+                                name={item.name}
+                                image={item.image_background}
+                                gamesCount={item.games_count}
+                                onPress={() =>
+                                    navigation.navigate(
+                                        'PlatformDetail',
+                                        {
+                                            id: item.id,
+                                            name: item.name,
+                                        },
+                                    )
+                                }
+                            />
+                        )}
+                    />
+                </View>
+            )}
+
+            {!!genres?.length && (
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <AppText style={styles.sectionTitle}>
+                            Oyun türleri
+                        </AppText>
+                    </View>
+
+                    <FlatList
+                        horizontal
+                        data={genres}
+                        keyExtractor={item =>
+                            `genre-${item.id}`
+                        }
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={
+                            styles.horizontalContent
+                        }
+                        renderItem={({ item }) => (
+                            <TouchableOpacity
+                                accessibilityRole="button"
+                                activeOpacity={0.8}
+                                style={styles.genreChip}
+                                onPress={() =>
+                                    navigation.navigate(
+                                        'GenreDetail',
+                                        {
+                                            slug: item.slug,
+                                            name: item.name,
+                                        },
+                                    )
+                                }
+                            >
+                                <AppText style={styles.genreText}>
+                                    {item.name}
+                                </AppText>
+                            </TouchableOpacity>
+                        )}
+                    />
+                </View>
+            )}
+
+            <View style={styles.separator} />
+
+            <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.filterContent}
+            >
+                {PRESETS.map(preset => {
+                    const selected =
+                        selection.preset === preset.id;
+
                     return (
                         <TouchableOpacity
-                            key={filter.id}
-                            style={styles.tabButton}
-                            onPress={() => handleFilterChange(filter)}
+                            key={preset.id}
+                            accessibilityRole="button"
+                            accessibilityState={{ selected }}
+                            activeOpacity={0.8}
+                            onPress={() =>
+                                handlePresetChange(preset.id)
+                            }
+                            style={[
+                                styles.filterChip,
+                                selected
+                                    ? styles.selectedFilterChip
+                                    : {},
+                            ]}
                         >
                             <AppText
-                                variant="body"
-                                color={isActive ? colors.white : colors.gray}
-                                bold={isActive}
+                                style={[
+                                    styles.filterText,
+                                    selected
+                                        ? styles.selectedFilterText
+                                        : {},
+                                ]}
                             >
-                                {filter.label.replace('Trendler', '').replace(`${currentYear} En İyileri`, 'Yılın En İyileri').trim()}
+                                {preset.label}
                             </AppText>
-                            {isActive && <View style={styles.tabIndicator} />}
                         </TouchableOpacity>
                     );
                 })}
+
+                {selection.preset === 'custom' && (
+                    <View
+                        style={[
+                            styles.filterChip,
+                            styles.selectedFilterChip,
+                        ]}
+                    >
+                        <AppText
+                            style={[
+                                styles.filterText,
+                                styles.selectedFilterText,
+                            ]}
+                        >
+                            Özel
+                        </AppText>
+                    </View>
+                )}
             </ScrollView>
+
+            <View style={styles.gamesHeader}>
+                <AppText style={styles.gamesTitle}>
+                    {sectionTitle}
+                </AppText>
+
+                <GameSortFilter
+                    value={selection.filters}
+                    onChange={handleFilterChange}
+                />
+            </View>
         </View>
     );
 
-    if (isInitialLoading && games.length === 0) {
-        return (
-            <Container>
-                <View style={styles.skeletonContainer}>
-                    <Skeleton style={styles.skeletonTitle} />
-                    <Skeleton style={styles.skeletonBanner} />
-                    <Skeleton style={styles.skeletonCard} />
-                    <Skeleton style={styles.skeletonCard} />
+    const renderEmpty = () => {
+        if (loading === 'initial') {
+            return (
+                <View style={styles.skeletonGrid}>
+                    {[0, 1, 2, 3].map(item => (
+                        <View
+                            key={item}
+                            style={styles.skeletonColumn}
+                        >
+                            <Skeleton
+                                style={styles.skeletonImage}
+                            />
+                            <Skeleton
+                                style={styles.skeletonText}
+                            />
+                            <Skeleton
+                                style={styles.skeletonSmallText}
+                            />
+                        </View>
+                    ))}
                 </View>
-            </Container>
+            );
+        }
+
+        if (loading === 'refresh') {
+            return (
+                <View style={styles.feedback}>
+                    <AppText style={styles.feedbackText}>
+                        Oyunlar yenileniyor…
+                    </AppText>
+                </View>
+            );
+        }
+
+        return (
+            <View style={styles.feedback}>
+                <AppText style={styles.feedbackTitle}>
+                    {failedRequest
+                        ? 'Oyunlar yüklenemedi'
+                        : 'Uygun oyun bulunamadı'}
+                </AppText>
+
+                <AppText style={styles.feedbackText}>
+                    {failedRequest
+                        ? 'Bağlantını kontrol edip tekrar deneyebilirsin.'
+                        : 'Filtreleri değiştirebilir veya başka bir dönem seçebilirsin.'}
+                </AppText>
+
+                {failedRequest && (
+                    <TouchableOpacity
+                        accessibilityRole="button"
+                        style={styles.retryButton}
+                        onPress={handleRetry}
+                    >
+                        <AppText style={styles.retryText}>
+                            Tekrar dene
+                        </AppText>
+                    </TouchableOpacity>
+                )}
+            </View>
         );
-    }
+    };
 
     return (
-        <Container style={{ paddingHorizontal: 0 }}>
+        <Container style={styles.container}>
             <FlatList
                 data={games}
                 numColumns={2}
-                keyExtractor={(item, index) => `game-${item.id}-${index}`}
-                columnWrapperStyle={{
-                    justifyContent: 'space-between',
-                    paddingHorizontal: 16
-                }}
+                keyExtractor={item => `game-${item.id}`}
+                columnWrapperStyle={styles.row}
                 showsVerticalScrollIndicator={false}
-                ListHeaderComponent={
-                    <View>
-                        {renderHeader()}
-                        {renderPlatforms()}
-                        {renderGenres()}
-                        {renderFilterAndSort()}
-                    </View>
-                }
+                contentContainerStyle={styles.listContent}
+                ListHeaderComponent={renderHeader()}
                 renderItem={({ item }) => (
-                    <GameCard
-                        game={item}
-                        onPress={(id, name) => navigation.navigate('GameDetail', { gameId: id, gameName: name })}
-                    />
+                    <View style={styles.gameColumn}>
+                        <GameCard
+                            game={item}
+                            onPress={handleGamePress}
+                        />
+                    </View>
                 )}
+                ListEmptyComponent={renderEmpty()}
                 refreshControl={
                     <RefreshControl
-                        refreshing={isRefreshing}
-                        onRefresh={() => fetchData(activeFilter, activeSort, selectedYear, 1)}
+                        refreshing={loading === 'refresh'}
+                        onRefresh={handleRefresh}
                         tintColor={colors.primary}
+                        colors={[colors.primary]}
                     />
                 }
                 onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
+                onEndReachedThreshold={0.3}
                 ListFooterComponent={
-                    isMoreLoading ? (
-                        <ActivityIndicator size="large" color={colors.primary} style={{ marginVertical: 20 }} />
-                    ) : <View style={{ height: 40 }} />
+                    loading === 'more' ? (
+                        <ActivityIndicator
+                            color={colors.primary}
+                            style={styles.footerLoader}
+                        />
+                    ) : failedRequest && games.length > 0 ? (
+                        <TouchableOpacity
+                            accessibilityRole="button"
+                            onPress={handleRetry}
+                            style={styles.footerRetry}
+                        >
+                            <AppText style={styles.retryText}>
+                                Yüklenemedi · Tekrar dene
+                            </AppText>
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={styles.footerSpace} />
+                    )
                 }
             />
-
-            <Modal
-                visible={sortModalVisible}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setSortModalVisible(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPressOut={() => setSortModalVisible(false)}
-                >
-                    <View style={styles.modalContent}>
-                        <AppText variant="h2" style={styles.modalTitle}>Sıralama Ölçütü</AppText>
-
-                        {SORT_OPTIONS.map((sort) => {
-                            const isSelected = activeSort.id === sort.id;
-                            return (
-                                <TouchableOpacity
-                                    key={sort.id}
-                                    style={styles.modalOption}
-                                    onPress={() => handleSortChange(sort)}
-                                >
-                                    <AppText
-                                        variant="body"
-                                        color={isSelected ? colors.primary : colors.white}
-                                        bold={isSelected}
-                                    >
-                                        {sort.shortLabel}
-                                    </AppText>
-                                    {isSelected && <AppText variant="body" color={colors.primary}>✓</AppText>}
-                                </TouchableOpacity>
-                            );
-                        })}
-                    </View>
-                </TouchableOpacity>
-            </Modal>
-
-            <Modal
-                visible={yearModalVisible}
-                transparent={true}
-                animationType="slide"
-                onRequestClose={() => setYearModalVisible(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPressOut={() => setYearModalVisible(false)}
-                >
-                    <View style={[styles.modalContent, { maxHeight: '60%' }]}>
-                        <AppText variant="h2" style={styles.modalTitle}>Yıl Seçin</AppText>
-
-                        <ScrollView showsVerticalScrollIndicator={false}>
-                            {YEARS.map((year) => {
-                                const isSelected = selectedYear === year;
-                                return (
-                                    <TouchableOpacity
-                                        key={`year-${year}`}
-                                        style={styles.modalOption}
-                                        onPress={() => handleYearChange(year)}
-                                    >
-                                        <AppText
-                                            variant="body"
-                                            color={isSelected ? colors.primary : colors.white}
-                                            bold={isSelected}
-                                        >
-                                            {year.toString()}
-                                        </AppText>
-                                        {isSelected && <AppText variant="body" color={colors.primary}>✓</AppText>}
-                                    </TouchableOpacity>
-                                );
-                            })}
-                        </ScrollView>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
         </Container>
     );
 };

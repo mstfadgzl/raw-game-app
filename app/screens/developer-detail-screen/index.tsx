@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { View, Image, FlatList } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '@hooks';
 import { getDeveloperDetailProcess } from '@actions';
 import { Container, AppText, GameCard, Skeleton } from '@components';
 import { translateText } from '@utils';
 import { styles } from './styles';
 import { spacing } from '@theme'; // Kartların kenar boşlukları için eklendi
-import { DeveloperDetailRouteProp, IDeveloper } from '@types';
+import { DeveloperDetailRouteProp, DiscoverScreenNavigationProp, IDeveloper } from '@types';
 
 
 export const DeveloperDetailScreen = () => {
+    const navigation = useNavigation<DiscoverScreenNavigationProp>();
     const route = useRoute<DeveloperDetailRouteProp>();
     const { id } = route.params;
     const dispatch = useAppDispatch();

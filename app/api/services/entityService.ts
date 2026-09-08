@@ -2,9 +2,12 @@ import { ICreatorResponse, IDeveloperResponse } from "@types";
 import apiClient from "../client"
 
 export const entityService = {
-    getCreators: async (page: number = 1): Promise<ICreatorResponse> => {
+    getCreators: async ({ page = 1, pageSize = 40 }): Promise<ICreatorResponse> => {
         const response = await apiClient.get<ICreatorResponse>('/creators', {
-            params: { page }
+            params: {
+                page,
+                page_size: pageSize,
+            }
         });
         return response.data;
 

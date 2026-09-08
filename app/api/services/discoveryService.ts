@@ -20,9 +20,12 @@ export const discoveryService = {
         });
         return response.data;
     },
-    getTags: async (page: number = 1): Promise<ITagResponse> => {
+    getTags: async ({ page = 1, pageSize = 40 }): Promise<ITagResponse> => {
         const response = await apiClient.get<ITagResponse>('/tags', {
-            params: { page }
+            params: {
+                page,
+                page_size: pageSize,
+            }
         });
         return response.data;
     },

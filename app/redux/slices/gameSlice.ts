@@ -50,15 +50,12 @@ export const gameSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(getGamesProcess.pending, (state, action) => {
+            const firstPage = action.meta.arg.page === 1;
 
-            const { page } = action.meta.arg;
-            if (page === 1) {
+            state.isLoading['getGamesProcess'] = firstPage;
+            state.isLoading['getGamesMoreLoading'] = !firstPage;
 
-                state.isLoading['getGamesProcess'] = true;
-            } else {
-                state.isLoading['getGamesProcess'] = false;
-                state.isLoading['getGamesMoreLoading'] = true
-            }
+            state.status['getGamesProcess'] = 'loading';
             state.error['getGamesProcess'] = undefined;
         });
         builder.addCase(getGamesProcess.fulfilled, (state, action) => {

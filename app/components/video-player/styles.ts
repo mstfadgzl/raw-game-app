@@ -1,34 +1,126 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { colors } from '@theme';
 
-const { width } = Dimensions.get('window');
-
 export const styles = StyleSheet.create({
-    container: {
-        width: width - 32,
-        height: (width - 32) * 0.5625, // 16:9 Oranı
-        backgroundColor: colors.black,
-        borderRadius: 16,
+    wrapper: {
+        width: '100%',
+    },
+
+    previewContainer: {
+        width: '100%',
+        aspectRatio: 16 / 9,
+        backgroundColor: '#141925',
+        borderRadius: 14,
         overflow: 'hidden',
-        marginVertical: 10,
-        justifyContent: 'center',
         alignItems: 'center',
+        justifyContent: 'center',
     },
-    webView: {
-        flex: 1,
-        backgroundColor: 'transparent',
-    },
-    placeholderImage: {
+
+    fill: {
         ...StyleSheet.absoluteFill,
-        opacity: 0.6,
+        width: '100%',
+        height: '100%',
     },
+
+    previewShade: {
+        ...StyleSheet.absoluteFill,
+        backgroundColor: 'rgba(0,0,0,0.35)',
+    },
+
     playButton: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: 'rgba(100, 255, 218, 0.8)', // Primary neon rengimiz
-        justifyContent: 'center',
+        width: 58,
+        height: 58,
+        borderRadius: 29,
+        backgroundColor: colors.primary,
         alignItems: 'center',
-        zIndex: 2,
-    }
+        justifyContent: 'center',
+    },
+
+    playIcon: {
+        color: '#0B1117',
+        fontSize: 25,
+        marginLeft: 3,
+    },
+
+    previewLabel: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        fontWeight: '600',
+        marginTop: 12,
+    },
+
+    fullscreen: {
+        flex: 1,
+        backgroundColor: '#080B10',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+    },
+
+    blurBackground: {
+        ...StyleSheet.absoluteFill,
+        width: '100%',
+        height: '100%',
+    },
+
+    backgroundShade: {
+        ...StyleSheet.absoluteFill,
+        backgroundColor: 'rgba(0,0,0,0.38)',
+    },
+
+    loadingOverlay: {
+        ...StyleSheet.absoluteFill,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.35)',
+    },
+
+    loadingText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        marginTop: 10,
+    },
+
+    closeButton: {
+        position: 'absolute',
+        top: 32,
+        right: 24,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10,
+    },
+
+    closeText: {
+        color: '#FFFFFF',
+        fontSize: 20,
+    },
+
+    errorContent: {
+        width: '85%',
+        maxWidth: 420,
+        padding: 20,
+        borderRadius: 16,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        alignItems: 'center',
+    },
+
+    message: {
+        color: '#E0E6F0',
+        fontSize: 13,
+        lineHeight: 21,
+        textAlign: 'center',
+        paddingHorizontal: 12,
+    },
+
+    retryButton: {
+        marginTop: 14,
+        paddingHorizontal: 18,
+        paddingVertical: 12,
+        borderRadius: 10,
+        backgroundColor: '#26303D',
+    },
 });
