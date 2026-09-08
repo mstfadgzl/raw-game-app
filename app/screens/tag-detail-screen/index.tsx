@@ -68,17 +68,15 @@ export const TagDetailScreen = () => {
                 }
                 renderItem={({ item }) => (
                     <View style={styles.cardColumn}>
-                        <View style={styles.cardShell}>
-                            <GameCard
-                                game={item}
-                                onPress={(gameId, gameName) =>
-                                    navigation.navigate('GameDetail', {
-                                        gameId,
-                                        gameName,
-                                    })
-                                }
-                            />
-                        </View>
+                        <GameCard
+                            game={item}
+                            onPress={(gameId, gameName) =>
+                                navigation.navigate('GameDetail', {
+                                    gameId,
+                                    gameName,
+                                })
+                            }
+                        />
                     </View>
                 )}
                 onEndReached={loadMore}

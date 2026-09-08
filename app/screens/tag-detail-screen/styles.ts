@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
     },
     cardColumn: {
         width: '48%',
-        marginBottom: 18,
+        marginBottom: 10,
     },
     cardShell: {
         width: '100%',
