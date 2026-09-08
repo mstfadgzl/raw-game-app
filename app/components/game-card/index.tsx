@@ -1,52 +1,198 @@
-import React, { memo } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import React, { memo, useState } from 'react';
+import {
+    View,
+    Text,
+    Image,
+    TouchableOpacity,
+} from 'react-native';
+
 import { IGame } from '@types';
 import { styles } from './styles';
 
+type CardGame = IGame & {
+    genres?: {
+        id: number;
+        name: string;
+    }[];
+};
+
 interface GameCardProps {
-    game: IGame;
+    game: CardGame;
     onPress: (id: number, name: string) => void;
+
+    // Gerçek bir indirme verisi kaynağından sağlanmalı.
+    downloadCount?: number | null;
 }
 
-export const GameCard: React.FC<GameCardProps> = memo(({ game, onPress }) => {
-    // İsteğin üzerine puanı tam 3.91 / 5 formatına getiriyoruz. 
-    // Puan yoksa "N/A" (Bilinmiyor) gösterecek.
-    const ratingDisplay = game.rating ? `${game.rating.toFixed(2)} / 5` : 'N/A';
+const formatReleaseDate = (
+    value?: string | null,
+): string => {
+    if (!value) return 'Açıklanmadı';
 
-    // "2024-05-12" gibi gelen tarihi sadece "2024" olarak almak tasarımı çok daha şık yapar.
-    const releaseYear = game.released ? game.released.substring(0, 20) : 'TBA';
+    const match = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(value);
+
+    if (!match) return 'Açıklanmadı';
+
+    const [, year, month, day] = match;
+
+    // Saat dilimi dönüşümü yapmadan tarihi biçimlendirir.
+    return `${day}-${month}-${year}`;
+};
+
+const formatCount = (value: number): string => {
+    // Örnek: 1250000 → 1.250.000
+    return Math.trunc(value)
+        .toString()
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
+export const GameCard = memo(function GameCard({
+    game,
+    onPress,
+    downloadCount,
+}: GameCardProps) {
+    const [failedImageUri, setFailedImageUri] = useState<
+        string | null
+    >(null);
+
+    const imageUri = game.background_image;
+
+    const hasImage = Boolean(
+        imageUri && imageUri !== failedImageUri,
+    );
+
+    const hasRating =
+        typeof game.rating === 'number' &&
+        Number.isFinite(game.rating) &&
+        game.rating > 0 &&
+        game.rating <= 5;
+
+    const ratingDisplay = hasRating
+        ? game.rating.toFixed(2)
+        : '—';
+
+    const releaseDate = formatReleaseDate(game.released);
+
+    const genreText = game.genres
+        ?.slice(0, 2)
+        .map(genre => genre.name)
+        .join(' · ');
+
+    const validDownloadCount =
+        typeof downloadCount === 'number' &&
+            Number.isFinite(downloadCount) &&
+            downloadCount >= 0
+            ? downloadCount
+            : null;
+
+    const downloadDisplay =
+        validDownloadCount !== null
+            ? formatCount(validDownloadCount)
+            : null;
 
     return (
         <TouchableOpacity
-            activeOpacity={0.8}
             style={styles.container}
+            activeOpacity={0.85}
             onPress={() => onPress(game.id, game.name)}
+            accessibilityRole="button"
+            accessibilityLabel={[
+                game.name,
+                hasRating
+                    ? `Puan: ${ratingDisplay} / 5`
+                    : 'Henüz puanlanmadı',
+                `Çıkış tarihi: ${releaseDate}`,
+                downloadDisplay !== null
+                    ? `${downloadDisplay} indirme`
+                    : '',
+            ]
+                .filter(Boolean)
+                .join('. ')}
+            accessibilityHint="Oyun detaylarını açar"
         >
-            {/* Görsel ve Yüzen Puan Rozeti Alanı */}
             <View style={styles.imageContainer}>
-                <Image
-                    source={{ uri: game.background_image }}
-                    style={styles.image}
-                    resizeMode="cover"
-                />
+                {hasImage ? (
+                    <Image
+                        source={{ uri: imageUri }}
+                        style={styles.image}
+                        resizeMode="cover"
+                        onError={() =>
+                            setFailedImageUri(imageUri || null)
+                        }
+                    />
+                ) : (
+                    <View style={styles.imagePlaceholder}>
+                        <Text style={styles.placeholderSymbol}>
+                            ◇
+                        </Text>
 
-                {/* 🌟 Premium Dokunuş: Sağ üstte asılı duran yarı saydam puan rozeti */}
-                <View style={styles.floatingRating}>
+                        <Text style={styles.placeholderText}>
+                            Görsel bulunmuyor
+                        </Text>
+                    </View>
+                )}
+
+                <View style={styles.ratingBadge}>
                     <Text style={styles.starIcon}>★</Text>
-                    <Text style={styles.ratingText}>{ratingDisplay}</Text>
+
+                    <Text style={styles.ratingText}>
+                        {ratingDisplay}
+                    </Text>
+
+                    {hasRating && (
+                        <Text style={styles.ratingLimit}>
+                            / 5
+                        </Text>
+                    )}
                 </View>
             </View>
 
-            {/* Metin İçerik Alanı */}
             <View style={styles.content}>
-                {/* İsim uzunsa 2 satıra sarar, tasarım bozulmaz */}
-                <Text style={styles.title} numberOfLines={2}>
+                <Text
+                    style={styles.title}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                >
                     {game.name}
                 </Text>
 
-                <View style={styles.footer}>
-                    <Text style={styles.releaseDate}>Çıkış: {releaseYear}</Text>
+                {!!genreText && (
+                    <Text
+                        style={styles.genre}
+                        numberOfLines={1}
+                    >
+                        {genreText}
+                    </Text>
+                )}
+
+                <View style={styles.divider} />
+
+                <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>
+                        Çıkış
+                    </Text>
+
+                    <Text style={styles.dateText}>
+                        {releaseDate}
+                    </Text>
                 </View>
+
+                {downloadDisplay !== null && (
+                    <View
+                        style={[
+                            styles.infoRow,
+                            styles.downloadRow,
+                        ]}
+                    >
+                        <Text style={styles.infoLabel}>
+                            İndirme
+                        </Text>
+
+                        <Text style={styles.downloadText}>
+                            {downloadDisplay}
+                        </Text>
+                    </View>
+                )}
             </View>
         </TouchableOpacity>
     );

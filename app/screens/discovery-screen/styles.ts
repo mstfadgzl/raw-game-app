@@ -138,4 +138,13 @@ export const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#2A2A2A',
     },
+    row: {
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+    },
+
+    cardColumn: {
+        width: '48%',
+        marginBottom: 12,
+    },
 });
