@@ -1,21 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Image, TouchableOpacity } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useRoute } from '@react-navigation/native';
+
 import { useAppDispatch, useAppSelector } from '@hooks';
-import {
-    getGameDetailProcess,
-    getGameTrailersProcess,
-    getGameAchievementsProcess,
-    getGameRedditPostsProcess,
-    getGameSeriesProcess,
-    getGameScreenshotsProcess
-} from '@actions';
+import { getGameDetailProcess } from '@actions';
 import { Container, AppText, Skeleton } from '@components';
 import { GameDetailRouteProp } from '@types';
 import { colors } from '@theme';
-import { styles } from './styles';
 import { toggleFavorite } from '../../redux/slices/gameSlice';
+
+import { styles } from './styles';
 
 import { AboutTab } from './tabs/AboutTab';
 import { MediaTab } from './tabs/MediaTab';
@@ -27,76 +22,219 @@ const Tab = createMaterialTopTabNavigator();
 
 export const DetailScreen = () => {
     const route = useRoute<GameDetailRouteProp>();
+    const gameId = Number(route.params.gameId);
+
+    if (!Number.isInteger(gameId) || gameId <= 0) {
+        return (
+            <Container>
+                <View style={styles.feedback}>
+                    <AppText>Geçerli bir oyun bulunamadı.</AppText>
+                </View>
+            </Container>
+        );
+    }
+
+    return <DetailContent key={gameId} gameId={gameId} />;
+};
+
+const DetailContent = ({ gameId }: { gameId: number }) => {
     const dispatch = useAppDispatch();
 
-    const safeGameId = Number(route.params.gameId);
+    const favorites = useAppSelector(
+        state => state.game.data.favorites || [],
+    );
 
-    const { data, isLoading } = useAppSelector(state => state.game);
-    const favorites = useAppSelector(state => state.game.data.favorites || []);
-
-    const detail = data.getGameDetailProcess;
-    const isFav = favorites.some((f: any) => f.id === detail?.id);
-    const isDataMatching = detail?.id === safeGameId;
-    const isFetching = isLoading['getGameDetailProcess'];
+    const [detail, setDetail] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [retryKey, setRetryKey] = useState(0);
 
     useEffect(() => {
-        dispatch(getGameDetailProcess(safeGameId));
-        dispatch(getGameTrailersProcess(safeGameId));
-        dispatch(getGameAchievementsProcess({ id: safeGameId, page: 1 }));
-        dispatch(getGameRedditPostsProcess({ id: safeGameId, page: 1 }));
-        dispatch(getGameSeriesProcess(safeGameId));
-        dispatch(getGameScreenshotsProcess(safeGameId));
-    }, [safeGameId, dispatch]);
+        let active = true;
 
-    const handleFavorites = () => {
-        if (detail) {
-            const leanGameObj = {
+        setLoading(true);
+        setError(false);
+
+        dispatch(getGameDetailProcess(gameId))
+            .unwrap()
+            .then(result => {
+                if (!result || Number(result.id) !== gameId) {
+                    throw new Error('Geçersiz oyun yanıtı');
+                }
+
+                if (active) {
+                    setDetail(result);
+                }
+            })
+            .catch(() => {
+                if (active) {
+                    setError(true);
+                }
+            })
+            .finally(() => {
+                if (active) {
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [dispatch, gameId, retryKey]);
+
+    const isFavorite = favorites.some(
+        (item: any) => Number(item.id) === gameId,
+    );
+
+    const handleFavorite = () => {
+        if (!detail) return;
+
+        dispatch(
+            toggleFavorite({
                 id: detail.id,
                 name: detail.name,
                 background_image: detail.background_image,
                 rating: detail.rating,
                 released: detail.released,
-            };
-            dispatch(toggleFavorite(leanGameObj as any));
-        }
+            } as any),
+        );
     };
 
-    if (isFetching || !isDataMatching) {
-        return <Container><Skeleton style={{ flex: 1 }} /></Container>;
+    if (loading) {
+        return (
+            <Container>
+                <View style={styles.container}>
+                    <Skeleton
+                        style={{ height: 235, width: '100%' }}
+                    />
+
+                    <View style={styles.content}>
+                        <Skeleton
+                            style={{
+                                height: 40,
+                                borderRadius: 12,
+                                marginBottom: 20,
+                            }}
+                        />
+
+                        <Skeleton
+                            style={{
+                                height: 160,
+                                borderRadius: 12,
+                            }}
+                        />
+                    </View>
+                </View>
+            </Container>
+        );
+    }
+
+    if (error || !detail) {
+        return (
+            <Container>
+                <View style={styles.feedback}>
+                    <AppText style={styles.muted}>
+                        Oyun bilgileri yüklenemedi.
+                    </AppText>
+
+                    <TouchableOpacity
+                        accessibilityRole="button"
+                        style={styles.retryButton}
+                        onPress={() => setRetryKey(value => value + 1)}
+                    >
+                        <AppText color={colors.primary} bold>
+                            Tekrar dene
+                        </AppText>
+                    </TouchableOpacity>
+                </View>
+            </Container>
+        );
     }
 
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}>
-                <Image source={{ uri: detail?.background_image }} style={styles.heroImage} />
-                <View style={styles.imageOverlay} />
+                {!!detail.background_image && (
+                    <Image
+                        source={{ uri: detail.background_image }}
+                        style={styles.heroImage}
+                    />
+                )}
 
-                <TouchableOpacity style={styles.favButton} onPress={handleFavorites}>
-                    <AppText style={{ fontSize: 24 }}>{isFav ? '❤️' : '🤍'}</AppText>
+                <View
+                    pointerEvents="none"
+                    style={styles.imageOverlay}
+                />
+
+                <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                        isFavorite
+                            ? 'Favorilerden çıkar'
+                            : 'Favorilere ekle'
+                    }
+                    style={styles.favButton}
+                    onPress={handleFavorite}
+                    activeOpacity={0.8}
+                >
+                    <AppText
+                        style={{
+                            fontSize: 26,
+                            color: isFavorite ? '#FF6B81' : '#FFFFFF',
+                        }}
+                    >
+                        {isFavorite ? '♥' : '♡'}
+                    </AppText>
                 </TouchableOpacity>
 
                 <View style={styles.absoluteInfo}>
-                    <AppText style={styles.gameTitle} numberOfLines={2}>{detail?.name}</AppText>
+                    <AppText
+                        style={styles.gameTitle}
+                        numberOfLines={2}
+                    >
+                        {detail.name}
+                    </AppText>
 
                     <View style={styles.metaContainer}>
-                        <View style={styles.metaBox}>
-                            <AppText variant="caption" bold color={colors.primary}>★ {detail?.rating}</AppText>
-                        </View>
-                        <View style={styles.metaBox}>
-                            <AppText variant="caption" bold>{detail?.released?.split('-')[0]}</AppText>
-                        </View>
-                        {detail?.playtime > 0 && (
+                        {detail.rating > 0 && (
                             <View style={styles.metaBox}>
-                                <AppText variant="caption" bold>{detail.playtime} Oynanış Süresi</AppText>
+                                <AppText
+                                    variant="caption"
+                                    color={colors.primary}
+                                    bold
+                                >
+                                    ★ {Number(detail.rating).toFixed(1)}
+                                </AppText>
+                            </View>
+                        )}
+
+                        {!!detail.released && (
+                            <View style={styles.metaBox}>
+                                <AppText
+                                    variant="caption"
+                                    color="#FFFFFF"
+                                >
+                                    {detail.released.split('-')[0]}
+                                </AppText>
+                            </View>
+                        )}
+
+                        {detail.playtime > 0 && (
+                            <View style={styles.metaBox}>
+                                <AppText
+                                    variant="caption"
+                                    color="#FFFFFF"
+                                >
+                                    {detail.playtime} saat
+                                </AppText>
                             </View>
                         )}
                     </View>
                 </View>
             </View>
 
-            <View style={[styles.tabWrapper, { flex: 1 }]}>
+            <View style={styles.tabWrapper}>
                 <Tab.Navigator
-                    key={safeGameId}
                     screenOptions={{
                         lazy: true,
                         lazyPreloadDistance: 0,
@@ -125,32 +263,34 @@ export const DetailScreen = () => {
                         ),
                     }}
                 >
-                    <Tab.Screen
-                        name="Hakkında"
-                        component={AboutTab}
-                        initialParams={{ gameId: safeGameId }}
-                    />
+                    <Tab.Screen name="Hakkında">
+                        {() => <AboutTab detail={detail} />}
+                    </Tab.Screen>
+
                     <Tab.Screen
                         name="Medya"
                         component={MediaTab}
-                        initialParams={{ gameId: safeGameId }}
+                        initialParams={{ gameId }}
                     />
+
                     <Tab.Screen
                         name="DLC"
                         options={{ title: 'Ek içerikler' }}
                         component={ExpansionsTab}
-                        initialParams={{ gameId: safeGameId }}
+                        initialParams={{ gameId }}
                     />
+
                     <Tab.Screen
                         name="Kupalar"
                         component={AchievementsTab}
-                        initialParams={{ gameId: safeGameId }}
+                        initialParams={{ gameId }}
                     />
+
                     <Tab.Screen
                         name="Reddit"
                         options={{ title: 'Topluluk' }}
                         component={RedditTab}
-                        initialParams={{ gameId: safeGameId }}
+                        initialParams={{ gameId }}
                     />
                 </Tab.Navigator>
             </View>
