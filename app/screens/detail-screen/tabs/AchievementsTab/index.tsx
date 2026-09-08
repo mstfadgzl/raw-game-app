@@ -1,33 +1,30 @@
-import React, { useState } from 'react';
-import { FlatList, View, ActivityIndicator } from 'react-native';
+import React, { useEffect } from 'react';
+import { FlatList, View } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { useAppSelector, useAppDispatch } from '@hooks';
 import { getGameAchievementsProcess } from '@actions';
 import { AchievementItem, AppText, EmptyState, Skeleton } from '@components';
 import { styles } from '../../styles';
-import { colors } from '@theme';
 
 export const AchievementsTab = () => {
     const route = useRoute<any>();
     const dispatch = useAppDispatch();
     const safeGameId = Number(route.params.gameId);
 
-    const [page, setPage] = useState(1);
     const { data, isLoading } = useAppSelector(state => state.game);
 
+    // Sayfalama derdi olmadan tüm başarımları tek seferde çekiyoruz
+    useEffect(() => {
+        dispatch(getGameAchievementsProcess({ id: safeGameId, page_size: 100 } as any));
+    }, [safeGameId, dispatch]);
+
     const achievementsData = data.getGameAchievementsProcess;
-    const achievements = achievementsData?.results || [];
+    // Eğer gelen veri direkt dizi (array) ise veya results nesnesindeyse her iki durumu da karşılıyoruz
+    const achievements = Array.isArray(achievementsData)
+        ? achievementsData
+        : (achievementsData?.results || []);
 
-    const isFetching = !!isLoading['getGameAchievementsProcess'] && page === 1;
-    const isMoreLoading = !!isLoading['getGameAchievementsProcess'] && page > 1;
-
-    const handleLoadMore = () => {
-        if (achievementsData?.next && !isLoading['getGameAchievementsProcess']) {
-            const nextPage = page + 1;
-            setPage(nextPage);
-            dispatch(getGameAchievementsProcess({ id: safeGameId, page: nextPage }));
-        }
-    };
+    const isFetching = !!isLoading['getGameAchievementsProcess'];
 
     if (isFetching && achievements.length === 0) {
         return (
@@ -41,19 +38,14 @@ export const AchievementsTab = () => {
         <View style={styles.tabContent}>
             <FlatList
                 data={achievements}
-                keyExtractor={(item, index) => `achievement-${item.id}-${index}`}
+                keyExtractor={(item, index) => `achievement-${item.id || index}`}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 50, padding: 16 }}
                 ListHeaderComponent={
                     <AppText variant="h2" style={{ marginBottom: 15 }}>Başarımlar</AppText>
                 }
                 renderItem={({ item }) => <AchievementItem achievement={item} />}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                ListEmptyComponent={achievements.length === 0 ? <EmptyState /> : undefined}
-                ListFooterComponent={
-                    isMoreLoading ? <ActivityIndicator size="large" color={colors.primary} style={{ marginVertical: 20 }} /> : undefined
-                }
+                ListEmptyComponent={<EmptyState message="Bu oyun için başarımlık veri bulunmuyor." />}
             />
         </View>
     );
