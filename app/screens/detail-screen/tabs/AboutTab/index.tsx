@@ -1,124 +1,269 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Linking, StyleSheet, TouchableOpacity } from 'react-native';
-import { useAppSelector } from '@hooks';
-import { AppText, GenreChip } from '@components';
-import { translateText } from '@utils';
-import { styles as globalStyles } from '../../styles';
-import { colors, spacing } from '@theme';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    ScrollView,
+    View,
+    Linking,
+    Alert,
+    StyleSheet,
+    TouchableOpacity,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-export const AboutTab = () => {
-    const navigation = useNavigation<any>();
-    const { data } = useAppSelector(state => state.game);
-    const detail = data.getGameDetailProcess;
+import { AppText, GenreChip } from '@components';
+import { translateText } from '@utils';
+import { colors } from '@theme';
+import { styles } from '../../styles';
 
-    const [trDescription, setTrDescription] = useState<string>('');
-    const [isTranslating, setIsTranslating] = useState<boolean>(false);
+type Props = {
+    detail: any;
+};
+
+const translationCache = new Map<string, string>();
+
+export const AboutTab = ({ detail }: Props) => {
+    const navigation = useNavigation<any>();
+
+    const source = detail?.description_raw?.trim() || '';
+
+    const [translation, setTranslation] = useState('');
+    const [translating, setTranslating] = useState(false);
+    const [translationError, setTranslationError] = useState(false);
+    const [showOriginal, setShowOriginal] = useState(false);
+    const [expanded, setExpanded] = useState(false);
+
+    const generation = useRef(0);
+    const translationLock = useRef(false);
 
     useEffect(() => {
-        if (detail?.description_raw) {
-            setTrDescription('');
-            setIsTranslating(true);
+        generation.current += 1;
+        translationLock.current = false;
 
-            translateText(detail.description_raw)
-                .then((translated) => {
-                    if (translated && translated.trim().length > 0) {
-                        setTrDescription(translated);
-                    } else {
-                        setTrDescription(detail.description_raw);
-                    }
-                })
-                .catch(() => {
-                    setTrDescription(detail.description_raw);
-                })
-                .finally(() => setIsTranslating(false));
-        } else {
-            setTrDescription('');
-        }
-    }, [detail?.description_raw]);
+        setTranslation(translationCache.get(source) || '');
+        setTranslating(false);
+        setTranslationError(false);
+        setShowOriginal(false);
+        setExpanded(false);
 
-    // Web sitesi açılmama sorununu kesin çözen güvenli fonksiyon
-    const handlePressWebsite = async (url: string) => {
-        if (!url) return;
-        let formattedUrl = url;
-        if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
-            formattedUrl = `https://${formattedUrl}`;
-        }
+        return () => {
+            generation.current += 1;
+        };
+    }, [detail?.id, source]);
+
+    const handleTranslate = async () => {
+        if (!source || translationLock.current) return;
+
+        translationLock.current = true;
+
+        const current = generation.current;
+
+        setTranslating(true);
+        setTranslationError(false);
 
         try {
-            await Linking.openURL(formattedUrl);
-        } catch (error) {
-            console.error('Web sitesi açılırken hata:', error);
+            const result = (await translateText(source))?.trim();
+
+            if (!result) {
+                throw new Error('Boş çeviri');
+            }
+
+            if (translationCache.size >= 20) {
+                const oldestKey = translationCache.keys().next().value;
+
+                if (oldestKey !== undefined) {
+                    translationCache.delete(oldestKey);
+                }
+            }
+
+            translationCache.set(source, result);
+
+            if (current === generation.current) {
+                setTranslation(result);
+                setShowOriginal(false);
+            }
+        } catch {
+            if (current === generation.current) {
+                setTranslationError(true);
+            }
+        } finally {
+            if (current === generation.current) {
+                translationLock.current = false;
+                setTranslating(false);
+            }
         }
     };
 
-    // Etikete tıklandığında konsola basıp yönlendirmeyi zorlayan güvenli fonksiyon
-    const handleTagPress = (tagId: number | string, tagName: string) => {
-        console.log('Tıklanan Etiket ID:', tagId, 'İsim:', tagName);
+    const handleWebsite = async () => {
+        const value = detail?.website?.trim();
+        if (!value) return;
+
+        if (
+            /^[a-z][a-z\d+.-]*:/i.test(value) &&
+            !/^https?:\/\//i.test(value)
+        ) {
+            Alert.alert('Bağlantı açılamadı', 'Geçersiz web adresi.');
+            return;
+        }
+
+        const url = /^https?:\/\//i.test(value)
+            ? value
+            : `https://${value.replace(/^\/\//, '')}`;
+
         try {
-            navigation.navigate('TagDetail', { id: tagId, name: tagName });
-        } catch (error) {
-            console.error('TagDetail yönlendirme hatası:', error);
+            await Linking.openURL(url);
+        } catch {
+            Alert.alert(
+                'Bağlantı açılamadı',
+                'Lütfen daha sonra tekrar deneyin.',
+            );
         }
     };
 
     if (!detail) return null;
 
+    const description =
+        translation && !showOriginal ? translation : source;
+
+    const facts = [
+        {
+            label: 'GELİŞTİRİCİ',
+            value:
+                detail.developers
+                    ?.map((item: any) => item.name)
+                    .join(', ') || 'Bilinmiyor',
+        },
+        {
+            label: 'YAYINCI',
+            value:
+                detail.publishers
+                    ?.map((item: any) => item.name)
+                    .join(', ') || 'Bilinmiyor',
+        },
+        {
+            label: 'ORTALAMA SÜRE',
+            value:
+                detail.playtime > 0
+                    ? `${detail.playtime} saat`
+                    : 'Veri yok',
+        },
+        {
+            label: 'YAŞ DERECELENDİRMESİ',
+            value:
+                detail.esrb_rating?.name || 'Derecelendirilmemiş',
+        },
+    ];
+
     return (
         <ScrollView
-            style={globalStyles.tabContent}
-            contentContainerStyle={{ paddingBottom: 100 }}
+            style={styles.tabContent}
+            contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
         >
-            <AppText variant="h2" style={{ marginBottom: spacing.sm }}>Oyun Hikayesi</AppText>
-            <AppText style={localStyles.description}>
-                {!detail.description_raw
-                    ? 'Bu oyun için bir hikaye bulunmuyor.'
-                    : isTranslating
-                        ? 'Hikaye Türkçeye çevriliyor, lütfen bekleyin...'
-                        : (trDescription || detail.description_raw)}
+            <AppText style={styles.sectionTitle}>
+                Oyun hakkında
             </AppText>
 
-            <View style={localStyles.gridContainer}>
-                <View style={localStyles.gridItem}>
-                    <AppText variant="caption" color={colors.primary} bold>GELİŞTİRİCİ</AppText>
-                    <AppText bold numberOfLines={1}>{detail.developers?.map((d: any) => d.name).join(', ') || 'Bilinmiyor'}</AppText>
-                </View>
+            <AppText
+                style={localStyles.description}
+                numberOfLines={expanded ? undefined : 7}
+            >
+                {description || 'Bu oyun için açıklama bulunmuyor.'}
+            </AppText>
 
-                <View style={localStyles.gridItem}>
-                    <AppText variant="caption" color={colors.primary} bold>YAYINCI</AppText>
-                    <AppText bold numberOfLines={1}>{detail.publishers?.map((p: any) => p.name).join(', ') || 'Bilinmiyor'}</AppText>
-                </View>
+            {!!source && (
+                <View style={localStyles.actions}>
+                    <TouchableOpacity
+                        accessibilityRole="button"
+                        style={localStyles.textButton}
+                        onPress={() => setExpanded(value => !value)}
+                    >
+                        <AppText color={colors.primary} bold>
+                            {expanded ? 'Daha az göster' : 'Devamını oku'}
+                        </AppText>
+                    </TouchableOpacity>
 
-                <View style={localStyles.gridItem}>
-                    <AppText variant="caption" color={colors.primary} bold>ORTALAMA SÜRE</AppText>
-                    <AppText bold>{detail.playtime > 0 ? `${detail.playtime} Saat` : 'Veri yok'}</AppText>
+                    <TouchableOpacity
+                        accessibilityRole="button"
+                        style={localStyles.textButton}
+                        disabled={translating}
+                        onPress={() => {
+                            if (translation) {
+                                setShowOriginal(value => !value);
+                            } else {
+                                void handleTranslate();
+                            }
+                        }}
+                    >
+                        <AppText color={colors.primary}>
+                            {translating
+                                ? 'Çevriliyor…'
+                                : translation
+                                    ? showOriginal
+                                        ? 'Türkçesini göster'
+                                        : 'Orijinali göster'
+                                    : 'Türkçeye çevir'}
+                        </AppText>
+                    </TouchableOpacity>
                 </View>
+            )}
 
-                <View style={localStyles.gridItem}>
-                    <AppText variant="caption" color={colors.primary} bold>YAŞ SINIRI (ESRB)</AppText>
-                    <AppText bold>{detail.esrb_rating?.name || 'Derecelendirilmemiş'}</AppText>
-                </View>
+            {translationError && (
+                <AppText style={styles.muted}>
+                    Çeviri yapılamadı. Düğmeye basarak tekrar deneyebilirsin.
+                </AppText>
+            )}
+
+            <View style={localStyles.grid}>
+                {facts.map(item => (
+                    <View
+                        key={item.label}
+                        style={localStyles.fact}
+                    >
+                        <AppText style={localStyles.factLabel}>
+                            {item.label}
+                        </AppText>
+
+                        <AppText style={localStyles.factValue}>
+                            {item.value}
+                        </AppText>
+                    </View>
+                ))}
             </View>
 
-            {detail.tags && detail.tags.length > 0 && (
+            {!!detail.tags?.length && (
                 <>
-                    <AppText variant="h2" style={{ marginTop: spacing.md, marginBottom: spacing.sm }}>Özellikler & Etiketler</AppText>
-                    <View style={localStyles.tagsContainer}>
-                        {detail.tags.slice(0, 15).map((tag: any) => (
-                            <GenreChip
-                                key={`about-tag-${tag.id}`}
-                                name={tag.name}
-                                onPress={() => handleTagPress(tag.id, tag.name)}
-                            />
-                        ))}
+                    <AppText style={styles.sectionTitle}>
+                        Etiketler
+                    </AppText>
+
+                    <View style={localStyles.tags}>
+                        {detail.tags
+                            .filter((tag: any) => Boolean(tag.slug))
+                            .slice(0, 15)
+                            .map((tag: any) => (
+                                <GenreChip
+                                    key={tag.id}
+                                    name={tag.name}
+                                    onPress={() =>
+                                        navigation.navigate('TagDetail', {
+                                            slug: tag.slug,
+                                            name: tag.name,
+                                        })
+                                    }
+                                />
+                            ))}
                     </View>
                 </>
             )}
 
-            {detail.website && (
-                <TouchableOpacity onPress={() => handlePressWebsite(detail.website)} style={localStyles.websiteButton}>
-                    <AppText bold color={colors.background}>Resmi Web Sitesini Ziyaret Et</AppText>
+            {!!detail.website && (
+                <TouchableOpacity
+                    accessibilityRole="link"
+                    style={localStyles.website}
+                    onPress={handleWebsite}
+                >
+                    <AppText color={colors.primary} bold>
+                        Resmi web sitesi ↗
+                    </AppText>
                 </TouchableOpacity>
             )}
         </ScrollView>
@@ -127,36 +272,56 @@ export const AboutTab = () => {
 
 const localStyles = StyleSheet.create({
     description: {
-        lineHeight: 22,
-        color: '#E0E0E0',
-        marginBottom: 20,
+        fontSize: 14,
+        lineHeight: 23,
+        color: '#D5DAE5',
     },
-    gridContainer: {
+    actions: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
-        marginBottom: 10,
+        marginTop: 6,
     },
-    gridItem: {
+    textButton: {
+        paddingVertical: 12,
+        paddingRight: 12,
+    },
+    grid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginTop: 16,
+        marginBottom: 12,
+    },
+    fact: {
         width: '48%',
-        backgroundColor: '#1E1E1E',
-        padding: 14,
+        padding: 13,
         borderRadius: 12,
-        marginBottom: 14,
-        borderWidth: 1,
-        borderColor: '#2A2A2A',
+        backgroundColor: '#191E2B',
+        marginBottom: 12,
     },
-    tagsContainer: {
+    factLabel: {
+        color: '#98A3BC',
+        fontSize: 10,
+        fontWeight: '700',
+        marginBottom: 7,
+    },
+    factValue: {
+        fontSize: 13,
+        lineHeight: 20,
+        fontWeight: '600',
+    },
+    tags: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 8,
-        marginBottom: 24,
+        marginBottom: 20,
     },
-    websiteButton: {
-        backgroundColor: colors.primary,
-        padding: 16,
-        borderRadius: 12,
+    website: {
         alignItems: 'center',
-        marginTop: 10,
-    }
+        padding: 15,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#343C50',
+    },
 });

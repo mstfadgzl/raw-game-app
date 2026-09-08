@@ -1,51 +1,181 @@
-import React, { useEffect } from 'react';
-import { FlatList, View } from 'react-native';
+import React, {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
+import {
+    FlatList,
+    View,
+    ActivityIndicator,
+    TouchableOpacity,
+} from 'react-native';
 import { useRoute } from '@react-navigation/native';
-import { useAppSelector, useAppDispatch } from '@hooks';
+
+import { useAppDispatch } from '@hooks';
 import { getGameAchievementsProcess } from '@actions';
-import { AchievementItem, AppText, EmptyState, Skeleton } from '@components';
+import { AchievementItem, AppText, EmptyState } from '@components';
+import { colors } from '@theme';
 import { styles } from '../../styles';
 
 export const AchievementsTab = () => {
     const route = useRoute<any>();
+    const gameId = Number(route.params.gameId);
     const dispatch = useAppDispatch();
-    const safeGameId = Number(route.params.gameId);
 
-    const { data, isLoading } = useAppSelector(state => state.game);
+    const [items, setItems] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [moreLoading, setMoreLoading] = useState(false);
+    const [error, setError] = useState(false);
 
-    // Sayfalama derdi olmadan tüm başarımları tek seferde çekiyoruz
+    const page = useRef(0);
+    const hasNext = useRef(false);
+    const locked = useRef(false);
+    const generation = useRef(0);
+
+    const fetchPage = useCallback(
+        async (reset: boolean) => {
+            if (locked.current) return;
+            if (!reset && !hasNext.current) return;
+
+            locked.current = true;
+
+            const current = generation.current;
+            const nextPage = reset ? 1 : page.current + 1;
+
+            setError(false);
+
+            if (reset) {
+                setLoading(true);
+            } else {
+                setMoreLoading(true);
+            }
+
+            try {
+                const result = await dispatch(
+                    getGameAchievementsProcess({
+                        id: gameId,
+                        page: nextPage,
+                    }),
+                ).unwrap();
+
+                if (current !== generation.current) return;
+
+                if (!Array.isArray(result?.results)) {
+                    throw new Error('Geçersiz yanıt');
+                }
+
+                setItems(previous => {
+                    const combined = reset
+                        ? result.results
+                        : [...previous, ...result.results];
+
+                    const unique = new Map<string, any>();
+
+                    combined.forEach((item: any) => {
+                        unique.set(String(item.id), item);
+                    });
+
+                    return [...unique.values()];
+                });
+
+                page.current = nextPage;
+                hasNext.current = Boolean(result.next);
+            } catch {
+                if (current === generation.current) {
+                    setError(true);
+                }
+            } finally {
+                if (current === generation.current) {
+                    locked.current = false;
+                    setLoading(false);
+                    setMoreLoading(false);
+                }
+            }
+        },
+        [dispatch, gameId],
+    );
+
     useEffect(() => {
-        dispatch(getGameAchievementsProcess({ id: safeGameId, page_size: 100 } as any));
-    }, [safeGameId, dispatch]);
+        generation.current += 1;
+        page.current = 0;
+        hasNext.current = false;
+        locked.current = false;
 
-    const achievementsData = data.getGameAchievementsProcess;
-    // Eğer gelen veri direkt dizi (array) ise veya results nesnesindeyse her iki durumu da karşılıyoruz
-    const achievements = Array.isArray(achievementsData)
-        ? achievementsData
-        : (achievementsData?.results || []);
+        setItems([]);
+        void fetchPage(true);
 
-    const isFetching = !!isLoading['getGameAchievementsProcess'];
+        return () => {
+            generation.current += 1;
+        };
+    }, [fetchPage]);
 
-    if (isFetching && achievements.length === 0) {
+    const errorContent = (
+        <View style={styles.feedback}>
+            <AppText style={styles.muted}>
+                {items.length
+                    ? 'Sonraki sayfa yüklenemedi.'
+                    : 'Başarımlar yüklenemedi.'}
+            </AppText>
+
+            <TouchableOpacity
+                accessibilityRole="button"
+                style={styles.retryButton}
+                onPress={() => {
+                    void fetchPage(page.current === 0);
+                }}
+            >
+                <AppText color={colors.primary} bold>
+                    Tekrar dene
+                </AppText>
+            </TouchableOpacity>
+        </View>
+    );
+
+    if (loading) {
         return (
-            <View style={[styles.tabContent, { padding: 20 }]}>
-                {[1, 2, 3, 4].map(i => <Skeleton key={i} style={{ height: 70, borderRadius: 12, marginBottom: 15 }} />)}
+            <View style={styles.feedback}>
+                <ActivityIndicator color={colors.primary} />
             </View>
         );
+    }
+
+    if (error && items.length === 0) {
+        return errorContent;
     }
 
     return (
         <View style={styles.tabContent}>
             <FlatList
-                data={achievements}
-                keyExtractor={(item, index) => `achievement-${item.id || index}`}
+                data={items}
+                keyExtractor={item => `achievement-${item.id}`}
+                contentContainerStyle={styles.content}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 50, padding: 16 }}
                 ListHeaderComponent={
-                    <AppText variant="h2" style={{ marginBottom: 15 }}>Başarımlar</AppText>
+                    <AppText style={styles.sectionTitle}>
+                        Başarımlar
+                    </AppText>
                 }
-                renderItem={({ item }) => <AchievementItem achievement={item} />}
-                ListEmptyComponent={<EmptyState message="Bu oyun için başarımlık veri bulunmuyor." />}
+                renderItem={({ item }) => (
+                    <AchievementItem achievement={item} />
+                )}
+                onEndReached={() => {
+                    if (!error) {
+                        void fetchPage(false);
+                    }
+                }}
+                onEndReachedThreshold={0.3}
+                ListEmptyComponent={<EmptyState />}
+                ListFooterComponent={
+                    moreLoading ? (
+                        <ActivityIndicator
+                            color={colors.primary}
+                            style={{ marginVertical: 20 }}
+                        />
+                    ) : error ? (
+                        errorContent
+                    ) : undefined
+                }
             />
         </View>
     );
