@@ -25,13 +25,13 @@ export const AchievementItem: React.FC<AchievementItemProps> = ({ achievement })
             <View
                 style={[
                     styles.percentBadge,
-                    { borderColor: isRare ? colors.gold : colors.border }
+                    { borderColor: isRare ? colors.primary : colors.border }
                 ]}
             >
                 <AppText
                     variant="caption"
                     bold
-                    color={isRare ? colors.primary : colors.secondary}
+                    color={isRare ? colors.gold : colors.secondary}
                 >
                     %{achievement.percent}
                 </AppText>
