@@ -49,7 +49,7 @@ export const gameService = {
         const response = await apiClient.get<ITrailerResponse>(`/games/${id}/movies`);
         return response.data;
     },
-    etGameAchievements: async (id: number | string, page: number = 1, page_size?: number) => {
+    getGameAchievements: async (id: number | string, page: number = 1, page_size?: number) => {
         const response = await apiClient.get(`/games/${id}/achievements`, {
             params: {
                 page,
