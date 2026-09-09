@@ -1,4 +1,4 @@
-import { ICreatorResponse, IDeveloperResponse } from "@types";
+import { ICreator, ICreatorResponse, IDeveloperResponse } from "@types";
 import apiClient from "../client"
 
 export const entityService = {
@@ -12,8 +12,8 @@ export const entityService = {
         return response.data;
 
     },
-    getCreatorDetail: async (id: number): Promise<ICreatorResponse> => {
-        const response = await apiClient.get<ICreatorResponse>(`/creators/${id}`);
+    getCreatorDetail: async (id: number): Promise<ICreator> => {
+        const response = await apiClient.get<ICreator>(`/creators/${id}`);
         return response.data;
     },
     getDevelopers: async (page: number = 1): Promise<IDeveloperResponse> => {
