@@ -9,3 +9,11 @@ export interface IStoreDetail {
     image_background: string;
 }
 export type IStoreResponse = IPaginatedResponse<IStoreDetail>;
+
+export interface IGameStoreLink {
+    id: number;
+    game_id: number | string;
+    store_id: number | string;
+    url: string;
+}
+export type IGameStoreResponse = IPaginatedResponse<IGameStoreLink>;
