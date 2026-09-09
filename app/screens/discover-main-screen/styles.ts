@@ -14,8 +14,8 @@ export const styles = StyleSheet.create({
 
     header: {
         paddingHorizontal: 18,
-        paddingTop: 22,
-        paddingBottom: 26,
+        paddingTop: 16,
+        paddingBottom: 20,
     },
 
     eyebrow: {
@@ -27,10 +27,10 @@ export const styles = StyleSheet.create({
     },
 
     mainTitle: {
-        color: '#F2F5FB',
-        fontSize: 27,
-        lineHeight: 34,
-        fontWeight: '800',
+        color: colors.text,
+        fontSize: 24,
+        lineHeight: 30,
+        fontWeight: '700',
     },
 
     subtitle: {
