@@ -1,15 +1,9 @@
-import React, {
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-} from 'react';
-
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
+    Image,
     Pressable,
-    RefreshControl,
     View,
 } from 'react-native';
 
@@ -18,347 +12,304 @@ import {
     useRoute,
 } from '@react-navigation/native';
 
-import { useAppDispatch } from '@hooks';
-import { getGamesProcess } from '@actions';
-
+import { useAppDispatch, useAppSelector } from '@hooks';
+import { getCreatorDetailProcess } from '@actions';
 import {
     AppText,
     Container,
-    DEFAULT_GAME_FILTERS,
-    EmptyState,
     GameCard,
-    GameSortFilter,
     Skeleton,
-    buildGameFilterQuery,
 } from '@components';
 
-import type { GameFilterValue } from '@components';
+import { translateText } from '@utils';
 
 import type {
+    CreatorDetailRouteProp,
     DiscoverScreenNavigationProp,
-    GenreDetailRouteProp,
-    IGame,
 } from '@types';
 
 import { colors } from '@theme';
 import { styles } from './styles';
 
-type LoadMode = 'initial' | 'refresh' | 'more';
-
-interface GenreGamesProps {
-    slug: string;
-    name: string;
-}
-
-interface FailedRequest {
-    page: number;
-    mode: LoadMode;
-}
-
-const mergeGames = (
-    previous: IGame[],
-    incoming: IGame[],
-): IGame[] => {
-    const unique = new Map<number, IGame>();
-
-    for (const game of previous) {
-        unique.set(game.id, game);
-    }
-
-    for (const game of incoming) {
-        unique.set(game.id, game);
-    }
-
-    return Array.from(unique.values());
-};
-
-const GenreGames = ({ slug, name }: GenreGamesProps) => {
-    const dispatch = useAppDispatch();
-
+export const CreatorDetailScreen = () => {
+    const route = useRoute<CreatorDetailRouteProp>();
     const navigation =
         useNavigation<DiscoverScreenNavigationProp>();
 
-    const listRef = useRef<FlatList<IGame>>(null);
+    const { id, name } = route.params;
+    const dispatch = useAppDispatch();
 
-    const [filters, setFilters] = useState<GameFilterValue>(
-        () => ({ ...DEFAULT_GAME_FILTERS }),
-    );
+    const { data } = useAppSelector(state => state.entity);
 
-    const [games, setGames] = useState<IGame[]>([]);
-    const [loading, setLoading] =
-        useState<LoadMode | null>('initial');
+    // Başka kişiden kalan profilin görünmesini engeller.
+    const storedCreator = data.getCreatorDetailProcess;
 
-    const [failedRequest, setFailedRequest] =
-        useState<FailedRequest | null>(null);
+    const creator =
+        Number(storedCreator?.id) === Number(id)
+            ? storedCreator
+            : undefined;
 
-    const pageRef = useRef(0);
-    const hasMoreRef = useRef(false);
-    const busyRef = useRef(false);
-    const requestVersionRef = useRef(0);
+    const [loading, setLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+    const [retryCount, setRetryCount] = useState(0);
 
-    // Sayfalama boyunca aynı tarih aralığını korur.
-    const queryRef = useRef<
-        ReturnType<typeof buildGameFilterQuery> | null
-    >(null);
+    const [trBio, setTrBio] = useState('');
+    const [isTranslating, setIsTranslating] = useState(false);
+    const [expanded, setExpanded] = useState(false);
+    const [imageFailed, setImageFailed] = useState(false);
 
-    const loadPage = useCallback(
-        async (requestedPage: number, mode: LoadMode) => {
-            if (mode !== 'initial' && busyRef.current) {
-                return;
-            }
+    const games = creator?.games ?? [];
+    const positions = creator?.positions ?? [];
 
-            if (
-                mode === 'more' &&
-                (!hasMoreRef.current || pageRef.current === 0)
-            ) {
-                return;
-            }
-
-            busyRef.current = true;
-
-            const version = ++requestVersionRef.current;
-
-            setLoading(mode);
-            setFailedRequest(null);
-
-            if (mode === 'initial') {
-                pageRef.current = 0;
-                hasMoreRef.current = false;
-                queryRef.current = null;
-                setGames([]);
-            }
-
-            try {
-                const query =
-                    requestedPage === 1
-                        ? buildGameFilterQuery(filters)
-                        : queryRef.current;
-
-                if (!query) {
-                    throw new Error('Liste filtresi bulunamadı.');
-                }
-
-                const response = await dispatch(
-                    getGamesProcess({
-                        page: requestedPage,
-                        genres: slug,
-                        ...query,
-                    }),
-                ).unwrap();
-
-                // Önceki filtreye ait yanıtı ekrana yazma.
-                if (version !== requestVersionRef.current) {
-                    return;
-                }
-
-                if (!Array.isArray(response.results)) {
-                    throw new Error('Geçersiz oyun listesi.');
-                }
-
-                setGames(previous =>
-                    requestedPage === 1
-                        ? mergeGames([], response.results)
-                        : mergeGames(previous, response.results),
-                );
-
-                queryRef.current = query;
-                pageRef.current = requestedPage;
-                hasMoreRef.current = Boolean(response.next);
-            } catch {
-                if (version === requestVersionRef.current) {
-                    setFailedRequest({
-                        page: requestedPage,
-                        mode,
-                    });
-                }
-            } finally {
-                if (version === requestVersionRef.current) {
-                    busyRef.current = false;
-                    setLoading(null);
-                }
-            }
-        },
-        [dispatch, slug, filters],
-    );
+    const description = (creator?.description ?? '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n\n')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .trim();
 
     useEffect(() => {
-        void loadPage(1, 'initial');
+        let active = true;
+
+        setLoading(true);
+        setHasError(false);
+        setImageFailed(false);
+        setExpanded(false);
+
+        const fetchCreator = async () => {
+            try {
+                await dispatch(
+                    getCreatorDetailProcess(id),
+                ).unwrap();
+            } catch {
+                if (active) {
+                    setHasError(true);
+                }
+            } finally {
+                if (active) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        void fetchCreator();
 
         return () => {
-            requestVersionRef.current += 1;
+            active = false;
         };
-    }, [loadPage]);
+    }, [dispatch, id, retryCount]);
 
-    const handleFilterChange = useCallback(
-        (nextFilters: GameFilterValue) => {
-            requestVersionRef.current += 1;
-            busyRef.current = true;
+    useEffect(() => {
+        let active = true;
 
-            pageRef.current = 0;
-            hasMoreRef.current = false;
-            queryRef.current = null;
+        setTrBio('');
+        setExpanded(false);
+        setIsTranslating(Boolean(description));
 
-            setGames([]);
-            setFailedRequest(null);
-            setLoading('initial');
-
-            listRef.current?.scrollToOffset({
-                offset: 0,
-                animated: false,
-            });
-
-            setFilters(nextFilters);
-        },
-        [],
-    );
-
-    const handleLoadMore = useCallback(() => {
-        if (failedRequest) {
+        if (!description) {
             return;
         }
 
-        void loadPage(pageRef.current + 1, 'more');
-    }, [failedRequest, loadPage]);
+        const translateBiography = async () => {
+            try {
+                const translated = await translateText(description);
 
-    const handleRefresh = useCallback(() => {
-        void loadPage(1, 'refresh');
-    }, [loadPage]);
+                if (active) {
+                    setTrBio(translated?.trim() || '');
+                }
+            } catch {
+                // Çeviri başarısızsa orijinal açıklama görünür.
+                if (active) {
+                    setTrBio('');
+                }
+            } finally {
+                if (active) {
+                    setIsTranslating(false);
+                }
+            }
+        };
 
-    const handleRetry = useCallback(() => {
-        if (!failedRequest) {
-            return;
-        }
+        void translateBiography();
 
-        // Başarısız olan sayfayı tekrar dene.
-        void loadPage(
-            failedRequest.page,
-            failedRequest.mode,
+        return () => {
+            active = false;
+        };
+    }, [description, id]);
+
+    const handleRetry = () => {
+        setRetryCount(value => value + 1);
+    };
+
+    if (loading && !creator) {
+        return (
+            <Container style={styles.container}>
+                <Skeleton style={styles.heroSkeleton} />
+
+                <View style={styles.content}>
+                    <Skeleton style={styles.titleSkeleton} />
+                    <Skeleton style={styles.bioSkeleton} />
+                </View>
+
+                <View style={styles.skeletonGrid}>
+                    {[0, 1].map(index => (
+                        <Skeleton
+                            key={index}
+                            style={styles.cardSkeleton}
+                        />
+                    ))}
+                </View>
+            </Container>
         );
-    }, [failedRequest, loadPage]);
+    }
 
-    const handleGamePress = useCallback(
-        (gameId: number, gameName: string) => {
-            navigation.navigate('GameDetail', {
-                gameId,
-                gameName,
-            });
-        },
-        [navigation],
-    );
+    if (!creator) {
+        return (
+            <Container style={styles.container}>
+                <View style={styles.feedback}>
+                    <AppText style={styles.subTitle}>
+                        Profil yüklenemedi
+                    </AppText>
 
-    const errorContent = (
-        <View style={styles.feedback}>
-            <AppText style={styles.feedbackText}>
-                Oyunlar yüklenemedi. Tekrar deneyebilirsin.
-            </AppText>
+                    <AppText style={styles.secondaryText}>
+                        Bağlantını kontrol edip tekrar deneyebilirsin.
+                    </AppText>
 
-            <Pressable
-                onPress={handleRetry}
-                accessibilityRole="button"
-                style={styles.retryButton}
-            >
-                <AppText color={colors.primary} bold>
-                    Tekrar dene
-                </AppText>
-            </Pressable>
-        </View>
-    );
+                    <Pressable
+                        onPress={handleRetry}
+                        accessibilityRole="button"
+                        style={styles.retryButton}
+                    >
+                        <AppText color={colors.primary} bold>
+                            Tekrar dene
+                        </AppText>
+                    </Pressable>
+                </View>
+            </Container>
+        );
+    }
 
     return (
         <Container style={styles.container}>
             <FlatList
-                ref={listRef}
+                key={`creator-${id}`}
                 data={games}
                 numColumns={2}
-                keyExtractor={item => `genre-game-${item.id}`}
+                keyExtractor={item => `creator-game-${item.id}`}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.listContent}
                 columnWrapperStyle={styles.row}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.35}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={loading === 'refresh'}
-                        onRefresh={handleRefresh}
-                        tintColor={colors.primary}
-                        colors={[colors.primary]}
-                    />
-                }
                 ListHeaderComponent={
-                    <View style={styles.headerContainer}>
-                        <AppText
-                            style={styles.header}
-                            numberOfLines={2}
-                        >
-                            {name}
-                        </AppText>
+                    <View>
+                        <View style={styles.heroContainer}>
+                            {creator.image && !imageFailed ? (
+                                <Image
+                                    source={{ uri: creator.image }}
+                                    style={styles.heroImage}
+                                    resizeMode="cover"
+                                    onError={() => setImageFailed(true)}
+                                />
+                            ) : (
+                                <View style={styles.imageFallback}>
+                                    <AppText style={styles.fallbackLetter}>
+                                        {(creator.name || name)
+                                            .charAt(0)
+                                            .toUpperCase()}
+                                    </AppText>
+                                </View>
+                            )}
+                        </View>
 
-                        <GameSortFilter
-                            value={filters}
-                            onChange={handleFilterChange}
-                        />
+                        <View style={styles.content}>
+                            <AppText style={styles.title}>
+                                {creator.name}
+                            </AppText>
+
+                            {positions.length > 0 && (
+                                <AppText style={styles.role}>
+                                    {positions
+                                        .map((position: any) => position.name)
+                                        .join(' · ')}
+                                </AppText>
+                            )}
+
+                            {hasError && (
+                                <AppText style={styles.errorText}>
+                                    Bilgiler yenilenemedi. Önceki profil
+                                    bilgileri gösteriliyor.
+                                </AppText>
+                            )}
+
+                            <AppText style={styles.subTitle}>
+                                Hakkında
+                            </AppText>
+
+                            <AppText
+                                style={styles.bio}
+                                numberOfLines={expanded ? undefined : 6}
+                            >
+                                {trBio ||
+                                    description ||
+                                    'Bu kişi için biyografi bulunmuyor.'}
+                            </AppText>
+
+                            {isTranslating && (
+                                <View style={styles.translationRow}>
+                                    <ActivityIndicator
+                                        size="small"
+                                        color={colors.primary}
+                                    />
+
+                                    <AppText style={styles.translationText}>
+                                        Türkçeye çevriliyor…
+                                    </AppText>
+                                </View>
+                            )}
+
+                            {!!description && (
+                                <Pressable
+                                    onPress={() =>
+                                        setExpanded(value => !value)
+                                    }
+                                    accessibilityRole="button"
+                                    accessibilityState={{ expanded }}
+                                    style={styles.expandButton}
+                                >
+                                    <AppText color={colors.primary} bold>
+                                        {expanded
+                                            ? 'Daha az göster'
+                                            : 'Tamamını göster'}
+                                    </AppText>
+                                </Pressable>
+                            )}
+
+                            <AppText style={styles.gamesTitle}>
+                                Yer aldığı oyunlar
+                            </AppText>
+                        </View>
                     </View>
                 }
                 renderItem={({ item }) => (
                     <View style={styles.cardColumn}>
                         <GameCard
                             game={item}
-                            onPress={handleGamePress}
+                            onPress={(gameId, gameName) =>
+                                navigation.navigate('GameDetail', {
+                                    gameId,
+                                    gameName,
+                                })
+                            }
                         />
                     </View>
                 )}
                 ListEmptyComponent={
-                    loading === 'initial' ? (
-                        <View style={styles.skeletonGrid}>
-                            {[0, 1, 2, 3].map(index => (
-                                <Skeleton
-                                    key={index}
-                                    style={styles.skeletonCard}
-                                />
-                            ))}
-                        </View>
-                    ) : loading === 'refresh' ? (
-                        <View style={styles.feedback}>
-                            <AppText color={colors.secondary}>
-                                Oyunlar yenileniyor…
-                            </AppText>
-                        </View>
-                    ) : failedRequest ? (
-                        errorContent
-                    ) : (
-                        <View style={styles.feedback}>
-                            <EmptyState
-                                message={`${name} türünde bu filtrelere uygun oyun bulunamadı.`}
-                            />
-                        </View>
-                    )
-                }
-                ListFooterComponent={
-                    loading === 'more' ? (
-                        <ActivityIndicator
-                            color={colors.primary}
-                            style={styles.loader}
-                        />
-                    ) : failedRequest && games.length > 0 ? (
-                        errorContent
-                    ) : (
-                        <View style={styles.footerSpace} />
-                    )
+                    <View style={styles.emptyContainer}>
+                        <AppText style={styles.secondaryText}>
+                            Bu kişi için oyun bilgisi bulunmuyor.
+                        </AppText>
+                    </View>
                 }
             />
         </Container>
-    );
-};
-
-export const GenreDetailScreen = () => {
-    const route = useRoute<GenreDetailRouteProp>();
-    const { slug, name } = route.params;
-
-    return (
-        <GenreGames
-            key={slug}
-            slug={slug}
-            name={name}
-        />
     );
 };
