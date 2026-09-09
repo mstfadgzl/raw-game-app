@@ -22,7 +22,7 @@ const DeveloperContent = ({ id }: { id: number }) => {
     const [expanded, setExpanded] = useState(false);
     const [translation, setTranslation] = useState('');
     const [translating, setTranslating] = useState(false);
-    const [ordering, setOrdering] = useState<'-added' | '-rating'>('-added');
+    const [ordering, setOrdering] = useState<'-added' | '-metacritic'>('-added');
     const description = (developer?.description || '')
         .replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n\n')
         .replace(/<[^>]*>/g, '').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').trim();
@@ -84,7 +84,7 @@ const DeveloperContent = ({ id }: { id: number }) => {
                 {translating && <AppText style={styles.muted}>Türkçeye çevriliyor…</AppText>}
                 {!!description && <TouchableOpacity accessibilityRole="button" accessibilityState={{ expanded }} style={styles.expand} onPress={() => setExpanded(value => !value)}><AppText color={colors.primary}>{expanded ? 'Daha az göster' : 'Devamını oku'}</AppText></TouchableOpacity>}
                 <View style={styles.gamesHeading}><AppText style={styles.sectionTitle}>Geliştirdiği oyunlar</AppText><AppText style={styles.muted}>Kaydırarak tüm oyunları keşfet.</AppText></View>
-                <View style={styles.sortRow}>{(['-added', '-rating'] as const).map(value => (
+                <View style={styles.sortRow}>{(['-added', '-metacritic'] as const).map(value => (
                     <TouchableOpacity key={value} accessibilityRole="button" accessibilityState={{ selected: ordering === value }} style={[styles.sortButton, ordering === value && styles.selected]} onPress={() => setOrdering(value)}>
                         <AppText color={ordering === value ? colors.primary : colors.secondary} bold>{value === '-added' ? 'Popüler' : 'En yüksek puan'}</AppText>
                     </TouchableOpacity>
@@ -95,7 +95,7 @@ const DeveloperContent = ({ id }: { id: number }) => {
     return <Container style={styles.container}><DeveloperGames key={ordering} id={id} ordering={ordering} header={header} /></Container>;
 };
 
-const DeveloperGames = ({ id, ordering, header }: { id: number; ordering: '-added' | '-rating'; header: React.ReactElement }) => {
+const DeveloperGames = ({ id, ordering, header }: { id: number; ordering: '-added' | '-metacritic'; header: React.ReactElement }) => {
     const navigation = useNavigation<DiscoverScreenNavigationProp>();
     const [games, setGames] = useState<IGame[]>([]);
     const [page, setPage] = useState(1);

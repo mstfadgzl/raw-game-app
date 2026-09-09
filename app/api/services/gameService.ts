@@ -139,7 +139,7 @@ async function cachedGet<T>(
 }
 
 export const gameService = {
-    getDeveloperGames: (id: number, page: number, ordering: '-added' | '-rating'): Promise<IGameListResponse> =>
+    getDeveloperGames: (id: number, page: number, ordering: '-added' | '-metacritic'): Promise<IGameListResponse> =>
         cachedGet<IGameListResponse>('/games', { developers: id, page, page_size: 20, ordering }),
     getGames: async (
         params: GetGamesParams,
