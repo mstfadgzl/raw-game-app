@@ -334,13 +334,26 @@ export const DiscoverMainScreen = () => {
             setDevelopersError(false);
             try {
                 const response = await dispatch(
-                    getDevelopersProcess({ page: 1 }),
+                    getDevelopersProcess({ page }),
                 ).unwrap();
                 if (!Array.isArray(response.results)) {
                     throw new Error('Geçersiz geliştirici listesi');
                 }
                 if (requestId !== developersRequestId.current) return;
-                setDevelopers(response.results);
+
+                setDevelopers(previous => {
+                    const combined = reset
+                        ? response.results
+                        : [...previous, ...response.results];
+
+                    return [
+                        ...new Map(
+                            combined.map(item => [item.id, item]),
+                        ).values(),
+                    ];
+                });
+
+
             } catch {
                 if (requestId === developersRequestId.current) {
                     setDevelopersError(true);
