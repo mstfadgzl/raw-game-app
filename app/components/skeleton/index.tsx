@@ -11,12 +11,13 @@ export const Skeleton: React.FC<SkeletonProps> = ({ style }) => {
 
     useEffect(() => {
         // Parlama efekti döngüsü
-        Animated.loop(
+        const animation = Animated.loop(
             Animated.sequence([
                 Animated.timing(opacity, {
                     toValue: 1,
                     duration: 1000,
                     useNativeDriver: true,
+                    isInteraction: false,
                 }),
                 Animated.timing(opacity, {
                     toValue: 0.3,
@@ -24,7 +25,9 @@ export const Skeleton: React.FC<SkeletonProps> = ({ style }) => {
                     useNativeDriver: true,
                 }),
             ])
-        ).start();
+        );
+        animation.start();
+        return () => animation.stop();
     }, [opacity]);
 
     return <Animated.View style={[styles.skeleton, style, { opacity }]} />;

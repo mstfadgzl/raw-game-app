@@ -15,8 +15,8 @@ export const DeveloperDetailScreen = () => {
 
 const DeveloperContent = ({ id }: { id: number }) => {
     const navigation = useNavigation<DiscoverScreenNavigationProp>();
-    const [developer, setDeveloper] = useState<IDeveloper | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [developer, setDeveloper] = useState<IDeveloper | null>(() => entityService.peekDeveloperDetail(id));
+    const [loading, setLoading] = useState(() => !entityService.peekDeveloperDetail(id));
     const [retry, setRetry] = useState(0);
     const [imageFailed, setImageFailed] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -29,11 +29,11 @@ const DeveloperContent = ({ id }: { id: number }) => {
 
     useEffect(() => {
         let active = true;
-        setLoading(true);
+        setLoading(!entityService.peekDeveloperDetail(id));
         const fetchProfile = async () => {
             try {
                 if (!Number.isInteger(id) || id <= 0) throw new Error('Geçersiz stüdyo');
-                const result = await entityService.getDeveloperDetail(id);
+                const result = await entityService.getDeveloperDetail(id, retry > 0);
                 if (Number(result.id) !== id) throw new Error('Geçersiz yanıt');
                 if (active) setDeveloper(result);
             } catch {

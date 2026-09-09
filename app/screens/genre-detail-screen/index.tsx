@@ -141,6 +141,7 @@ const GenreGames = ({ slug, name }: GenreGamesProps) => {
                 const response = await dispatch(
                     getGamesProcess({
                         page: requestedPage,
+                        forceRefresh: mode === 'refresh',
                         genres: slug,
                         ...query,
                     }),

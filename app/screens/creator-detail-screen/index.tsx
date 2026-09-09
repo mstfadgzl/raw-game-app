@@ -12,8 +12,7 @@ import {
     useRoute,
 } from '@react-navigation/native';
 
-import { useAppDispatch, useAppSelector } from '@hooks';
-import { getCreatorDetailProcess, getGamesProcess } from '@actions';
+import { entityService, gameService } from '@services';
 import {
     AppText,
     Container,
@@ -25,6 +24,7 @@ import { translateText } from '@utils';
 
 import {
     IGame,
+    ICreator,
     type CreatorDetailRouteProp,
     type DiscoverScreenNavigationProp,
 } from '@types';
@@ -33,24 +33,16 @@ import { colors } from '@theme';
 import { styles } from './styles';
 
 export const CreatorDetailScreen = () => {
-    const route = useRoute<CreatorDetailRouteProp>();
+    const { params } = useRoute<CreatorDetailRouteProp>();
+    return <CreatorContent key={params.id} id={Number(params.id)} name={params.name} />;
+};
+
+const CreatorContent = ({ id, name }: { id: number; name: string }) => {
     const navigation =
         useNavigation<DiscoverScreenNavigationProp>();
 
-    const { id, name } = route.params;
-    const dispatch = useAppDispatch();
-
-    const { data } = useAppSelector(state => state.entity);
-
-    // Başka kişiden kalan profilin görünmesini engeller.
-    const storedCreator = data.getCreatorDetailProcess;
-
-    const creator =
-        Number(storedCreator?.id) === Number(id)
-            ? storedCreator
-            : undefined;
-
-    const [loading, setLoading] = useState(true);
+    const [creator, setCreator] = useState<ICreator | null>(() => entityService.peekCreatorDetail(id));
+    const [loading, setLoading] = useState(() => !entityService.peekCreatorDetail(id));
     const [hasError, setHasError] = useState(false);
     const [retryCount, setRetryCount] = useState(0);
 
@@ -75,7 +67,7 @@ export const CreatorDetailScreen = () => {
     useEffect(() => {
         let active = true;
 
-        setLoading(true);
+        setLoading(!entityService.peekCreatorDetail(id));
         setHasError(false);
         setImageFailed(false);
 
@@ -86,13 +78,12 @@ export const CreatorDetailScreen = () => {
                     throw new Error('Geçersiz kişi kimliği');
                 }
 
-                const response = await dispatch(
-                    getCreatorDetailProcess(creatorId),
-                ).unwrap();
+                const response = await entityService.getCreatorDetail(creatorId, retryCount > 0);
 
                 if (!response || Number(response.id) !== creatorId) {
                     throw new Error('Geçersiz profil yanıtı');
                 }
+                if (active) setCreator(response);
             } catch {
                 if (active) {
                     setHasError(true);
@@ -109,7 +100,7 @@ export const CreatorDetailScreen = () => {
         return () => {
             active = false;
         };
-    }, [dispatch, id, retryCount]);
+    }, [id, retryCount]);
 
     useEffect(() => {
         let active = true;
@@ -120,13 +111,11 @@ export const CreatorDetailScreen = () => {
 
         const fetchCreatorGames = async () => {
             try {
-                const response = await dispatch(
-                    getGamesProcess({
+                const response = await gameService.getGames({
                         page: 1,
                         creators: String(id),
                         ordering: '-added',
-                    }),
-                ).unwrap();
+                    });
 
                 if (active) {
                     setGames(response.results ?? []);
@@ -147,7 +136,7 @@ export const CreatorDetailScreen = () => {
         return () => {
             active = false;
         };
-    }, [dispatch, id]);
+    }, [id]);
 
     useEffect(() => {
         let active = true;
@@ -277,7 +266,7 @@ export const CreatorDetailScreen = () => {
                             {positions.length > 0 && (
                                 <AppText style={styles.role}>
                                     {positions
-                                        .map((position: any) => position.name)
+                                        .map(position => position.name)
                                         .join(' · ')}
                                 </AppText>
                             )}

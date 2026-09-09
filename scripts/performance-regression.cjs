@@ -4,12 +4,21 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const ts = require('typescript');
 
-function load(file, client, clock = Date) {
-  const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+function load(file, client, clock = Date, modules = new Map()) {
+  const path = require('node:path');
+  const absolute = path.resolve(file);
+  if (modules.has(absolute)) return modules.get(absolute);
+  const code = ts.transpileModule(fs.readFileSync(absolute, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
   }).outputText;
   const exports = {};
-  vm.runInNewContext(code, { exports, require: () => ({ __esModule: true, default: client }), Date: clock, __DEV__: false, console });
+  modules.set(absolute, exports);
+  const resolve = name => {
+    if (name.endsWith('/client')) return { __esModule: true, default: client };
+    if (!name.startsWith('.')) throw new Error('Unexpected dependency: ' + name);
+    return load(path.resolve(path.dirname(absolute), name + '.ts'), client, clock, modules);
+  };
+  vm.runInNewContext(code, { exports, require: resolve, Date: clock, __DEV__: false, console });
   return exports;
 }
 const serviceFile = 'app/api/services/gameService.ts';
@@ -105,4 +114,56 @@ test('screenshots share requests and remain isolated by game', async () => {
   assert.equal(calls, 1);
   await api.getGameScreenshots(2);
   assert.equal(calls, 2);
+});
+
+test('profiles deduplicate requests, retain distinct identities and expire', async () => {
+  let now = 0;
+  const calls = [];
+  const { entityService: api } = load('app/api/services/entityService.ts', { get: async url => {
+    calls.push(url);
+    return { data: { id: Number(url.split('/').pop()), name: url } };
+  } }, { now: () => now });
+  await Promise.all([api.getCreatorDetail(1), api.getCreatorDetail(1)]);
+  await api.getCreatorDetail(1);
+  assert.equal(calls.length, 1);
+  await api.getCreatorDetail(2);
+  await api.getDeveloperDetail(1);
+  assert.equal(api.peekCreatorDetail(1).name, '/creators/1');
+  assert.equal(api.peekCreatorDetail(2).name, '/creators/2');
+  assert.equal(api.peekDeveloperDetail(1).name, '/developers/1');
+  now = 300001;
+  assert.equal(api.peekCreatorDetail(1), null);
+  await api.getCreatorDetail(1);
+  assert.equal(calls.length, 4);
+});
+
+test('profile refresh bypasses cache and an older response cannot overwrite it', async () => {
+  const pending = [];
+  const { entityService: api } = load('app/api/services/entityService.ts', {
+    get: () => new Promise((resolve, reject) => pending.push({ resolve, reject })),
+  });
+  const old = api.getDeveloperDetail(7);
+  const fresh = api.getDeveloperDetail(7, true);
+  pending[1].resolve({ data: { id: 7, name: 'Fresh' } });
+  await fresh;
+  pending[0].resolve({ data: { id: 7, name: 'Old' } });
+  await old;
+  assert.equal(api.peekDeveloperDetail(7).name, 'Fresh');
+  const failed = api.getDeveloperDetail(7, true);
+  pending[2].reject(new Error('offline'));
+  await assert.rejects(failed);
+  assert.equal(api.peekDeveloperDetail(7), null);
+});
+
+test('manual refresh replaces cached filtered results', async () => {
+  let calls = 0;
+  const { gameService: api } = load(serviceFile, { get: async () => response(String(++calls)) });
+  for (const filter of [{ platforms: 4 }, { genres: 'action' }, { tags: 'singleplayer' }]) {
+    const params = { page: 1, ...filter };
+    const before = await api.getGames(params);
+    const after = await api.getGames({ ...params, forceRefresh: true });
+    assert.notEqual(before.results[0].name, after.results[0].name);
+    assert.equal((await api.getGames(params)).results[0].name, after.results[0].name);
+  }
+  assert.equal(calls, 6);
 });

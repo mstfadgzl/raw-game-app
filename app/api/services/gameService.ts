@@ -7,21 +7,7 @@ import {
     IScreenshotResponse,
 } from '../../types';
 
-import apiClient from '../client';
-
-type QueryParams = Record<
-    string,
-    string | number | boolean | undefined
->;
-
-type CacheEntry = {
-    data: unknown;
-    expiresAt: number;
-};
-
-type RequestOptions = {
-    forceRefresh?: boolean;
-};
+import { cachedGet, peekCached } from '../request-cache';
 
 export interface GetGamesParams {
     page: number;
@@ -36,122 +22,11 @@ export interface GetGamesParams {
     creators?: string;
 }
 
-const CACHE_TTL = 5 * 60 * 1000;
-const MAX_CACHE_ENTRIES = 80;
-
-const cache = new Map<string, CacheEntry>();
-const pendingRequests = new Map<string, Promise<unknown>>();
-
-const createCacheKey = (
-    url: string,
-    params: QueryParams,
-): string => {
-    const entries = Object.entries(params)
-        .filter(([, value]) => value !== undefined)
-        .sort(([first], [second]) => first.localeCompare(second));
-
-    return JSON.stringify([url, entries]);
-};
-
-const saveToCache = (key: string, data: unknown) => {
-    const now = Date.now();
-
-    // Süresi dolmuş kayıtları temizle.
-    for (const [entryKey, entry] of cache) {
-        if (entry.expiresAt <= now) {
-            cache.delete(entryKey);
-        }
-    }
-
-    cache.delete(key);
-
-    while (cache.size >= MAX_CACHE_ENTRIES) {
-        const oldestKey = cache.keys().next().value;
-
-        if (oldestKey === undefined) break;
-
-        cache.delete(oldestKey);
-    }
-
-    cache.set(key, {
-        data,
-        expiresAt: now + CACHE_TTL,
-    });
-};
-
-async function cachedGet<T>(
-    url: string,
-    params: QueryParams = {},
-    options: RequestOptions = {},
-): Promise<T> {
-    const key = createCacheKey(url, params);
-
-    if (options.forceRefresh) {
-        cache.delete(key);
-    }
-
-    // Devam eden aynı ağ isteği varsa onu paylaş.
-    const pending = pendingRequests.get(key);
-
-    if (pending && !options.forceRefresh) {
-        return pending as Promise<T>;
-    }
-
-    const cached = cache.get(key);
-
-    if (cached && cached.expiresAt > Date.now()) {
-        // Kullanılan kaydı sıranın sonuna taşı.
-        cache.delete(key);
-        cache.set(key, cached);
-
-        return cached.data as T;
-    }
-
-    cache.delete(key);
-
-    let request!: Promise<T>;
-    request = (async (): Promise<T> => {
-        const startedAt = Date.now();
-
-        try {
-            const response = await apiClient.get<T>(url, {
-                params,
-            });
-
-            // A forced refresh may have superseded this request.
-            if (pendingRequests.get(key) === request) {
-                saveToCache(key, response.data);
-            }
-
-            return response.data;
-        } finally {
-            if (__DEV__) {
-                console.log(
-                    `[Game API] ${url} · sayfa ${params.page ?? 1}`,
-                    `${Date.now() - startedAt} ms`,
-                );
-            }
-        }
-    })();
-
-    pendingRequests.set(key, request);
-
-    try {
-        return await request;
-    } finally {
-        if (pendingRequests.get(key) === request) {
-            pendingRequests.delete(key);
-        }
-    }
-}
-
 export const gameService = {
     getGameScreenshots: (id: number): Promise<IScreenshotResponse> =>
         cachedGet<IScreenshotResponse>(`/games/${id}/screenshots`),
-    peekGameDetail: (id: number): IGameDetail | null => {
-        const entry = cache.get(createCacheKey(`/games/${id}`, {}));
-        return entry && entry.expiresAt > Date.now() ? entry.data as IGameDetail : null;
-    },
+    peekGameDetail: (id: number): IGameDetail | null =>
+        peekCached<IGameDetail>(`/games/${id}`),
     getDeveloperGames: (id: number, page: number, ordering: '-added' | '-metacritic'): Promise<IGameListResponse> =>
         cachedGet<IGameListResponse>('/games', { developers: id, page, page_size: 20, ordering }),
     getGames: async (

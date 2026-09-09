@@ -1,3 +1,4 @@
+import { cachedGet, peekCached } from '../request-cache';
 import { ICreator, ICreatorResponse, IDeveloper, IDeveloperResponse } from "@types";
 import apiClient from "../client"
 
@@ -19,9 +20,10 @@ export const entityService = {
         return response.data;
 
     },
-    getCreatorDetail: async (id: number): Promise<ICreator> => {
-        const response = await apiClient.get<ICreator>(`/creators/${id}`);
-        return response.data;
+    peekCreatorDetail: (id: number): ICreator | null =>
+        peekCached<ICreator>(`/creators/${id}`),
+    getCreatorDetail: async (id: number, forceRefresh = false): Promise<ICreator> => {
+        return cachedGet<ICreator>(`/creators/${id}`, {}, { forceRefresh });
     },
     getDevelopers: async (page: number = 1): Promise<IDeveloperResponse> => {
         const response = await apiClient.get<IDeveloperResponse>('/developers', {
@@ -29,9 +31,10 @@ export const entityService = {
         });
         return response.data;
     },
-    getDeveloperDetail: async (id: number): Promise<IDeveloper> => {
-        const response = await apiClient.get<IDeveloper>(`/developers/${id}`);
-        return response.data;
+    peekDeveloperDetail: (id: number): IDeveloper | null =>
+        peekCached<IDeveloper>(`/developers/${id}`),
+    getDeveloperDetail: async (id: number, forceRefresh = false): Promise<IDeveloper> => {
+        return cachedGet<IDeveloper>(`/developers/${id}`, {}, { forceRefresh });
     },
     getPublishers: async (page: number = 1): Promise<IDeveloperResponse> => {
         const response = await apiClient.get<IDeveloperResponse>('/publishers', {

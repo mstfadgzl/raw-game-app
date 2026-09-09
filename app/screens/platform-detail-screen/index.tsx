@@ -144,6 +144,7 @@ const PlatformGames = ({
                 const response = await dispatch(
                     getGamesProcess({
                         page: requestedPage,
+                        forceRefresh: mode === 'refresh',
                         platforms: platformId,
                         ...query,
                     }),

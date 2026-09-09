@@ -125,6 +125,7 @@ const TagGames = ({ slug, name }: TagGamesProps) => {
                 const response = await dispatch(
                     getGamesProcess({
                         page: requestedPage,
+                        forceRefresh: mode === 'refresh',
                         tags: slug,
                         ...buildGameFilterQuery(filters),
                     }),
