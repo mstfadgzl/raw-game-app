@@ -348,8 +348,9 @@ export const DiscoverMainScreen = () => {
         await Promise.allSettled([
             fetchTags(1, true),
             fetchCreators(1, true),
+            fetchDevelopers(),
         ]);
-    }, [fetchTags, fetchCreators]);
+    }, [fetchTags, fetchCreators, fetchDevelopers]);
 
     useEffect(() => {
         void fetchData();
@@ -357,6 +358,7 @@ export const DiscoverMainScreen = () => {
         return () => {
             tagsGeneration.current += 1;
             creatorsGeneration.current += 1;
+            developersRequestId.current += 1;
         };
     }, [fetchData]);
 
