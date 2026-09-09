@@ -32,6 +32,7 @@ export interface GetGamesParams {
     dates?: string;
     metacritic?: string;
     forceRefresh?: boolean;
+    creators?: string;
 }
 
 const CACHE_TTL = 5 * 60 * 1000;
@@ -154,6 +155,7 @@ export const gameService = {
                     ordering: params.ordering,
                     dates: params.dates,
                     metacritic: params.metacritic,
+                    creators: params.creators,
                 },
             },
         );

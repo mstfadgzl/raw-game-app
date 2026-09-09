@@ -13,7 +13,7 @@ import {
 } from '@react-navigation/native';
 
 import { useAppDispatch, useAppSelector } from '@hooks';
-import { getCreatorDetailProcess } from '@actions';
+import { getCreatorDetailProcess, getGamesProcess } from '@actions';
 import {
     AppText,
     Container,
@@ -23,9 +23,10 @@ import {
 
 import { translateText } from '@utils';
 
-import type {
-    CreatorDetailRouteProp,
-    DiscoverScreenNavigationProp,
+import {
+    IGame,
+    type CreatorDetailRouteProp,
+    type DiscoverScreenNavigationProp,
 } from '@types';
 
 import { colors } from '@theme';
@@ -58,7 +59,9 @@ export const CreatorDetailScreen = () => {
     const [expanded, setExpanded] = useState(false);
     const [imageFailed, setImageFailed] = useState(false);
 
-    const games = creator?.games ?? [];
+    const [games, setGames] = useState<IGame[]>([]);
+    const [gamesLoading, setGamesLoading] = useState(true);
+    const [gamesError, setGamesError] = useState(false);
     const positions = creator?.positions ?? [];
 
     const description = (creator?.description ?? '')
@@ -72,33 +75,40 @@ export const CreatorDetailScreen = () => {
     useEffect(() => {
         let active = true;
 
-        setLoading(true);
-        setHasError(false);
-        setImageFailed(false);
-        setExpanded(false);
+        setGames([]);
+        setGamesLoading(true);
+        setGamesError(false);
 
-        const fetchCreator = async () => {
+        const fetchCreatorGames = async () => {
             try {
-                await dispatch(
-                    getCreatorDetailProcess(id),
+                const response = await dispatch(
+                    getGamesProcess({
+                        page: 1,
+                        creators: String(id),
+                        ordering: '-added',
+                    }),
                 ).unwrap();
+
+                if (active) {
+                    setGames(response.results ?? []);
+                }
             } catch {
                 if (active) {
-                    setHasError(true);
+                    setGamesError(true);
                 }
             } finally {
                 if (active) {
-                    setLoading(false);
+                    setGamesLoading(false);
                 }
             }
         };
 
-        void fetchCreator();
+        void fetchCreatorGames();
 
         return () => {
             active = false;
         };
-    }, [dispatch, id, retryCount]);
+    }, [dispatch, id]);
 
     useEffect(() => {
         let active = true;
@@ -304,9 +314,18 @@ export const CreatorDetailScreen = () => {
                 )}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <AppText style={styles.secondaryText}>
-                            Bu kişi için oyun bilgisi bulunmuyor.
-                        </AppText>
+                        {gamesLoading ? (
+                            <ActivityIndicator
+                                size="large"
+                                color={colors.primary}
+                            />
+                        ) : (
+                            <AppText style={styles.secondaryText}>
+                                {gamesError
+                                    ? 'Oyunlar yüklenemedi.'
+                                    : 'Bu kişi için oyun bulunamadı.'}
+                            </AppText>
+                        )}
                     </View>
                 }
             />

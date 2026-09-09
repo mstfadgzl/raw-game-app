@@ -16,6 +16,7 @@ export const getGamesProcess = createAsyncThunk<
         dates?: string;
         forceRefresh?: boolean;
         metacritic?: string;
+        creators?: string;
     },
     {
         rejectValue: string;
