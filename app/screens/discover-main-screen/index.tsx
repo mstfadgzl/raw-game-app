@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import {
     getCreatorsProcess,
     getTagsProcess,
+    getDevelopersProcess,
 } from '@actions';
 
 import { useAppDispatch } from '@hooks';
@@ -29,7 +30,7 @@ import {
     Skeleton,
 } from '@components';
 
-import { DiscoverMainNavigationProp } from '@types';
+import { DiscoverMainNavigationProp, IDeveloper } from '@types';
 import { colors } from '@theme';
 
 import { styles } from './styles';
@@ -92,6 +93,12 @@ export const DiscoverMainScreen = () => {
 
     const navigation =
         useNavigation<DiscoverMainNavigationProp>();
+
+
+    const [developers, setDevelopers] = useState<IDeveloper[]>([]);
+    const [developersLoading, setDevelopersLoading] = useState(true);
+    const [developersError, setDevelopersError] = useState(false);
+    const developersRequestId = useRef(0);
 
     const [tags, setTags] = useState<RawgTag[]>([]);
     const [creators, setCreators] =
