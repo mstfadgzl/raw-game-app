@@ -78,7 +78,7 @@ const DeveloperContent = ({ id }: { id: number }) => {
                 <View style={styles.heroText}><AppText style={styles.eyebrow}>GELİŞTİRİCİ STÜDYO</AppText><AppText style={styles.title}>{developer.name}</AppText></View>
             </View>
             <View style={styles.content}>
-                <View style={styles.stat}><AppText style={styles.statNumber}>{developer.games_count}</AppText><AppText style={styles.muted}>RAWG kataloğunda oyun</AppText></View>
+                <View style={styles.stat}><AppText style={styles.statNumber}>{developer.games_count}</AppText><AppText style={styles.muted}>Bu zamana kadar yapılan oyun </AppText></View>
                 <AppText style={styles.sectionTitle}>Stüdyo hakkında</AppText>
                 <AppText style={styles.bio} numberOfLines={expanded ? undefined : 5}>{translation || description || 'Bu stüdyo için henüz açıklama bulunmuyor.'}</AppText>
                 {translating && <AppText style={styles.muted}>Türkçeye çevriliyor…</AppText>}
