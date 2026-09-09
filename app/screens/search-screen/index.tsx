@@ -17,6 +17,7 @@ import { colors } from '@theme';
 
 import { styles } from './styles';
 import { CreatorSearchResults } from './creator-search-results';
+import { DeveloperSearchResults } from './developer-search-results';
 
 type SearchState = {
     query: string;
@@ -42,7 +43,7 @@ export const SearchScreen = () => {
     const navigation = useNavigation<SearchScreenNavigationProp>();
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [category, setCategory] = useState<'games' | 'creators'>('games');
+    const [category, setCategory] = useState<'games' | 'creators' | 'developers'>('games');
     const [focused, setFocused] = useState(false);
     const [retryKey, setRetryKey] = useState(0);
     const [search, setSearch] = useState<SearchState>(INITIAL_STATE);
@@ -249,7 +250,7 @@ export const SearchScreen = () => {
                 </AppText>
 
                 <AppText style={styles.title}>
-                    {category === 'games' ? 'Oyununu bul.' : 'Kişileri keşfet.'}
+                    {category === 'games' ? 'Oyununu bul.' : category === 'creators' ? 'Kişileri keşfet.' : 'Stüdyoları keşfet.'}
                 </AppText>
             </View>
 
@@ -264,9 +265,9 @@ export const SearchScreen = () => {
                 </AppText>
 
                 <TextInput
-                    accessibilityLabel={category === 'games' ? 'Oyun adı' : 'Kişi adı'}
+                    accessibilityLabel={category === 'games' ? 'Oyun adı' : category === 'creators' ? 'Kişi adı' : 'Stüdyo adı'}
                     style={styles.searchInput}
-                    placeholder={category === 'games' ? 'Oyun adı yaz...' : 'Kişi adı yaz...'}
+                    placeholder={category === 'games' ? 'Oyun adı yaz...' : category === 'creators' ? 'Kişi adı yaz...' : 'Stüdyo adı yaz...'}
                     placeholderTextColor="#8893A8"
                     selectionColor={colors.primary}
                     value={searchTerm}
@@ -294,7 +295,7 @@ export const SearchScreen = () => {
             </View>
 
             <View style={styles.suggestions}>
-                {(['games', 'creators'] as const).map(value => (
+                {(['games', 'creators', 'developers'] as const).map(value => (
                     <TouchableOpacity
                         key={value}
                         accessibilityRole="tab"
@@ -303,7 +304,7 @@ export const SearchScreen = () => {
                         onPress={() => setCategory(value)}
                     >
                         <AppText color={category === value ? colors.primary : colors.secondary} bold={category === value}>
-                            {value === 'games' ? 'Oyunlar' : 'Kişiler'}
+                            {value === 'games' ? 'Oyunlar' : value === 'creators' ? 'Kişiler' : 'Stüdyolar'}
                         </AppText>
                     </TouchableOpacity>
                 ))}
@@ -311,6 +312,8 @@ export const SearchScreen = () => {
 
             {category === 'creators' ? (
                 <CreatorSearchResults query={query} debouncedQuery={debouncedQuery} />
+            ) : category === 'developers' ? (
+                <DeveloperSearchResults query={query} debouncedQuery={debouncedQuery} />
             ) : <FlatList
                 key="search-two-columns"
                 style={styles.list}
