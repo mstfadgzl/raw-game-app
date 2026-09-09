@@ -26,3 +26,20 @@ babel de anlaması için {npm i babel-plugin-module-resolver} kullanıyoruz sonr
 2.servisleri yaz
 3.action ları yaz ve actionları tekrar yazmamak için createAppAsyncThunk helperı yaz
 4. sliceları yaz ve store.ts içine aktar
+
+## RAWG proxy ile yerel çalışma
+
+RAWG anahtarı mobil uygulamada tutulmaz. Proxy anahtarı `server/.env` içinden okur.
+
+```text
+cd server
+npm run dev
+```
+
+Debug Android cihazı için portu ADB üzerinden yönlendir:
+
+```text
+adb reverse tcp:3000 tcp:3000
+```
+
+Mobil uygulamanın kök `.env` dosyası debug ortamında `API_BASE_URL=http://127.0.0.1:3000/api/` kullanır. Üretimde bu adres HTTPS kullanan yayınlanmış backend adresiyle değiştirilmelidir.

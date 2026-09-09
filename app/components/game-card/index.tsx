@@ -99,7 +99,7 @@ export const GameCard = memo(function GameCard({
             accessibilityLabel={[
                 game.name,
                 hasMetacritic
-                    ? `Puan: ${metacriticDisplay} / 5`
+                    ? `Puan: ${metacriticDisplay} / 100`
                     : 'Henüz puanlanmadı',
                 `Çıkış tarihi: ${releaseDate}`,
                 downloadDisplay !== null

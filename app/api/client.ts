@@ -1,10 +1,10 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { RAWG_API_KEY, RAWG_BASE_URL } from '@env';
+import { API_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const apiClient = axios.create({
-    baseURL: RAWG_BASE_URL,
+    baseURL: API_BASE_URL,
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
@@ -13,10 +13,6 @@ const apiClient = axios.create({
 });
 apiClient.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
-        config.params = {
-            ...config.params,
-            key: RAWG_API_KEY,
-        };
         const token = await AsyncStorage.getItem('@TOKEN');
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`

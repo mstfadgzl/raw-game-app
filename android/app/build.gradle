@@ -96,11 +96,14 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            // Yerel geliştirme proxy'si HTTP kullanır; release her zaman HTTPS olmalı.
+            manifestPlaceholders = [usesCleartextTraffic: true]
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
+            manifestPlaceholders = [usesCleartextTraffic: false]
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
