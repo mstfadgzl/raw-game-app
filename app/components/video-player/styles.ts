@@ -22,6 +22,91 @@ export const styles = StyleSheet.create({
         height: '100%',
     },
 
+    videoSurface: {
+        ...StyleSheet.absoluteFill,
+    },
+
+    controls: {
+        ...StyleSheet.absoluteFill,
+        justifyContent: 'center',
+    },
+
+    controlCenter: {
+        flexDirection: 'row',
+        gap: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    seekButtons: {
+        width: 70,
+        alignItems: 'center',
+    },
+
+    skipButton: {
+        paddingHorizontal: 8,
+        paddingVertical: 10,
+        borderRadius: 10,
+        backgroundColor: 'rgba(0,0,0,0.62)',
+    },
+
+    skipText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        fontWeight: '700',
+    },
+
+    playPauseButton: {
+        width: 58,
+        height: 58,
+        borderRadius: 29,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.68)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.65)',
+    },
+
+    controlIcon: {
+        color: '#FFFFFF',
+        fontSize: 22,
+        letterSpacing: 1,
+    },
+
+    bottomControls: {
+        position: 'absolute',
+        left: 14,
+        right: 14,
+        bottom: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        borderRadius: 12,
+        backgroundColor: 'rgba(0,0,0,0.72)',
+    },
+
+    timeText: {
+        color: '#FFFFFF',
+        fontSize: 11,
+        minWidth: 34,
+        textAlign: 'center',
+    },
+
+    seekTrack: {
+        flex: 1,
+        height: 24,
+        justifyContent: 'center',
+        paddingVertical: 9,
+    },
+
+    seekProgress: {
+        height: 5,
+        borderRadius: 3,
+        backgroundColor: colors.primary,
+    },
+
     previewShade: {
         ...StyleSheet.absoluteFill,
         backgroundColor: 'rgba(0,0,0,0.35)',

@@ -4,11 +4,12 @@ import {
   AppState,
   Image,
   Modal,
+  Pressable,
   StatusBar,
   TouchableOpacity,
   View,
 } from 'react-native';
-import Video from 'react-native-video';
+import Video, { type VideoRef } from 'react-native-video';
 
 import { ITrailer } from '@types';
 import { AppText } from '../app-text';
@@ -135,6 +136,12 @@ const FullscreenPlayer = ({
   const [buffering, setBuffering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const videoRef = React.useRef<VideoRef>(null);
+  const [paused, setPaused] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [barWidth, setBarWidth] = useState(0);
 
   const [appActive, setAppActive] = useState(
     AppState.currentState === 'active',
@@ -142,6 +149,13 @@ const FullscreenPlayer = ({
 
   const landscape = size.width > size.height;
   const waiting = loading || buffering;
+
+  useEffect(() => {
+    if (!controlsVisible || paused || waiting) return;
+
+    const timer = setTimeout(() => setControlsVisible(false), 4000);
+    return () => clearTimeout(timer);
+  }, [controlsVisible, paused, waiting]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener(
@@ -172,6 +186,27 @@ const FullscreenPlayer = ({
     setLoading(true);
     setBuffering(false);
     setAttempt(value => value + 1);
+    setPaused(false);
+    setControlsVisible(true);
+  };
+
+  const showControls = () => setControlsVisible(true);
+
+  const toggleControls = () => {
+    setControlsVisible(value => !value);
+  };
+
+  const seekFromBar = (locationX: number) => {
+    if (!barWidth || !duration) return;
+    const nextTime = Math.max(0, Math.min(duration, (locationX / barWidth) * duration));
+    videoRef.current?.seek(nextTime);
+    setCurrentTime(nextTime);
+    showControls();
+  };
+
+  const formatTime = (value: number) => {
+    const seconds = Math.max(0, Math.floor(value));
+    return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
   };
 
   const portraitWidth = size.width;
@@ -243,21 +278,20 @@ const FullscreenPlayer = ({
 
           }}
         >
+          <Pressable style={styles.videoSurface} onPress={toggleControls}>
           <Video
             key={attempt}
+            ref={videoRef}
             source={{ uri: videoUrl }}
             style={styles.fill}
             resizeMode="cover"
-            controls={true}
-            controlsStyles={{
-              hideFullscreen: true,
-            }}
-            paused={!appActive}
+            controls={false}
+            paused={!appActive || paused}
             repeat={false}
             playInBackground={false}
             playWhenInactive={false}
             onLoadStart={() => setLoading(true)}
-            onLoad={({ naturalSize }) => {
+            onLoad={({ naturalSize, duration: loadedDuration }) => {
               const { width, height } = naturalSize;
 
               if (width > 0 && height > 0) {
@@ -265,7 +299,9 @@ const FullscreenPlayer = ({
               }
 
               setLoading(false);
+              setDuration(loadedDuration || 0);
             }}
+            onProgress={({ currentTime: nextTime }) => setCurrentTime(nextTime)}
             onReadyForDisplay={() => {
               setLoading(false);
               setBuffering(false);
@@ -273,7 +309,11 @@ const FullscreenPlayer = ({
             onBuffer={({ isBuffering }) => {
               setBuffering(isBuffering);
             }}
-            onEnd={onClose}
+            onEnd={() => {
+              setPaused(true);
+              setCurrentTime(duration);
+              showControls();
+            }}
             onError={event => {
               if (__DEV__) {
                 console.log(
@@ -290,6 +330,65 @@ const FullscreenPlayer = ({
             }}
           />
 
+          {controlsVisible && !error && (
+            <View style={styles.controls} pointerEvents="box-none">
+              <View style={styles.controlCenter} pointerEvents="box-none">
+                <View style={styles.seekButtons}>
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel="10 saniye geri al"
+                    style={styles.skipButton}
+                    onPress={() => {
+                      const nextTime = Math.max(0, currentTime - 10);
+                      videoRef.current?.seek(nextTime);
+                      setCurrentTime(nextTime);
+                      showControls();
+                    }}
+                  >
+                    <AppText style={styles.skipText}>↺ 10</AppText>
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel={paused ? 'Videoyu oynat' : 'Videoyu durdur'}
+                  style={styles.playPauseButton}
+                  onPress={() => {
+                    setPaused(value => !value);
+                    showControls();
+                  }}
+                >
+                  <AppText style={styles.controlIcon}>{paused ? '▶' : 'Ⅱ'}</AppText>
+                </TouchableOpacity>
+                <View style={styles.seekButtons}>
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel="10 saniye ileri al"
+                    style={styles.skipButton}
+                    onPress={() => {
+                      const nextTime = Math.min(duration, currentTime + 10);
+                      videoRef.current?.seek(nextTime);
+                      setCurrentTime(nextTime);
+                      showControls();
+                    }}
+                  >
+                    <AppText style={styles.skipText}>10 ↻</AppText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.bottomControls}>
+                <AppText style={styles.timeText}>{formatTime(currentTime)}</AppText>
+                <Pressable
+                  style={styles.seekTrack}
+                  onLayout={event => setBarWidth(event.nativeEvent.layout.width)}
+                  onPress={event => seekFromBar(event.nativeEvent.locationX)}
+                >
+                  <View style={[styles.seekProgress, { width: duration ? `${Math.min(100, (currentTime / duration) * 100)}%` : '0%' }]} />
+                </Pressable>
+                <AppText style={styles.timeText}>{formatTime(duration)}</AppText>
+              </View>
+            </View>
+          )}
+
           {waiting && (
             <View
               pointerEvents="none"
@@ -305,6 +404,7 @@ const FullscreenPlayer = ({
               </AppText>
             </View>
           )}
+          </Pressable>
         </View>
       ) : null}
 

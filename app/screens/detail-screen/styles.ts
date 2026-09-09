@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
         backgroundColor: colors.background,
     },
     headerContainer: {
-        height: 235,
+        height: 260,
         width: '100%',
         backgroundColor: '#1B2030',
     },
@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
     },
     absoluteInfo: {
         position: 'absolute',
-        bottom: 28,
+        bottom: 24,
         left: 18,
         right: 18,
     },

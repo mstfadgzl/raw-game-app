@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Image, TouchableOpacity } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useRoute } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppDispatch, useAppSelector } from '@hooks';
 import { getGameDetailProcess } from '@actions';
@@ -39,6 +40,7 @@ export const DetailScreen = () => {
 
 const DetailContent = ({ gameId }: { gameId: number }) => {
     const dispatch = useAppDispatch();
+    const insets = useSafeAreaInsets();
 
     const favorites = useAppSelector(
         state => state.game.data.favorites || [],
@@ -173,7 +175,7 @@ const DetailContent = ({ gameId }: { gameId: number }) => {
                             ? 'Favorilerden çıkar'
                             : 'Favorilere ekle'
                     }
-                    style={styles.favButton}
+                    style={[styles.favButton, { top: insets.top + 10 }]}
                     onPress={handleFavorite}
                     activeOpacity={0.8}
                 >
