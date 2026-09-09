@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -9,16 +9,26 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-import { useDebounce } from '@hooks';
-import { gameService } from '@services';
-import { usePaginatedGames } from '../../hooks/usePaginatedGames';
+import { useAppDispatch, useDebounce } from '@hooks';
+import { searchGamesProcess } from '../../redux/actions/gameActions';
 import { Container, GameCard, AppText } from '@components';
-import { SearchScreenNavigationProp } from '@types';
+import { IGame, SearchScreenNavigationProp } from '@types';
 import { colors } from '@theme';
 
 import { styles } from './styles';
-import { CreatorSearchResults } from './creator-search-results';
-import { DeveloperSearchResults } from './developer-search-results';
+
+type SearchState = {
+    query: string;
+    status: 'idle' | 'loading' | 'success' | 'error';
+    results: IGame[];
+};
+type SearchCategory = 'games' | 'creators';
+
+const INITIAL_STATE: SearchState = {
+    query: '',
+    status: 'idle',
+    results: [],
+};
 
 const SUGGESTIONS = [
     'God of War',
@@ -28,25 +38,102 @@ const SUGGESTIONS = [
 ];
 
 export const SearchScreen = () => {
+    const dispatch = useAppDispatch();
     const navigation = useNavigation<SearchScreenNavigationProp>();
+    const [category, setCategory] = useState<SearchCategory>('games');
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [category, setCategory] = useState<'games' | 'creators' | 'developers'>('games');
     const [focused, setFocused] = useState(false);
+    const [retryKey, setRetryKey] = useState(0);
+    const [search, setSearch] = useState<SearchState>(INITIAL_STATE);
 
     const query = searchTerm.trim();
-    const debouncedQuery = useDebounce(query, 200);
+    const debouncedQuery = useDebounce(query, 300);
     const canSearch = query.length >= 3;
 
-    const loadSearchPage = useCallback((page: number) => gameService.searchGames(debouncedQuery, page), [debouncedQuery]);
-    const ready = category === 'games' && canSearch && query === debouncedQuery;
-    const games = usePaginatedGames(ready ? loadSearchPage : null);
-    const isWaiting = canSearch && (!ready || games.loading);
-    const hasError = games.error;
-    const searchResults = games.items;
+    useEffect(() => {
+        let active = true;
+
+        if (query.length < 3) {
+            setSearch(INITIAL_STATE);
+
+            return () => {
+                active = false;
+            };
+        }
+
+        // Kullanıcı yazarken bekle.
+        if (query !== debouncedQuery) {
+            return () => {
+                active = false;
+            };
+        }
+
+        setSearch({
+            query,
+            status: 'loading',
+            results: [],
+        });
+
+        dispatch(searchGamesProcess(query))
+            .unwrap()
+            .then(response => {
+                if (!Array.isArray(response?.results)) {
+                    throw new Error('Geçersiz arama yanıtı');
+                }
+
+                if (!active) return;
+
+                const uniqueGames = new Map<number, IGame>();
+
+                response.results.forEach((game: IGame) => {
+                    uniqueGames.set(game.id, game);
+                });
+
+                setSearch({
+                    query,
+                    status: 'success',
+                    results: [...uniqueGames.values()],
+                });
+            })
+            .catch(() => {
+                if (!active) return;
+
+                setSearch({
+                    query,
+                    status: 'error',
+                    results: [],
+                });
+            });
+
+        // Arama değişince veya ekran kapanınca eski yanıtı kullanma.
+        return () => {
+            active = false;
+        };
+    }, [query, debouncedQuery, dispatch, retryKey]);
+
+    const matchesCurrentQuery =
+        search.query === query && query === debouncedQuery;
+
+    const isWaiting =
+        canSearch &&
+        (!matchesCurrentQuery || search.status === 'loading');
+
+    const hasError =
+        canSearch &&
+        matchesCurrentQuery &&
+        search.status === 'error';
+
+    const searchResults =
+        canSearch &&
+            matchesCurrentQuery &&
+            search.status === 'success'
+            ? search.results
+            : [];
 
     const clearSearch = () => {
         setSearchTerm('');
+        setSearch(INITIAL_STATE);
     };
 
     const selectSuggestion = (value: string) => {
@@ -127,7 +214,7 @@ export const SearchScreen = () => {
                         accessibilityRole="button"
                         style={styles.retryButton}
                         onPress={() =>
-                            games.retry()
+                            setRetryKey(value => value + 1)
                         }
                     >
                         <AppText style={styles.retryText}>
@@ -160,7 +247,7 @@ export const SearchScreen = () => {
                 </AppText>
 
                 <AppText style={styles.title}>
-                    {category === 'games' ? 'Oyununu bul.' : category === 'creators' ? 'Kişileri keşfet.' : 'Stüdyoları keşfet.'}
+                    Oyununu bul.
                 </AppText>
             </View>
 
@@ -175,9 +262,9 @@ export const SearchScreen = () => {
                 </AppText>
 
                 <TextInput
-                    accessibilityLabel={category === 'games' ? 'Oyun adı' : category === 'creators' ? 'Kişi adı' : 'Stüdyo adı'}
+                    accessibilityLabel="Oyun adı"
                     style={styles.searchInput}
-                    placeholder={category === 'games' ? 'Oyun adı yaz...' : category === 'creators' ? 'Kişi adı yaz...' : 'Stüdyo adı yaz...'}
+                    placeholder="Oyun adı yaz..."
                     placeholderTextColor="#8893A8"
                     selectionColor={colors.primary}
                     value={searchTerm}
@@ -187,6 +274,8 @@ export const SearchScreen = () => {
                     onSubmitEditing={() => Keyboard.dismiss()}
                     autoCorrect={false}
                     autoCapitalize="none"
+                    spellCheck={false}
+                    autoComplete="off"
                     returnKeyType="search"
                 />
 
@@ -204,28 +293,8 @@ export const SearchScreen = () => {
                 )}
             </View>
 
-            <View style={styles.suggestions}>
-                {(['games', 'creators', 'developers'] as const).map(value => (
-                    <TouchableOpacity
-                        key={value}
-                        accessibilityRole="tab"
-                        accessibilityState={{ selected: category === value }}
-                        style={styles.suggestionChip}
-                        onPress={() => setCategory(value)}
-                    >
-                        <AppText color={category === value ? colors.primary : colors.secondary} bold={category === value}>
-                            {value === 'games' ? 'Oyunlar' : value === 'creators' ? 'Kişiler' : 'Stüdyolar'}
-                        </AppText>
-                    </TouchableOpacity>
-                ))}
-            </View>
-
-            {category === 'creators' ? (
-                <CreatorSearchResults key={debouncedQuery.toLowerCase()} query={query} debouncedQuery={debouncedQuery} />
-            ) : category === 'developers' ? (
-                <DeveloperSearchResults query={query} debouncedQuery={debouncedQuery} />
-            ) : <FlatList
-                key={`search-${debouncedQuery}`}
+            <FlatList
+                key="search-two-columns"
                 style={styles.list}
                 data={searchResults}
                 numColumns={2}
@@ -260,20 +329,8 @@ export const SearchScreen = () => {
                         />
                     </View>
                 )}
-                onEndReached={games.loadMore}
-                onEndReachedThreshold={0.4}
-                ListFooterComponent={searchResults.length > 0 && (games.loading || games.error) ? (
-                    <View style={styles.feedback}>
-                        {games.loading && <ActivityIndicator color={colors.primary} />}
-                        {games.error && (
-                            <TouchableOpacity accessibilityRole="button" style={styles.retryButton} onPress={games.retry}>
-                                <AppText style={styles.retryText}>Devamı yüklenemedi · Tekrar dene</AppText>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                ) : undefined}
                 ListEmptyComponent={renderEmpty()}
-            />}
+            />
         </Container>
     );
 };
