@@ -5,7 +5,6 @@ import {
     View,
 } from 'react-native';
 
-import { ICreator } from '@types';
 import { AppText } from '../app-text';
 import { styles } from './styles';
 
@@ -15,9 +14,12 @@ type CreatorGame = {
     slug?: string;
 };
 
-type CreatorCardData = ICreator & {
-    games?: CreatorGame[];
+type CreatorCardData = {
+    id: number;
+    name: string;
+    image?: string | null;
     image_background?: string | null;
+    games?: CreatorGame[];
     games_count?: number;
 };
 
