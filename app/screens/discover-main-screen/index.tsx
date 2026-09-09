@@ -441,11 +441,7 @@ export const DiscoverMainScreen = () => {
                 <View style={styles.sectionHeader}>
                     <View>
                         <AppText style={styles.sectionTitle}>
-                            Oyunların arkasındaki isimler
-                        </AppText>
-
-                        <AppText style={styles.sectionSubtitle}>
-                            Sevdiğin oyunları geliştiren kişileri keşfet.
+                            Oyun Yaratıcıları
                         </AppText>
                     </View>
                 </View>
