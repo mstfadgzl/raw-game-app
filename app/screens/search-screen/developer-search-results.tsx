@@ -10,6 +10,16 @@ export const DeveloperSearchResults = ({ query, debouncedQuery }: {
     query: string;
     debouncedQuery: string;
 }) => {
+    if (query.length < 3) {
+        return <AppText style={localStyles.prompt}>Stüdyo aramak için en az 3 karakter yaz. Örneğin: rockstar</AppText>;
+    }
+    if (query !== debouncedQuery) {
+        return <ActivityIndicator color={colors.primary} />;
+    }
+    return <DeveloperResults key={debouncedQuery.toLowerCase()} query={debouncedQuery.toLowerCase()} />;
+};
+
+const DeveloperResults = ({ query }: { query: string }) => {
     const navigation = useNavigation<SearchScreenNavigationProp>();
     const [creators, setCreators] = useState<IDeveloper[]>([]);
     const [page, setPage] = useState(1);
@@ -17,15 +27,17 @@ export const DeveloperSearchResults = ({ query, debouncedQuery }: {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [hasNext, setHasNext] = useState(false);
+    const [count, setCount] = useState(0);
     const lock = useRef(true);
 
     useEffect(() => {
         let active = true;
+        const controller = new AbortController();
         lock.current = true;
         setLoading(true);
         setError(false);
 
-        entityService.getDevelopers(page)
+        entityService.searchDevelopers(query, page, controller.signal)
             .then(response => {
                 if (!Array.isArray(response.results)) throw new Error('Geçersiz stüdyo listesi');
                 if (!active) return;
@@ -33,6 +45,7 @@ export const DeveloperSearchResults = ({ query, debouncedQuery }: {
                     [...previous, ...response.results].map(person => [person.id, person]),
                 ).values()]);
                 setHasNext(Boolean(response.next));
+                setCount(response.count);
             })
             .catch(() => { if (active) setError(true); })
             .finally(() => {
@@ -42,24 +55,19 @@ export const DeveloperSearchResults = ({ query, debouncedQuery }: {
                 }
             });
 
-        return () => { active = false; };
-    }, [page, retry]);
-
-    const ready = query.length >= 3 && query === debouncedQuery;
-    const results = ready ? creators.filter(person =>
-        person.name.toLowerCase().includes(debouncedQuery.toLowerCase()),
-    ) : [];
+        return () => { active = false; controller.abort(); };
+    }, [query, page, retry]);
 
     return (
         <FlatList
-            data={results}
+            data={creators}
             keyExtractor={person => String(person.id)}
             contentContainerStyle={localStyles.list}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             ListHeaderComponent={
                 <AppText style={localStyles.hint}>
-                    {creators.length} yüklenen stüdyo içinde aranır. Daha fazla stüdyo yükleyerek aramayı genişletebilirsin.
+                    {loading && creators.length === 0 ? 'Stüdyolar aranıyor…' : error && creators.length === 0 ? 'Arama tamamlanamadı.' : `“${query}” için ${count} stüdyo`}
                 </AppText>
             }
             renderItem={({ item }) => (
@@ -85,9 +93,7 @@ export const DeveloperSearchResults = ({ query, debouncedQuery }: {
             )}
             ListEmptyComponent={
                 <AppText style={localStyles.hint}>
-                    {query.length < 3 ? 'Stüdyo aramak için en az 3 karakter yaz. Örneğin: val' :
-                        !ready ? 'Aranıyor…' : loading ? 'Stüdyolar yükleniyor…' :
-                            error ? 'Stüdyolar yüklenemedi.' : 'Yüklenen stüdyolar arasında eşleşme bulunamadı.'}
+                    {loading ? 'Sonuçlar yükleniyor…' : error ? 'Stüdyolar yüklenemedi.' : 'Eşleşen stüdyo bulunamadı.'}
                 </AppText>
             }
             ListFooterComponent={
@@ -116,6 +122,7 @@ export const DeveloperSearchResults = ({ query, debouncedQuery }: {
 };
 
 const localStyles = StyleSheet.create({
+    prompt: { padding: 18, color: colors.secondary, lineHeight: 22 },
     list: { padding: 18, paddingBottom: 32 },
     hint: { color: colors.secondary, marginBottom: 20, lineHeight: 22 },
     person: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, gap: 14 },
