@@ -4,7 +4,6 @@ import { persistor, store } from "./app/redux/store";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { AppStack } from "@navigators";
-import { DiscoveryScreen } from '@screens';
 import { PersistGate } from 'redux-persist/integration/react';
 
 const App = () => {

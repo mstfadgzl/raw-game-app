@@ -5,7 +5,7 @@ import { HomeStackParamList } from "@types";
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 
 export const HomeStack = () => (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade_from_bottom', contentStyle: { backgroundColor: '#151515' } }}>
         <Stack.Screen name="DiscoveryScreen" component={DiscoveryScreen} />
         <Stack.Screen name="GameDetail" component={DetailScreen} />
         <Stack.Screen name="PlatformDetail" component={PlatformDetailScreen} />

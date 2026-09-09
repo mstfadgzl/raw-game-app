@@ -85,3 +85,24 @@ test('card thumbnails resize RAWG originals without rewriting other URLs', () =>
   assert.equal(cardImageUrl('https://example.com/media/cover.jpg'), 'https://example.com/media/cover.jpg');
   assert.equal(cardImageUrl(null), '');
 });
+
+test('detail is readable synchronously only while fresh', async () => {
+  let now = 0;
+  const { gameService: api } = load(serviceFile, { get: async () => ({ data: { id: 42, name: 'Detail' } }) }, { now: () => now });
+  assert.equal(api.peekGameDetail(42), null);
+  await api.getGameDetail(42);
+  assert.equal(api.peekGameDetail(42).name, 'Detail');
+  assert.equal(api.peekGameDetail(43), null);
+  now = 300001;
+  assert.equal(api.peekGameDetail(42), null);
+});
+
+test('screenshots share requests and remain isolated by game', async () => {
+  let calls = 0;
+  const { gameService: api } = load(serviceFile, { get: async () => { calls++; return response('shot'); } });
+  await Promise.all([api.getGameScreenshots(1), api.getGameScreenshots(1)]);
+  await api.getGameScreenshots(1);
+  assert.equal(calls, 1);
+  await api.getGameScreenshots(2);
+  assert.equal(calls, 2);
+});

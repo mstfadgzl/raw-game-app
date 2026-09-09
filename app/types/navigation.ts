@@ -47,6 +47,7 @@ export type BottomTabParamList = {
 
 export type AppStackParamList = {
     Main: undefined; // BottomTab'ı kapsar
+    Video: { videoUrl: string; preview?: string | null };
     Auth: undefined;
 };
 

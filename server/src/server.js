@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import http from 'node:http';
 
 const port = Number(process.env.PORT || 3000);

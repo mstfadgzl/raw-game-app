@@ -5,9 +5,9 @@ import { useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppDispatch, useAppSelector } from '@hooks';
-import { getGameDetailProcess } from '@actions';
 import { Container, AppText, Skeleton } from '@components';
-import { GameDetailRouteProp } from '@types';
+import { GameDetailRouteProp, IGameDetail } from '@types';
+import { gameService } from '../../api/services/gameService';
 import { colors } from '@theme';
 import { toggleFavorite } from '../../redux/slices/gameSlice';
 
@@ -46,19 +46,18 @@ const DetailContent = ({ gameId }: { gameId: number }) => {
         state => state.game.data.favorites || [],
     );
 
-    const [detail, setDetail] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const [detail, setDetail] = useState<IGameDetail | null>(() => gameService.peekGameDetail(gameId));
+    const [loading, setLoading] = useState(() => !gameService.peekGameDetail(gameId));
     const [error, setError] = useState(false);
     const [retryKey, setRetryKey] = useState(0);
 
     useEffect(() => {
         let active = true;
 
-        setLoading(true);
+        setLoading(!gameService.peekGameDetail(gameId));
         setError(false);
 
-        dispatch(getGameDetailProcess(gameId))
-            .unwrap()
+        gameService.getGameDetail(gameId)
             .then(result => {
                 if (!result || Number(result.id) !== gameId) {
                     throw new Error('Geçersiz oyun yanıtı');

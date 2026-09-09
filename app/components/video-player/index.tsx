@@ -3,14 +3,15 @@ import {
   ActivityIndicator,
   AppState,
   Image,
-  Modal,
   Pressable,
   StatusBar,
   TouchableOpacity,
   View,
 } from 'react-native';
 import Video, { type VideoRef } from 'react-native-video';
-import Orientation from 'react-native-orientation-locker';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { AppStackParamList } from '../../types/navigation';
 
 import { ITrailer } from '@types';
 import { AppText } from '../app-text';
@@ -50,7 +51,7 @@ interface PlayerProps {
 }
 
 const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
-  const [open, setOpen] = useState(false);
+  const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
 
   return (
     <View style={styles.wrapper}>
@@ -60,7 +61,7 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
         activeOpacity={0.85}
         disabled={!videoUrl}
         style={styles.previewContainer}
-        onPress={() => setOpen(true)}
+        onPress={() => navigation.navigate('Video', { videoUrl, preview })}
       >
         {!!preview && (
           <Image
@@ -94,45 +95,21 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
         )}
       </TouchableOpacity>
 
-      <Modal
-        visible={open}
-        transparent={false}
-        animationType="fade"
-        presentationStyle="fullScreen"
-        hardwareAccelerated
-        statusBarTranslucent
-        navigationBarTranslucent
-        supportedOrientations={[
-          'portrait',
-          'landscape-left',
-          'landscape-right',
-        ]}
-        onRequestClose={() => setOpen(false)}
-        onDismiss={() => {
-          Orientation.lockToPortrait();
-          StatusBar.setHidden(false);
-        }}
-      >
-        {open && (
-          <FullscreenPlayer
-            videoUrl={videoUrl}
-            preview={preview}
-            onClose={() => setOpen(false)}
-          />
-        )}
-      </Modal>
+
     </View>
   );
 };
 
 interface FullscreenPlayerProps extends PlayerProps {
   onClose: () => void;
+  onToggleOrientation: () => void;
 }
 
 const FullscreenPlayer = ({
   videoUrl,
   preview,
   onClose,
+  onToggleOrientation,
 }: FullscreenPlayerProps) => {
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [videoRatio, setVideoRatio] = useState(16 / 9);
@@ -147,7 +124,7 @@ const FullscreenPlayer = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [barWidth, setBarWidth] = useState(0);
-  const [isLandscape, setIsLandscape] = useState(false);
+
 
   const [appActive, setAppActive] = useState(
     AppState.currentState === 'active',
@@ -169,21 +146,7 @@ const FullscreenPlayer = ({
       state => setAppActive(state === 'active'),
     );
 
-    const orientationListener = (orientation: string) => {
-      setIsLandscape(orientation.startsWith('LANDSCAPE'));
-    };
-
-    Orientation.addOrientationListener(orientationListener);
-
-    return () => {
-      appStateSubscription.remove();
-      Orientation.removeOrientationListener(orientationListener);
-      StatusBar.setHidden(false);
-    };
-  }, []);
-
-  useEffect(() => () => {
-    Orientation.lockToPortrait();
+    return () => appStateSubscription.remove();
   }, []);
 
   useEffect(() => {
@@ -204,15 +167,13 @@ const FullscreenPlayer = ({
     setBuffering(false);
     setAttempt(value => value + 1);
     setPaused(false);
+    setCurrentTime(0);
+    setDuration(0);
     setControlsVisible(true);
   };
 
   const toggleOrientation = () => {
-    if (isLandscape) {
-      Orientation.lockToPortrait();
-    } else {
-      Orientation.lockToLandscapeLeft();
-    }
+    onToggleOrientation();
     showControls();
   };
 
@@ -315,7 +276,7 @@ const FullscreenPlayer = ({
               source={{ uri: videoUrl }}
               style={styles.fill}
               pointerEvents="none"
-              resizeMode="cover"
+              resizeMode="contain"
               controls={false}
               paused={!appActive || paused}
               repeat={false}
@@ -366,11 +327,11 @@ const FullscreenPlayer = ({
             <View style={styles.controls} pointerEvents="box-none">
               <TouchableOpacity
                 accessibilityRole="button"
-                accessibilityLabel={isLandscape ? 'Dikey görünüme dön' : 'Yatay görünümü aç'}
+                accessibilityLabel={landscape ? 'Dikey görünüme dön' : 'Yatay görünümü aç'}
                 style={styles.orientationButton}
                 onPress={toggleOrientation}
               >
-                <AppText style={styles.orientationText}>{isLandscape ? '⛶' : '⛶'}</AppText>
+                <AppText style={styles.orientationText}>{landscape ? '⛶' : '⛶'}</AppText>
               </TouchableOpacity>
               <View style={styles.controlCenter} pointerEvents="box-none">
                 <View style={styles.seekButtons}>
@@ -393,6 +354,10 @@ const FullscreenPlayer = ({
                   accessibilityLabel={paused ? 'Videoyu oynat' : 'Videoyu durdur'}
                   style={styles.playPauseButton}
                   onPress={() => {
+                    if (duration > 0 && currentTime >= duration) {
+                      videoRef.current?.seek(0);
+                      setCurrentTime(0);
+                    }
                     setPaused(value => !value);
                     showControls();
                   }}
@@ -457,4 +422,12 @@ const FullscreenPlayer = ({
       </TouchableOpacity>
     </View>
   );
+};
+
+export const VideoScreen = ({ route, navigation }: NativeStackScreenProps<AppStackParamList, 'Video'>) => {
+  const [wide, setWide] = useState(false);
+  React.useLayoutEffect(() => {
+    navigation.setOptions({ orientation: wide ? 'landscape' : 'portrait' });
+  }, [navigation, wide]);
+  return <FullscreenPlayer {...route.params} onClose={() => navigation.goBack()} onToggleOrientation={() => setWide(value => !value)} />;
 };

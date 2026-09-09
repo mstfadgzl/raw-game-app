@@ -4,6 +4,7 @@ import {
     IGameListResponse,
     IRedditResponse,
     ITrailerResponse,
+    IScreenshotResponse,
 } from '../../types';
 
 import apiClient from '../client';
@@ -145,6 +146,12 @@ async function cachedGet<T>(
 }
 
 export const gameService = {
+    getGameScreenshots: (id: number): Promise<IScreenshotResponse> =>
+        cachedGet<IScreenshotResponse>(`/games/${id}/screenshots`),
+    peekGameDetail: (id: number): IGameDetail | null => {
+        const entry = cache.get(createCacheKey(`/games/${id}`, {}));
+        return entry && entry.expiresAt > Date.now() ? entry.data as IGameDetail : null;
+    },
     getDeveloperGames: (id: number, page: number, ordering: '-added' | '-metacritic'): Promise<IGameListResponse> =>
         cachedGet<IGameListResponse>('/games', { developers: id, page, page_size: 20, ordering }),
     getGames: async (

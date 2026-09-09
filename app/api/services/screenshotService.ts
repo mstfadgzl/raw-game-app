@@ -1,9 +1,5 @@
-import apiClient from "../client";
-import { IScreenshotResponse } from "../../types";
+import { gameService } from './gameService';
 
 export const screenshotService = {
-    getGameScreenshots: async (gameId: number): Promise<IScreenshotResponse> => {
-        const response = await apiClient.get<IScreenshotResponse>(`/games/${gameId}/screenshots`);
-        return response.data;
-    },
+    getGameScreenshots: gameService.getGameScreenshots,
 };

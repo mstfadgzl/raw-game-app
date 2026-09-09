@@ -16,6 +16,7 @@ import {
 } from '@actions';
 import { AppText, EmptyState, VideoPlayer } from '@components';
 import { colors } from '@theme';
+import type { IScreenshot, ITrailer } from '@types';
 import { styles } from '../../styles';
 
 const Screenshot = ({ uri }: { uri: string }) => {
@@ -60,8 +61,8 @@ export const MediaTab = () => {
     const dispatch = useAppDispatch();
     const isFocused = useIsFocused();
 
-    const [screenshots, setScreenshots] = useState<any[]>([]);
-    const [trailer, setTrailer] = useState<any>(null);
+    const [screenshots, setScreenshots] = useState<IScreenshot[]>([]);
+    const [trailer, setTrailer] = useState<ITrailer | null>(null);
 
     const [shotsLoading, setShotsLoading] = useState(true);
     const [trailerLoading, setTrailerLoading] = useState(true);

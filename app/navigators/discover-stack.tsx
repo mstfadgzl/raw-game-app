@@ -13,7 +13,7 @@ import {
 const Stack = createNativeStackNavigator<DiscoverStackParamList>();
 
 export const DiscoverStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade_from_bottom', contentStyle: { backgroundColor: '#151515' } }}>
     <Stack.Screen name="DiscoverMain" component={DiscoverMainScreen} />
     <Stack.Screen name="PlatformDetail" component={PlatformDetailScreen} />
     <Stack.Screen name="GenreDetail" component={GenreDetailScreen} />
