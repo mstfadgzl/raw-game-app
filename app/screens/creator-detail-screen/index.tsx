@@ -75,6 +75,45 @@ export const CreatorDetailScreen = () => {
     useEffect(() => {
         let active = true;
 
+        setLoading(true);
+        setHasError(false);
+        setImageFailed(false);
+
+        const fetchCreator = async () => {
+            try {
+                const creatorId = Number(id);
+                if (!Number.isInteger(creatorId) || creatorId <= 0) {
+                    throw new Error('Geçersiz kişi kimliği');
+                }
+
+                const response = await dispatch(
+                    getCreatorDetailProcess(creatorId),
+                ).unwrap();
+
+                if (!response || Number(response.id) !== creatorId) {
+                    throw new Error('Geçersiz profil yanıtı');
+                }
+            } catch {
+                if (active) {
+                    setHasError(true);
+                }
+            } finally {
+                if (active) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        void fetchCreator();
+
+        return () => {
+            active = false;
+        };
+    }, [dispatch, id, retryCount]);
+
+    useEffect(() => {
+        let active = true;
+
         setGames([]);
         setGamesLoading(true);
         setGamesError(false);
