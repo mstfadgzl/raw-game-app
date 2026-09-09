@@ -19,6 +19,7 @@ export const DiscoverStack = () => (
     <Stack.Screen name="GenreDetail" component={GenreDetailScreen} />
     <Stack.Screen name="CreatorDetail" component={CreatorDetailScreen} />
     <Stack.Screen name="DeveloperDetail" component={DeveloperDetailScreen} />
+    <Stack.Screen name="PublisherDetail" component={DeveloperDetailScreen} />
     <Stack.Screen name="GameDetail" component={DetailScreen} />
     <Stack.Screen name="TagDetail" component={TagDetailScreen} />
   </Stack.Navigator>

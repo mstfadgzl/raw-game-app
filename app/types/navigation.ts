@@ -14,6 +14,9 @@ export type HomeStackParamList = {
     DiscoverMain: { id: number; name: string };
     GenreDetail: { slug: string; name: string; };
     TagDetail: { slug: string; name: string };
+    CreatorDetail: { id: number; name: string };
+    DeveloperDetail: { id: number; name: string };
+    PublisherDetail: { id: number; name: string };
 };
 
 export type DiscoverStackParamList = {
@@ -23,6 +26,7 @@ export type DiscoverStackParamList = {
     GenreDetail: { slug: string; name: string };
     CreatorDetail: { id: number; name: string };
     DeveloperDetail: { id: number; name: string };
+    PublisherDetail: { id: number; name: string };
     GameDetail: { gameId: number | string; gameName: string };
 };
 
@@ -32,12 +36,18 @@ export type SearchStackParamList = {
     SearchScreen: undefined;
     CreatorDetail: { id: number; name: string };
     GameDetail: { gameId: number | string; gameName: string };
+    PlatformDetail: { id: number; name: string };
+    PublisherDetail: { id: number; name: string };
 };
 
 export type LibraryStackParamList = {
     TagDetail: { slug: string; name: string };
     LibraryScreen: undefined;
     GameDetail: { gameId: number | string; gameName: string };
+    PlatformDetail: { id: number; name: string };
+    CreatorDetail: { id: number; name: string };
+    DeveloperDetail: { id: number; name: string };
+    PublisherDetail: { id: number; name: string };
 };
 
 export type BottomTabParamList = {
@@ -99,3 +109,5 @@ export type GameDetailRouteProp = RouteProp<HomeStackParamList, 'GameDetail'>;
 export type PlatformDetailRouteProp = RouteProp<DiscoverStackParamList, 'PlatformDetail'>;
 export type GenreDetailRouteProp = RouteProp<DiscoverStackParamList, 'GenreDetail'>;
 export type CreatorDetailRouteProp = RouteProp<DiscoverStackParamList, 'CreatorDetail'>;
+export type CompanyDetailRouteProp = RouteProp<DiscoverStackParamList, 'DeveloperDetail' | 'PublisherDetail'>;
+export type GameRelationNavigationParamList = Pick<DiscoverStackParamList, 'TagDetail' | 'PlatformDetail' | 'CreatorDetail' | 'DeveloperDetail' | 'PublisherDetail'>;

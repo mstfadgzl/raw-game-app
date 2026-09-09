@@ -35,7 +35,7 @@ export const SearchScreen = () => {
     const [focused, setFocused] = useState(false);
 
     const query = searchTerm.trim();
-    const debouncedQuery = useDebounce(query, 350);
+    const debouncedQuery = useDebounce(query, 200);
     const canSearch = query.length >= 3;
 
     const loadSearchPage = useCallback((page: number) => gameService.searchGames(debouncedQuery, page), [debouncedQuery]);
@@ -221,7 +221,7 @@ export const SearchScreen = () => {
             </View>
 
             {category === 'creators' ? (
-                <CreatorSearchResults query={query} debouncedQuery={debouncedQuery} />
+                <CreatorSearchResults key={debouncedQuery.toLowerCase()} query={query} debouncedQuery={debouncedQuery} />
             ) : category === 'developers' ? (
                 <DeveloperSearchResults query={query} debouncedQuery={debouncedQuery} />
             ) : <FlatList

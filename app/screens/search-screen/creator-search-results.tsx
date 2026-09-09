@@ -21,11 +21,17 @@ export const CreatorSearchResults = ({ query, debouncedQuery }: {
 
     useEffect(() => {
         let active = true;
+        const controller = new AbortController();
         lock.current = true;
+        if (debouncedQuery.length < 3) {
+            setLoading(false);
+            lock.current = false;
+            return () => { active = false; controller.abort(); };
+        }
         setLoading(true);
         setError(false);
 
-        entityService.getCreators({ page, pageSize: 40 })
+        entityService.getCreators({ page, pageSize: 20, search: debouncedQuery, signal: controller.signal })
             .then(response => {
                 if (!Array.isArray(response.results)) throw new Error('Geçersiz kişi listesi');
                 if (!active) return;
@@ -42,13 +48,11 @@ export const CreatorSearchResults = ({ query, debouncedQuery }: {
                 }
             });
 
-        return () => { active = false; };
-    }, [page, retry]);
+        return () => { active = false; controller.abort(); };
+    }, [debouncedQuery, page, retry]);
 
     const ready = query.length >= 3 && query === debouncedQuery;
-    const results = ready ? creators.filter(person =>
-        person.name.toLowerCase().includes(debouncedQuery.toLowerCase()),
-    ) : [];
+    const results = ready ? creators : [];
 
     return (
         <FlatList

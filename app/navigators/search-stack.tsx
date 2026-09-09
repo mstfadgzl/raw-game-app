@@ -1,5 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { CreatorDetailScreen, DeveloperDetailScreen, TagDetailScreen, DetailScreen, SearchScreen } from "@screens";
+import { CreatorDetailScreen, DeveloperDetailScreen, PlatformDetailScreen, TagDetailScreen, DetailScreen, SearchScreen } from "@screens";
 import type { SearchStackParamList } from '@types';
 
 const Stack = createNativeStackNavigator<SearchStackParamList>();
@@ -11,5 +11,7 @@ export const SearchStack = () => (
         <Stack.Screen name="CreatorDetail" component={CreatorDetailScreen} />
         <Stack.Screen name="DeveloperDetail" component={DeveloperDetailScreen} />
         <Stack.Screen name="TagDetail" component={TagDetailScreen} />
+        <Stack.Screen name="PlatformDetail" component={PlatformDetailScreen} />
+        <Stack.Screen name="PublisherDetail" component={DeveloperDetailScreen} />
     </Stack.Navigator>
 );

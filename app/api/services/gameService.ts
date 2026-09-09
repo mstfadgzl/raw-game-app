@@ -5,6 +5,7 @@ import {
     IRedditResponse,
     ITrailerResponse,
     IScreenshotResponse,
+    IGamePersonResponse,
 } from '../../types';
 
 import { cachedGet, peekCached } from '../request-cache';
@@ -29,6 +30,8 @@ export const gameService = {
         peekCached<IGameDetail>(`/games/${id}`),
     getDeveloperGames: (id: number, page: number, ordering: '-added' | '-metacritic'): Promise<IGameListResponse> =>
         cachedGet<IGameListResponse>('/games', { developers: id, page, page_size: 20, ordering }),
+    getCompanyGames: (id: number, page: number, ordering: '-added' | '-metacritic', kind: 'developer' | 'publisher' = 'developer'): Promise<IGameListResponse> =>
+        cachedGet<IGameListResponse>('/games', { [kind === 'publisher' ? 'publishers' : 'developers']: id, page, page_size: 20, ordering }),
     getGames: async (
         params: GetGamesParams,
     ): Promise<IGameListResponse> => {
@@ -55,6 +58,8 @@ export const gameService = {
     ): Promise<IGameDetail> => {
         return cachedGet<IGameDetail>(`/games/${id}`);
     },
+    getGameDevelopmentTeam: (id: number, page: number = 1): Promise<IGamePersonResponse> =>
+        cachedGet<IGamePersonResponse>(`/games/${id}/development-team`, { page, page_size: 40 }),
 
     searchGames: (
         query: string,

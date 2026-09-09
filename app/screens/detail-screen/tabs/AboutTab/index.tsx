@@ -12,9 +12,10 @@ import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { AppText, GenreChip } from '@components';
 import { translateText } from '@utils';
 import { colors } from '@theme';
-import type { IGameDetail, DiscoverStackParamList } from '@types';
+import type { IGameDetail, GameRelationNavigationParamList } from '@types';
 import { styles } from '../../styles';
 import { GameStores } from '../../../../components/game-stores';
+import { gameService } from '../../../../api/services/gameService';
 
 type Props = {
     detail: IGameDetail;
@@ -23,10 +24,22 @@ type Props = {
 const translationCache = new Map<string, string>();
 
 export const AboutTab = ({ detail }: Props) => {
-    const navigation = useNavigation<NavigationProp<Pick<DiscoverStackParamList, 'TagDetail'>>>();
+    const navigation = useNavigation<NavigationProp<GameRelationNavigationParamList>>();
 
     const source = detail?.description_raw?.trim() || '';
     const stores = useMemo(() => detail.stores?.map(item => item.store) ?? [], [detail.stores]);
+    const [developmentTeam, setDevelopmentTeam] = useState<{ id: number; name: string }[]>([]);
+
+    useEffect(() => {
+        let active = true;
+        setDevelopmentTeam([]);
+        void gameService.getGameDevelopmentTeam(detail.id)
+            .then(response => {
+                if (active && Array.isArray(response.results)) setDevelopmentTeam(response.results);
+            })
+            .catch(() => { if (active) setDevelopmentTeam([]); });
+        return () => { active = false; };
+    }, [detail.id]);
 
     const [translation, setTranslation] = useState('');
     const [translating, setTranslating] = useState(false);
@@ -162,6 +175,28 @@ export const AboutTab = ({ detail }: Props) => {
                 detail.esrb_rating?.name || 'Derecelendirilmemiş',
         },
     ];
+    const relationGroups = [
+        {
+            label: 'GELİŞTİRİCİLER',
+            items: detail.developers ?? [],
+            open: (id: number, name: string) => navigation.navigate('DeveloperDetail', { id, name }),
+        },
+        {
+            label: 'YAYINCILAR',
+            items: detail.publishers ?? [],
+            open: (id: number, name: string) => navigation.navigate('PublisherDetail', { id, name }),
+        },
+        {
+            label: 'YARATICILAR',
+            items: developmentTeam,
+            open: (id: number, name: string) => navigation.navigate('CreatorDetail', { id, name }),
+        },
+        {
+            label: 'PLATFORMLAR',
+            items: (detail.platforms ?? []).map(item => item.platform),
+            open: (id: number, name: string) => navigation.navigate('PlatformDetail', { id, name }),
+        },
+    ];
 
     return (
         <ScrollView
@@ -240,6 +275,30 @@ export const AboutTab = ({ detail }: Props) => {
                     </View>
                 ))}
             </View>
+
+            <AppText style={styles.sectionTitle}>Bağlantılı bilgiler</AppText>
+            <AppText style={localStyles.relationHint}>
+                Bir öğeye dokunarak ilgili detay sayfasını veya oyun listesini aç.
+            </AppText>
+            {relationGroups.map(group => group.items.length > 0 && (
+                <View key={group.label} style={localStyles.relationGroup}>
+                    <AppText style={localStyles.factLabel}>{group.label}</AppText>
+                    <View style={localStyles.relations}>
+                        {group.items.map(item => (
+                            <TouchableOpacity
+                                key={`${group.label}-${item.id}`}
+                                accessibilityRole="button"
+                                accessibilityLabel={`${item.name}, detayını aç`}
+                                style={localStyles.relation}
+                                onPress={() => group.open(item.id, item.name)}
+                            >
+                                <AppText color={colors.primary} bold numberOfLines={1}>{item.name}</AppText>
+                                <AppText color={colors.secondary}>›</AppText>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+            ))}
 
             {!!detail.tags?.length && (
                 <>
@@ -324,6 +383,32 @@ const localStyles = StyleSheet.create({
         fontSize: 13,
         lineHeight: 20,
         fontWeight: '600',
+    },
+    relationHint: {
+        color: colors.secondary,
+        fontSize: 12,
+        lineHeight: 19,
+        marginTop: -6,
+        marginBottom: 12,
+    },
+    relationGroup: {
+        marginBottom: 16,
+    },
+    relations: {
+        gap: 8,
+    },
+    relation: {
+        minHeight: 48,
+        paddingHorizontal: 14,
+        paddingVertical: 11,
+        borderRadius: 12,
+        backgroundColor: '#191E2B',
+        borderWidth: 1,
+        borderColor: '#2A3040',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
     },
     tags: {
         flexDirection: 'row',

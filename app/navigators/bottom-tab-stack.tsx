@@ -14,7 +14,10 @@ export const BottomTabStack = () => {
     return (
         <Tab.Navigator
             safeAreaInsets={{ bottom: insets.bottom }}
+            detachInactiveScreens
             screenOptions={({ route }) => ({
+                lazy: true,
+                freezeOnBlur: true,
                 tabBarStyle: {
                     backgroundColor: colors.surface,
                     borderTopWidth: 1,
@@ -28,6 +31,7 @@ export const BottomTabStack = () => {
                 tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
                 tabBarLabelPosition: 'below-icon',
                 tabBarHideOnKeyboard: true,
+                animation: 'none',
                 tabBarIcon: ({ focused, color }) => (
                     <AnimatedTabIcon
                         name={route.name === 'HomeTab' ? 'home' : route.name === 'DiscoverTab' ? 'discover' : route.name === 'SearchTab' ? 'search' : 'library'}

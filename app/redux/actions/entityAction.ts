@@ -22,7 +22,7 @@ export const getPublishersProcess = createAppAsyncThunk<IDeveloperResponse, { pa
     'entity/getPublishersProcess',
     ({ page }) => entityService.getPublishers(page)
 );
-export const getPublisherDetailProcess = createAppAsyncThunk<IDeveloperResponse, number>(
+export const getPublisherDetailProcess = createAppAsyncThunk<IDeveloper, number>(
     'entity/getPublisherDetailProcess',
     (id) => entityService.getPublisherDetail(id)
 );

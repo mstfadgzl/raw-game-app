@@ -1,22 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, TouchableOpacity, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Container, AppText, GameCard, Skeleton } from '@components';
 import { entityService, gameService } from '@services';
 import { translateText } from '@utils';
-import type { DeveloperDetailRouteProp, DiscoverScreenNavigationProp, IDeveloper, IGame } from '@types';
+import type { CompanyDetailRouteProp, DiscoverScreenNavigationProp, IDeveloper, IGame } from '@types';
 import { colors } from '@theme';
 import { styles } from './styles';
 
 export const DeveloperDetailScreen = () => {
-    const { params } = useRoute<DeveloperDetailRouteProp>();
-    return <DeveloperContent key={params.id} id={Number(params.id)} />;
+    const { params, name } = useRoute<CompanyDetailRouteProp>();
+    const kind = name === 'PublisherDetail' ? 'publisher' : 'developer';
+    return <DeveloperContent key={`${kind}-${params.id}`} id={Number(params.id)} kind={kind} />;
 };
 
-const DeveloperContent = ({ id }: { id: number }) => {
+type CompanyKind = 'developer' | 'publisher';
+
+const DeveloperContent = ({ id, kind }: { id: number; kind: CompanyKind }) => {
     const navigation = useNavigation<DiscoverScreenNavigationProp>();
-    const [developer, setDeveloper] = useState<IDeveloper | null>(() => entityService.peekDeveloperDetail(id));
-    const [loading, setLoading] = useState(() => !entityService.peekDeveloperDetail(id));
+    const readProfile = useCallback(() => kind === 'publisher' ? entityService.peekPublisherDetail(id) : entityService.peekDeveloperDetail(id), [id, kind]);
+    const [developer, setDeveloper] = useState<IDeveloper | null>(() => readProfile());
+    const [loading, setLoading] = useState(() => !readProfile());
     const [retry, setRetry] = useState(0);
     const [imageFailed, setImageFailed] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -29,11 +33,13 @@ const DeveloperContent = ({ id }: { id: number }) => {
 
     useEffect(() => {
         let active = true;
-        setLoading(!entityService.peekDeveloperDetail(id));
+        setLoading(!readProfile());
         const fetchProfile = async () => {
             try {
                 if (!Number.isInteger(id) || id <= 0) throw new Error('Geçersiz stüdyo');
-                const result = await entityService.getDeveloperDetail(id, retry > 0);
+                const result = kind === 'publisher'
+                    ? await entityService.getPublisherDetail(id, retry > 0)
+                    : await entityService.getDeveloperDetail(id, retry > 0);
                 if (Number(result.id) !== id) throw new Error('Geçersiz yanıt');
                 if (active) setDeveloper(result);
             } catch {
@@ -44,7 +50,7 @@ const DeveloperContent = ({ id }: { id: number }) => {
         };
         void fetchProfile();
         return () => { active = false; };
-    }, [id, retry]);
+    }, [id, kind, readProfile, retry]);
 
     useEffect(() => {
         let active = true;
@@ -62,7 +68,7 @@ const DeveloperContent = ({ id }: { id: number }) => {
     if (loading) return <Container style={styles.container}><Skeleton style={styles.hero} /><View style={styles.content}><Skeleton style={styles.bioSkeleton} /></View></Container>;
     if (!developer) return (
         <Container style={styles.container}><View style={styles.feedback}>
-            <AppText style={styles.sectionTitle}>Stüdyo yüklenemedi</AppText>
+            <AppText style={styles.sectionTitle}>{kind === 'publisher' ? 'Yayıncı yüklenemedi' : 'Stüdyo yüklenemedi'}</AppText>
             <AppText style={styles.muted}>Bağlantını kontrol edip tekrar deneyebilirsin.</AppText>
             <TouchableOpacity accessibilityRole="button" style={styles.button} onPress={() => setRetry(value => value + 1)}><AppText color={colors.primary}>Tekrar dene</AppText></TouchableOpacity>
             <TouchableOpacity accessibilityRole="button" style={styles.button} onPress={() => navigation.goBack()}><AppText>Geri dön</AppText></TouchableOpacity>
@@ -75,7 +81,7 @@ const DeveloperContent = ({ id }: { id: number }) => {
                 {developer.image_background && !imageFailed ? <Image source={{ uri: developer.image_background }} style={styles.heroImage} onError={() => setImageFailed(true)} /> : <AppText style={styles.monogram}>{developer.name.charAt(0)}</AppText>}
                 <View style={styles.shade} />
                 <TouchableOpacity accessibilityRole="button" accessibilityLabel="Geri dön" style={styles.back} onPress={() => navigation.goBack()}><AppText bold>‹ Geri</AppText></TouchableOpacity>
-                <View style={styles.heroText}><AppText style={styles.eyebrow}>GELİŞTİRİCİ STÜDYO</AppText><AppText style={styles.title}>{developer.name}</AppText></View>
+                <View style={styles.heroText}><AppText style={styles.eyebrow}>{kind === 'publisher' ? 'YAYINCI' : 'GELİŞTİRİCİ STÜDYO'}</AppText><AppText style={styles.title}>{developer.name}</AppText></View>
             </View>
             <View style={styles.content}>
                 <View style={styles.stat}><AppText style={styles.statNumber}>{developer.games_count}</AppText><AppText style={styles.muted}>Bu zamana kadar yapılan oyun </AppText></View>
@@ -83,7 +89,7 @@ const DeveloperContent = ({ id }: { id: number }) => {
                 <AppText style={styles.bio} numberOfLines={expanded ? undefined : 5}>{translation || description || 'Bu stüdyo için henüz açıklama bulunmuyor.'}</AppText>
                 {translating && <AppText style={styles.muted}>Türkçeye çevriliyor…</AppText>}
                 {!!description && <TouchableOpacity accessibilityRole="button" accessibilityState={{ expanded }} style={styles.expand} onPress={() => setExpanded(value => !value)}><AppText color={colors.primary}>{expanded ? 'Daha az göster' : 'Devamını oku'}</AppText></TouchableOpacity>}
-                <View style={styles.gamesHeading}><AppText style={styles.sectionTitle}>Geliştirdiği oyunlar</AppText><AppText style={styles.muted}>Kaydırarak tüm oyunları keşfet.</AppText></View>
+                <View style={styles.gamesHeading}><AppText style={styles.sectionTitle}>{kind === 'publisher' ? 'Yayınladığı oyunlar' : 'Geliştirdiği oyunlar'}</AppText><AppText style={styles.muted}>Kaydırarak tüm oyunları keşfet.</AppText></View>
                 <View style={styles.sortRow}>{(['-added', '-metacritic'] as const).map(value => (
                     <TouchableOpacity key={value} accessibilityRole="button" accessibilityState={{ selected: ordering === value }} style={[styles.sortButton, ordering === value && styles.selected]} onPress={() => setOrdering(value)}>
                         <AppText color={ordering === value ? colors.primary : colors.secondary} bold>{value === '-added' ? 'Popüler' : 'En yüksek puan'}</AppText>
@@ -92,10 +98,10 @@ const DeveloperContent = ({ id }: { id: number }) => {
             </View>
         </View>
     );
-    return <Container style={styles.container}><DeveloperGames key={ordering} id={id} ordering={ordering} header={header} /></Container>;
+    return <Container style={styles.container}><DeveloperGames key={ordering} id={id} kind={kind} ordering={ordering} header={header} /></Container>;
 };
 
-const DeveloperGames = ({ id, ordering, header }: { id: number; ordering: '-added' | '-metacritic'; header: React.ReactElement }) => {
+const DeveloperGames = ({ id, kind, ordering, header }: { id: number; kind: CompanyKind; ordering: '-added' | '-metacritic'; header: React.ReactElement }) => {
     const navigation = useNavigation<DiscoverScreenNavigationProp>();
     const [games, setGames] = useState<IGame[]>([]);
     const [page, setPage] = useState(1);
@@ -109,7 +115,7 @@ const DeveloperGames = ({ id, ordering, header }: { id: number; ordering: '-adde
         lock.current = true;
         setLoading(true);
         setError(false);
-        gameService.getDeveloperGames(id, page, ordering)
+        gameService.getCompanyGames(id, page, ordering, kind)
             .then(response => {
                 if (!Array.isArray(response.results)) throw new Error('Geçersiz oyun listesi');
                 if (!active) return;
@@ -140,7 +146,7 @@ const DeveloperGames = ({ id, ordering, header }: { id: number; ordering: '-adde
             .catch(() => { if (active) setError(true); })
             .finally(() => { if (active) { lock.current = false; setLoading(false); } });
         return () => { active = false; };
-    }, [id, ordering, page, retry]);
+    }, [id, kind, ordering, page, retry]);
     const loadMore = () => {
         if (lock.current || !hasNext || error) return;
         lock.current = true;
@@ -162,4 +168,3 @@ const DeveloperGames = ({ id, ordering, header }: { id: number; ordering: '-adde
         </View>}
     />;
 };
-

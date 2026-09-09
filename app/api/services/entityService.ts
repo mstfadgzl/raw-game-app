@@ -14,12 +14,14 @@ export const entityService = {
         });
         return response.data;
     },
-    getCreators: async ({ page = 1, pageSize = 40 }): Promise<ICreatorResponse> => {
+    getCreators: async ({ page = 1, pageSize = 40, search, signal }: { page?: number; pageSize?: number; search?: string; signal?: AbortSignal }): Promise<ICreatorResponse> => {
         const response = await apiClient.get<ICreatorResponse>('/creators', {
             params: {
                 page,
                 page_size: pageSize,
-            }
+                search: search?.trim() || undefined,
+            },
+            signal,
         });
         return response.data;
 
@@ -52,9 +54,12 @@ export const entityService = {
         });
         return response.data;
     },
-    getPublisherDetail: async (id: number): Promise<IDeveloperResponse> => {
-        const response = await apiClient.get<IDeveloperResponse>(`/publishers/${id}`);
-        return response.data;
-    },
+    peekPublisherDetail: (id: number): IDeveloper | null =>
+        peekCached<IDeveloper>(`/publishers/${id}`),
+    getPublisherDetail: async (id: number, forceRefresh = false): Promise<IDeveloper> =>
+        cachedGet<IDeveloper>(`/publishers/${id}`, {}, {
+            forceRefresh,
+            validate: value => matchesProfile(value, id),
+        }),
 
 }

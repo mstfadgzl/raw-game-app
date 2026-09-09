@@ -67,6 +67,15 @@ export interface IGameDetail extends IGame {
         };
     }[];
 }
+export interface IGamePerson {
+    id: number;
+    name: string;
+    slug: string;
+    image?: string | null;
+    image_background?: string | null;
+    games_count?: number;
+}
+export type IGamePersonResponse = IPaginatedResponse<IGamePerson>;
 export interface IScreenshot {
     id: number;
     image: string;
