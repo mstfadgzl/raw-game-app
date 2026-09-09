@@ -11,6 +11,7 @@ import { View } from 'react-native';
 const App = () => {
   const [splashVisible, setSplashVisible] = React.useState(true);
   const [hydrated, setHydrated] = React.useState(false);
+  const hideSplash = React.useCallback(() => setSplashVisible(false), []);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#151515' }}>
@@ -23,7 +24,7 @@ const App = () => {
         </SafeAreaProvider>
       </PersistGate>
       </Provider>
-      {(splashVisible || !hydrated) && <SplashScreen onFinish={() => setSplashVisible(false)} />}
+      {(splashVisible || !hydrated) && <SplashScreen onFinish={hideSplash} />}
     </View>
   );
 };
