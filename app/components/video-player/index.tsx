@@ -149,7 +149,10 @@ const FullscreenPlayer = ({
       state => setAppActive(state === 'active'),
     );
 
-    return () => subscription.remove();
+    return () => {
+      subscription.remove();
+      StatusBar.setHidden(false);
+    };
   }, []);
 
   useEffect(() => {
@@ -248,13 +251,6 @@ const FullscreenPlayer = ({
             controls={true}
             controlsStyles={{
               hideFullscreen: true,
-              hideNext: true,
-              hidePrevious: true,
-              hideForward: true,
-              hideRewind: true,
-              hideSettingButton: true,
-              hidePosition: true,
-              hideDuration: true,
             }}
             paused={!appActive}
             repeat={false}
