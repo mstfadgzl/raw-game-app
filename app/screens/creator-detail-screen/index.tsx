@@ -1,9 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
+
 import {
     ActivityIndicator,
     FlatList,
-    Image,
-    Pressable,
+    RefreshControl,
     View,
 } from 'react-native';
 
@@ -12,335 +17,351 @@ import {
     useRoute,
 } from '@react-navigation/native';
 
-import { useAppDispatch, useAppSelector } from '@hooks';
-import { getCreatorDetailProcess, getGamesProcess } from '@actions';
+import { useAppDispatch } from '@hooks';
+import { getGamesProcess } from '@actions';
+
 import {
     AppText,
     Container,
+    DEFAULT_GAME_FILTERS,
+    EmptyState,
     GameCard,
+    GameSortFilter,
     Skeleton,
+    buildGameFilterQuery,
 } from '@components';
 
-import { translateText } from '@utils';
+import type { GameFilterValue } from '@components';
 
-import {
+import type {
+    DiscoverScreenNavigationProp,
+    GenreDetailRouteProp,
     IGame,
-    type CreatorDetailRouteProp,
-    type DiscoverScreenNavigationProp,
 } from '@types';
 
 import { colors } from '@theme';
-import { styles } from './styles';
+import { styles } from './style';
 
-export const CreatorDetailScreen = () => {
-    const route = useRoute<CreatorDetailRouteProp>();
+type LoadMode = 'initial' | 'refresh' | 'more';
+
+interface FailedRequest {
+    page: number;
+    mode: LoadMode;
+}
+
+const mergeUniqueGames = (
+    previous: IGame[],
+    incoming: IGame[],
+): IGame[] => {
+    const gameMap = new Map<number, IGame>();
+
+    [...previous, ...incoming].forEach(game => {
+        if (game?.id) {
+            gameMap.set(game.id, game);
+        }
+    });
+
+    return Array.from(gameMap.values());
+};
+
+export const GenreDetailScreen = () => {
+    const route = useRoute<GenreDetailRouteProp>();
     const navigation =
         useNavigation<DiscoverScreenNavigationProp>();
 
-    const { id, name } = route.params;
+    const { slug, name } = route.params;
     const dispatch = useAppDispatch();
 
-    const { data } = useAppSelector(state => state.entity);
+    const listRef = useRef<FlatList<IGame>>(null);
 
-    // Başka kişiden kalan profilin görünmesini engeller.
-    const storedCreator = data.getCreatorDetailProcess;
-
-    const creator =
-        Number(storedCreator?.id) === Number(id)
-            ? storedCreator
-            : undefined;
-
-    const [loading, setLoading] = useState(true);
-    const [hasError, setHasError] = useState(false);
-    const [retryCount, setRetryCount] = useState(0);
-
-    const [trBio, setTrBio] = useState('');
-    const [isTranslating, setIsTranslating] = useState(false);
-    const [expanded, setExpanded] = useState(false);
-    const [imageFailed, setImageFailed] = useState(false);
+    const [filters, setFilters] = useState<GameFilterValue>(
+        () => ({ ...DEFAULT_GAME_FILTERS }),
+    );
 
     const [games, setGames] = useState<IGame[]>([]);
-    const [gamesLoading, setGamesLoading] = useState(true);
-    const [gamesError, setGamesError] = useState(false);
-    const positions = creator?.positions ?? [];
+    const [loading, setLoading] =
+        useState<LoadMode | null>('initial');
 
-    const description = (creator?.description ?? '')
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<\/p>/gi, '\n\n')
-        .replace(/<[^>]*>/g, '')
-        .replace(/&nbsp;/gi, ' ')
-        .replace(/&amp;/gi, '&')
-        .trim();
+    const [failedRequest, setFailedRequest] =
+        useState<FailedRequest | null>(null);
 
-    useEffect(() => {
-        let active = true;
+    const pageRef = useRef(0);
+    const hasNextRef = useRef(false);
+    const requestLockRef = useRef(false);
+    const requestVersionRef = useRef(0);
 
-        setGames([]);
-        setGamesLoading(true);
-        setGamesError(false);
+    const loadPage = useCallback(
+        async (requestedPage: number, mode: LoadMode) => {
+            if (
+                mode !== 'initial' &&
+                requestLockRef.current
+            ) {
+                return;
+            }
 
-        const fetchCreatorGames = async () => {
+            if (
+                mode === 'more' &&
+                (
+                    !hasNextRef.current ||
+                    pageRef.current === 0
+                )
+            ) {
+                return;
+            }
+
+            requestLockRef.current = true;
+
+            const currentVersion =
+                ++requestVersionRef.current;
+
+            setLoading(mode);
+            setFailedRequest(null);
+
+            if (mode === 'initial') {
+                pageRef.current = 0;
+                hasNextRef.current = false;
+                setGames([]);
+            }
+
             try {
+                const query = buildGameFilterQuery(filters);
+
                 const action = await dispatch(
                     getGamesProcess({
                         page: requestedPage,
                         genres: slug,
-                        ...query,
+                        ordering: query.ordering,
+                        dates: query.dates,
+                        metacritic: query.metacritic,
                     }),
                 );
 
-                if (getGamesProcess.fulfilled.match(action)) {
-                    const response = action.payload;
-
-                    const incomingGames = response.results ?? [];
-
-                    setGames(previous =>
-                        requestedPage === 1
-                            ? incomingGames
-                            : mergeGames(previous, incomingGames),
-                    );
-
-                    queryRef.current = query;
-                    pageRef.current = requestedPage;
-                    hasMoreRef.current = Boolean(response.next);
-                } else {
-                    throw new Error('Oyunlar alınamadı.');
+                if (currentVersion !== requestVersionRef.current) {
+                    return;
                 }
+
+                if (!getGamesProcess.fulfilled.match(action)) {
+                    throw new Error('Oyun listesi alınamadı.');
+                }
+
+                const response = action.payload;
+                const incomingGames = response.results ?? [];
+
+                setGames(previousGames =>
+                    requestedPage === 1
+                        ? mergeUniqueGames([], incomingGames)
+                        : mergeUniqueGames(
+                            previousGames,
+                            incomingGames,
+                        ),
+                );
+
+                pageRef.current = requestedPage;
+                hasNextRef.current = Boolean(response.next);
             } catch {
-                if (active) {
-                    setGamesError(true);
+                if (currentVersion === requestVersionRef.current) {
+                    setFailedRequest({
+                        page: requestedPage,
+                        mode,
+                    });
                 }
             } finally {
-                if (active) {
-                    setGamesLoading(false);
+                if (
+                    currentVersion ===
+                    requestVersionRef.current
+                ) {
+                    requestLockRef.current = false;
+                    setLoading(null);
                 }
             }
-        };
-
-        void fetchCreatorGames();
-
-        return () => {
-            active = false;
-        };
-    }, [dispatch, id]);
+        },
+        [dispatch, filters, slug],
+    );
 
     useEffect(() => {
-        let active = true;
+        void loadPage(1, 'initial');
 
-        setTrBio('');
-        setExpanded(false);
-        setIsTranslating(Boolean(description));
+        return () => {
+            requestVersionRef.current += 1;
+            requestLockRef.current = false;
+        };
+    }, [loadPage]);
 
-        if (!description) {
+    const handleFilterChange = useCallback(
+        (nextFilters: GameFilterValue) => {
+            // Eski isteğin sonucunu geçersiz kıl.
+            requestVersionRef.current += 1;
+            requestLockRef.current = false;
+
+            pageRef.current = 0;
+            hasNextRef.current = false;
+
+            setGames([]);
+            setFailedRequest(null);
+            setLoading('initial');
+
+            listRef.current?.scrollToOffset({
+                offset: 0,
+                animated: false,
+            });
+
+            setFilters(nextFilters);
+        },
+        [],
+    );
+
+    const handleLoadMore = useCallback(() => {
+        if (
+            loading !== null ||
+            failedRequest ||
+            !hasNextRef.current
+        ) {
             return;
         }
 
-        const translateBiography = async () => {
-            try {
-                const translated = await translateText(description);
+        void loadPage(pageRef.current + 1, 'more');
+    }, [failedRequest, loadPage, loading]);
 
-                if (active) {
-                    setTrBio(translated?.trim() || '');
-                }
-            } catch {
-                // Çeviri başarısızsa orijinal açıklama görünür.
-                if (active) {
-                    setTrBio('');
-                }
-            } finally {
-                if (active) {
-                    setIsTranslating(false);
-                }
-            }
-        };
+    const handleRefresh = useCallback(() => {
+        void loadPage(1, 'refresh');
+    }, [loadPage]);
 
-        void translateBiography();
+    const handleRetry = useCallback(() => {
+        if (!failedRequest) {
+            return;
+        }
 
-        return () => {
-            active = false;
-        };
-    }, [description, id]);
+        void loadPage(
+            failedRequest.page,
+            failedRequest.mode,
+        );
+    }, [failedRequest, loadPage]);
 
-    const handleRetry = () => {
-        setRetryCount(value => value + 1);
-    };
+    const handleGamePress = useCallback(
+        (gameId: number, gameName: string) => {
+            navigation.navigate('GameDetail', {
+                gameId,
+                gameName,
+            });
+        },
+        [navigation],
+    );
 
-    if (loading && !creator) {
-        return (
-            <Container style={styles.container}>
-                <Skeleton style={styles.heroSkeleton} />
-
-                <View style={styles.content}>
-                    <Skeleton style={styles.titleSkeleton} />
-                    <Skeleton style={styles.bioSkeleton} />
-                </View>
-
+    const renderEmptyState = () => {
+        if (loading === 'initial') {
+            return (
                 <View style={styles.skeletonGrid}>
-                    {[0, 1].map(index => (
+                    {[0, 1, 2, 3].map(index => (
                         <Skeleton
-                            key={index}
-                            style={styles.cardSkeleton}
+                            key={`genre-skeleton-${index}`}
+                            style={styles.skeletonCard}
                         />
                     ))}
                 </View>
-            </Container>
-        );
-    }
+            );
+        }
 
-    if (!creator) {
-        return (
-            <Container style={styles.container}>
+        if (loading === 'refresh') {
+            return (
                 <View style={styles.feedback}>
-                    <AppText style={styles.subTitle}>
-                        Profil yüklenemedi
+                    <AppText color={colors.secondary}>
+                        Oyunlar yenileniyor…
                     </AppText>
-
-                    <AppText style={styles.secondaryText}>
-                        Bağlantını kontrol edip tekrar deneyebilirsin.
-                    </AppText>
-
-                    <Pressable
-                        onPress={handleRetry}
-                        accessibilityRole="button"
-                        style={styles.retryButton}
-                    >
-                        <AppText color={colors.primary} bold>
-                            Tekrar dene
-                        </AppText>
-                    </Pressable>
                 </View>
-            </Container>
+            );
+        }
+
+        if (failedRequest) {
+            return (
+                <View style={styles.feedback}>
+                    <AppText style={styles.feedbackText}>
+                        Oyunlar yüklenemedi.
+                    </AppText>
+
+                    <AppText
+                        color={colors.primary}
+                        bold
+                        onPress={handleRetry}
+                    >
+                        Tekrar dene
+                    </AppText>
+                </View>
+            );
+        }
+
+        return (
+            <View style={styles.feedback}>
+                <EmptyState
+                    message={`${name} türünde uygun oyun bulunamadı.`}
+                />
+            </View>
         );
-    }
+    };
 
     return (
         <Container style={styles.container}>
             <FlatList
-                key={`creator-${id}`}
+                ref={listRef}
                 data={games}
                 numColumns={2}
-                keyExtractor={item => `creator-game-${item.id}`}
+                keyExtractor={item => `genre-game-${item.id}`}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.listContent}
                 columnWrapperStyle={styles.row}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.35}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={loading === 'refresh'}
+                        onRefresh={handleRefresh}
+                        tintColor={colors.primary}
+                        colors={[colors.primary]}
+                    />
+                }
                 ListHeaderComponent={
-                    <View>
-                        <View style={styles.heroContainer}>
-                            {creator.image && !imageFailed ? (
-                                <Image
-                                    source={{ uri: creator.image }}
-                                    style={styles.heroImage}
-                                    resizeMode="cover"
-                                    onError={() => setImageFailed(true)}
-                                />
-                            ) : (
-                                <View style={styles.imageFallback}>
-                                    <AppText style={styles.fallbackLetter}>
-                                        {(creator.name || name)
-                                            .charAt(0)
-                                            .toUpperCase()}
-                                    </AppText>
-                                </View>
-                            )}
-                        </View>
+                    <View style={styles.headerContainer}>
+                        <AppText
+                            style={styles.header}
+                            numberOfLines={2}
+                        >
+                            {name}
+                        </AppText>
 
-                        <View style={styles.content}>
-                            <AppText style={styles.title}>
-                                {creator.name}
-                            </AppText>
-
-                            {positions.length > 0 && (
-                                <AppText style={styles.role}>
-                                    {positions
-                                        .map((position: any) => position.name)
-                                        .join(' · ')}
-                                </AppText>
-                            )}
-
-                            {hasError && (
-                                <AppText style={styles.errorText}>
-                                    Bilgiler yenilenemedi. Önceki profil
-                                    bilgileri gösteriliyor.
-                                </AppText>
-                            )}
-
-                            <AppText style={styles.subTitle}>
-                                Hakkında
-                            </AppText>
-
-                            <AppText
-                                style={styles.bio}
-                                numberOfLines={expanded ? undefined : 6}
-                            >
-                                {trBio ||
-                                    description ||
-                                    'Bu kişi için biyografi bulunmuyor.'}
-                            </AppText>
-
-                            {isTranslating && (
-                                <View style={styles.translationRow}>
-                                    <ActivityIndicator
-                                        size="small"
-                                        color={colors.primary}
-                                    />
-
-                                    <AppText style={styles.translationText}>
-                                        Türkçeye çevriliyor…
-                                    </AppText>
-                                </View>
-                            )}
-
-                            {!!description && (
-                                <Pressable
-                                    onPress={() =>
-                                        setExpanded(value => !value)
-                                    }
-                                    accessibilityRole="button"
-                                    accessibilityState={{ expanded }}
-                                    style={styles.expandButton}
-                                >
-                                    <AppText color={colors.primary} bold>
-                                        {expanded
-                                            ? 'Daha az göster'
-                                            : 'Tamamını göster'}
-                                    </AppText>
-                                </Pressable>
-                            )}
-
-                            <AppText style={styles.gamesTitle}>
-                                Yer aldığı oyunlar
-                            </AppText>
-                        </View>
+                        <GameSortFilter
+                            value={filters}
+                            onChange={handleFilterChange}
+                        />
                     </View>
                 }
                 renderItem={({ item }) => (
                     <View style={styles.cardColumn}>
                         <GameCard
                             game={item}
-                            onPress={(gameId, gameName) =>
-                                navigation.navigate('GameDetail', {
-                                    gameId,
-                                    gameName,
-                                })
-                            }
+                            onPress={handleGamePress}
                         />
                     </View>
                 )}
-                ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        {gamesLoading ? (
-                            <ActivityIndicator
-                                size="large"
+                ListEmptyComponent={renderEmptyState()}
+                ListFooterComponent={
+                    loading === 'more' ? (
+                        <ActivityIndicator
+                            color={colors.primary}
+                            size="large"
+                            style={styles.loader}
+                        />
+                    ) : failedRequest && games.length > 0 ? (
+                        <View style={styles.feedback}>
+                            <AppText
                                 color={colors.primary}
-                            />
-                        ) : (
-                            <AppText style={styles.secondaryText}>
-                                {gamesError
-                                    ? 'Oyunlar yüklenemedi.'
-                                    : 'Bu kişi için oyun bulunamadı.'}
+                                bold
+                                onPress={handleRetry}
+                            >
+                                Yüklenemedi · Tekrar dene
                             </AppText>
-                        )}
-                    </View>
+                        </View>
+                    ) : (
+                        <View style={styles.footerSpace} />
+                    )
                 }
             />
         </Container>
