@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+    FlatList,
+    Modal,
+    Pressable,
     ScrollView,
     View,
     Linking,
@@ -8,6 +11,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText, GenreChip } from '@components';
 import { translateText } from '@utils';
@@ -20,15 +24,23 @@ import { gameService } from '../../../../api/services/gameService';
 type Props = {
     detail: IGameDetail;
 };
+type RelationItem = { id: number; name: string };
+type SelectorState = {
+    title: string;
+    items: RelationItem[];
+    onSelect: (item: RelationItem) => void;
+} | null;
 
 const translationCache = new Map<string, string>();
 
 export const AboutTab = ({ detail }: Props) => {
     const navigation = useNavigation<NavigationProp<GameRelationNavigationParamList>>();
+    const insets = useSafeAreaInsets();
 
     const source = detail?.description_raw?.trim() || '';
     const stores = useMemo(() => detail.stores?.map(item => item.store) ?? [], [detail.stores]);
     const [developmentTeam, setDevelopmentTeam] = useState<{ id: number; name: string }[]>([]);
+    const [selector, setSelector] = useState<SelectorState>(null);
 
     useEffect(() => {
         let active = true;
@@ -139,20 +151,26 @@ export const AboutTab = ({ detail }: Props) => {
     const description =
         translation && !showOriginal ? translation : source;
 
-    const facts = [
+    const developers = detail.developers ?? [];
+    const publishers = detail.publishers ?? [];
+    const platforms = (detail.platforms ?? []).map(item => item.platform);
+    const openSelector = (
+        title: string,
+        items: RelationItem[],
+        onSelect: (item: RelationItem) => void,
+    ) => {
+        if (items.length > 0) setSelector({ title, items, onSelect });
+    };
+    const facts: { label: string; value: string; onPress?: () => void }[] = [
         {
             label: 'GELİŞTİRİCİ',
-            value:
-                detail.developers
-                    ?.map(item => item.name)
-                    .join(', ') || 'Bilinmiyor',
+            value: developers.map(item => item.name).join(', ') || 'Bilinmiyor',
+            onPress: developers.length > 0 ? () => openSelector('Geliştiriciler', developers, item => navigation.navigate('DeveloperDetail', item)) : undefined,
         },
         {
             label: 'YAYINCI',
-            value:
-                detail.publishers
-                    ?.map(item => item.name)
-                    .join(', ') || 'Bilinmiyor',
+            value: publishers.map(item => item.name).join(', ') || 'Bilinmiyor',
+            onPress: publishers.length > 0 ? () => openSelector('Yayıncılar', publishers, item => navigation.navigate('PublisherDetail', item)) : undefined,
         },
         {
             label: 'ÇIKIŞ TARİHİ',
@@ -160,7 +178,8 @@ export const AboutTab = ({ detail }: Props) => {
         },
         {
             label: 'PLATFORMLAR',
-            value: detail.platforms?.map(item => item.platform.name).join(', ') || 'Belirtilmemiş',
+            value: platforms.map(item => item.name).join(', ') || 'Belirtilmemiş',
+            onPress: platforms.length > 0 ? () => openSelector('Platformlar', platforms, item => navigation.navigate('PlatformDetail', item)) : undefined,
         },
         {
             label: 'ORTALAMA SÜRE',
@@ -174,28 +193,11 @@ export const AboutTab = ({ detail }: Props) => {
             value:
                 detail.esrb_rating?.name || 'Derecelendirilmemiş',
         },
-    ];
-    const relationGroups = [
-        {
-            label: 'GELİŞTİRİCİLER',
-            items: detail.developers ?? [],
-            open: (id: number, name: string) => navigation.navigate('DeveloperDetail', { id, name }),
-        },
-        {
-            label: 'YAYINCILAR',
-            items: detail.publishers ?? [],
-            open: (id: number, name: string) => navigation.navigate('PublisherDetail', { id, name }),
-        },
-        {
+        ...(developmentTeam.length > 0 ? [{
             label: 'YARATICILAR',
-            items: developmentTeam,
-            open: (id: number, name: string) => navigation.navigate('CreatorDetail', { id, name }),
-        },
-        {
-            label: 'PLATFORMLAR',
-            items: (detail.platforms ?? []).map(item => item.platform),
-            open: (id: number, name: string) => navigation.navigate('PlatformDetail', { id, name }),
-        },
+            value: `${developmentTeam.length} kişi`,
+            onPress: () => openSelector('Yaratıcılar', developmentTeam, item => navigation.navigate('CreatorDetail', item)),
+        }] : []),
     ];
 
     return (
@@ -261,9 +263,12 @@ export const AboutTab = ({ detail }: Props) => {
 
             <View style={localStyles.grid}>
                 {facts.map(item => (
-                    <View
+                    <TouchableOpacity
                         key={item.label}
                         style={localStyles.fact}
+                        disabled={!item.onPress}
+                        activeOpacity={0.75}
+                        onPress={item.onPress}
                     >
                         <AppText style={localStyles.factLabel}>
                             {item.label}
@@ -272,33 +277,57 @@ export const AboutTab = ({ detail }: Props) => {
                         <AppText style={localStyles.factValue}>
                             {item.value}
                         </AppText>
-                    </View>
+                        {!!item.onPress && <AppText color={colors.primary} style={localStyles.factArrow}>›</AppText>}
+                    </TouchableOpacity>
                 ))}
             </View>
 
-            <AppText style={styles.sectionTitle}>Bağlantılı bilgiler</AppText>
-            <AppText style={localStyles.relationHint}>
-                Bir öğeye dokunarak ilgili detay sayfasını veya oyun listesini aç.
-            </AppText>
-            {relationGroups.map(group => group.items.length > 0 && (
-                <View key={group.label} style={localStyles.relationGroup}>
-                    <AppText style={localStyles.factLabel}>{group.label}</AppText>
-                    <View style={localStyles.relations}>
-                        {group.items.map(item => (
-                            <TouchableOpacity
-                                key={`${group.label}-${item.id}`}
-                                accessibilityRole="button"
-                                accessibilityLabel={`${item.name}, detayını aç`}
-                                style={localStyles.relation}
-                                onPress={() => group.open(item.id, item.name)}
-                            >
-                                <AppText color={colors.primary} bold numberOfLines={1}>{item.name}</AppText>
-                                <AppText color={colors.secondary}>›</AppText>
-                            </TouchableOpacity>
-                        ))}
+            <Modal
+                visible={selector !== null}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setSelector(null)}
+                statusBarTranslucent
+                navigationBarTranslucent
+            >
+                <View style={localStyles.modalRoot}>
+                    <Pressable
+                        style={localStyles.modalBackdrop}
+                        accessibilityRole="button"
+                        accessibilityLabel="Seçim panelini kapat"
+                        onPress={() => setSelector(null)}
+                    />
+                    <View style={[localStyles.selectorSheet, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+                        <View style={localStyles.selectorHeader}>
+                            <AppText style={styles.sectionTitle}>{selector?.title}</AppText>
+                            <Pressable accessibilityRole="button" accessibilityLabel="Seçim panelini kapat" onPress={() => setSelector(null)} style={localStyles.closeButton}>
+                                <AppText style={localStyles.closeText}>×</AppText>
+                            </Pressable>
+                        </View>
+                        <FlatList
+                            data={selector?.items ?? []}
+                            keyExtractor={item => String(item.id)}
+                            contentContainerStyle={localStyles.selectorList}
+                            renderItem={({ item }) => (
+                                <Pressable
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`${item.name}, detayını aç`}
+                                    style={localStyles.selectorRow}
+                                    onPress={() => {
+                                        const current = selector;
+                                        setSelector(null);
+                                        current?.onSelect(item);
+                                    }}
+                                >
+                                    <AppText bold numberOfLines={1} style={localStyles.selectorName}>{item.name}</AppText>
+                                    <AppText color={colors.primary} style={localStyles.selectorArrow}>›</AppText>
+                                </Pressable>
+                            )}
+                            ListEmptyComponent={<AppText style={styles.muted}>Bu alanda gösterilecek bilgi yok.</AppText>}
+                        />
                     </View>
                 </View>
-            ))}
+            </Modal>
 
             {!!detail.tags?.length && (
                 <>
@@ -384,31 +413,64 @@ const localStyles = StyleSheet.create({
         lineHeight: 20,
         fontWeight: '600',
     },
-    relationHint: {
-        color: colors.secondary,
-        fontSize: 12,
-        lineHeight: 19,
-        marginTop: -6,
-        marginBottom: 12,
+    factArrow: {
+        position: 'absolute',
+        top: 10,
+        right: 12,
+        fontSize: 22,
+        lineHeight: 22,
     },
-    relationGroup: {
-        marginBottom: 16,
+    modalRoot: {
+        flex: 1,
+        justifyContent: 'flex-end',
     },
-    relations: {
-        gap: 8,
+    modalBackdrop: {
+        ...StyleSheet.absoluteFill,
+        backgroundColor: 'rgba(0,0,0,0.68)',
     },
-    relation: {
-        minHeight: 48,
+    selectorSheet: {
+        maxHeight: '72%',
+        backgroundColor: '#191E22',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        paddingTop: 16,
+    },
+    selectorHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    closeButton: {
+        width: 44,
+        height: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    closeText: {
+        fontSize: 28,
+        color: '#FFFFFF',
+    },
+    selectorList: {
+        paddingHorizontal: 16,
+        paddingBottom: 8,
+    },
+    selectorRow: {
+        minHeight: 56,
         paddingHorizontal: 14,
-        paddingVertical: 11,
-        borderRadius: 12,
-        backgroundColor: '#191E2B',
-        borderWidth: 1,
-        borderColor: '#2A3040',
+        paddingVertical: 12,
+        borderRadius: 14,
+        marginBottom: 8,
+        backgroundColor: '#242B30',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 12,
+    },
+    selectorName: {
+        flex: 1,
+    },
+    selectorArrow: {
+        fontSize: 24,
     },
     tags: {
         flexDirection: 'row',
