@@ -12,6 +12,7 @@ type CacheEntry = {
 
 type RequestOptions = {
     forceRefresh?: boolean;
+    validate?: (data: unknown) => boolean;
 };
 
 const CACHE_TTL = 5 * 60 * 1000;
@@ -97,6 +98,10 @@ export async function cachedGet<T>(
             const response = await apiClient.get<T>(url, {
                 params,
             });
+
+            if (options.validate && !options.validate(response.data)) {
+                throw new Error('Geçersiz API yanıtı');
+            }
 
             // A forced refresh may have superseded this request.
             if (pendingRequests.get(key) === request) {

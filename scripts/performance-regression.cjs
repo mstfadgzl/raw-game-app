@@ -167,3 +167,15 @@ test('manual refresh replaces cached filtered results', async () => {
   }
   assert.equal(calls, 6);
 });
+
+test('incorrect profile identities are rejected and never cached', async () => {
+  let calls = 0;
+  const { entityService: api } = load('app/api/services/entityService.ts', {
+    get: async () => ({ data: { id: ++calls === 1 ? 99 : 7, name: 'Profile' } }),
+  });
+  await assert.rejects(api.getCreatorDetail(7));
+  assert.equal(api.peekCreatorDetail(7), null);
+  await api.getCreatorDetail(7);
+  assert.equal(api.peekCreatorDetail(7).id, 7);
+  assert.equal(calls, 2);
+});
