@@ -173,7 +173,7 @@ export const gameService = {
     ): Promise<IGameListResponse> => {
         return cachedGet<IGameListResponse>('/games', {
             search: query.trim(),
-            search_precise: true,
+            search_precise: false,
             search_exact: false,
             ordering: '-added',
             metacritic: '1,100',
