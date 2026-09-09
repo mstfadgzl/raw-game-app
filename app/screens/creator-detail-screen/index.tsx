@@ -106,10 +106,6 @@ export const CreatorDetailScreen = () => {
                 } else {
                     throw new Error('Oyunlar alınamadı.');
                 }
-
-                if (active) {
-                    setGames(response.results ?? []);
-                }
             } catch {
                 if (active) {
                     setGamesError(true);
