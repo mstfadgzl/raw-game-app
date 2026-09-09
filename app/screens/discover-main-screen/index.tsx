@@ -320,6 +320,30 @@ export const DiscoverMainScreen = () => {
         [dispatch],
     );
 
+    const fetchDevelopers = useCallback(async () => {
+        const requestId = ++developersRequestId.current;
+        setDevelopersLoading(true);
+        setDevelopersError(false);
+        try {
+            const response = await dispatch(
+                getDevelopersProcess({ page: 1 }),
+            ).unwrap();
+            if (!Array.isArray(response.results)) {
+                throw new Error('Geçersiz geliştirici listesi');
+            }
+            if (requestId !== developersRequestId.current) return;
+            setDevelopers(response.results);
+        } catch {
+            if (requestId === developersRequestId.current) {
+                setDevelopersError(true);
+            }
+        } finally {
+            if (requestId === developersRequestId.current) {
+                setDevelopersLoading(false);
+            }
+        }
+    }, [dispatch]);
+
     const fetchData = useCallback(async () => {
         await Promise.allSettled([
             fetchTags(1, true),
