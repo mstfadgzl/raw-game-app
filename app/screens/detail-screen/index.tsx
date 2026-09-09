@@ -97,6 +97,7 @@ const DetailContent = ({ gameId }: { gameId: number }) => {
                 name: detail.name,
                 background_image: detail.background_image,
                 rating: detail.rating,
+                metacritic: detail.metacritic,
                 released: detail.released,
             } as any),
         );
@@ -206,6 +207,18 @@ const DetailContent = ({ gameId }: { gameId: number }) => {
                                     bold
                                 >
                                     ★ {Number(detail.rating).toFixed(1)}
+                                </AppText>
+                            </View>
+                        )}
+
+                        {detail.metacritic > 0 && (
+                            <View style={styles.metaBox}>
+                                <AppText
+                                    variant="caption"
+                                    color="#FFFFFF"
+                                    bold
+                                >
+                                    Metacritic {detail.metacritic}
                                 </AppText>
                             </View>
                         )}

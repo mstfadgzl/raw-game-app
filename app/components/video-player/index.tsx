@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import Video, { type VideoRef } from 'react-native-video';
+import Orientation from 'react-native-orientation-locker';
 
 import { ITrailer } from '@types';
 import { AppText } from '../app-text';
@@ -142,6 +143,7 @@ const FullscreenPlayer = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [barWidth, setBarWidth] = useState(0);
+  const [isLandscape, setIsLandscape] = useState(false);
 
   const [appActive, setAppActive] = useState(
     AppState.currentState === 'active',
@@ -169,6 +171,10 @@ const FullscreenPlayer = ({
     };
   }, []);
 
+  useEffect(() => () => {
+    Orientation.lockToPortrait();
+  }, []);
+
   useEffect(() => {
     if (!waiting || error || !appActive) return;
 
@@ -188,6 +194,17 @@ const FullscreenPlayer = ({
     setAttempt(value => value + 1);
     setPaused(false);
     setControlsVisible(true);
+  };
+
+  const toggleOrientation = () => {
+    if (isLandscape) {
+      Orientation.lockToPortrait();
+    } else {
+      Orientation.lockToLandscape();
+    }
+
+    setIsLandscape(value => !value);
+    showControls();
   };
 
   const showControls = () => setControlsVisible(true);
@@ -278,7 +295,6 @@ const FullscreenPlayer = ({
 
           }}
         >
-          <Pressable style={styles.videoSurface} onPress={toggleControls}>
           <Video
             key={attempt}
             ref={videoRef}
@@ -330,8 +346,22 @@ const FullscreenPlayer = ({
             }}
           />
 
+          <Pressable
+            accessibilityLabel="Video kontrollerini göster veya gizle"
+            style={styles.touchSurface}
+            onPress={toggleControls}
+          />
+
           {controlsVisible && !error && (
             <View style={styles.controls} pointerEvents="box-none">
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={isLandscape ? 'Dikey görünüme dön' : 'Yatay görünümü aç'}
+                style={styles.orientationButton}
+                onPress={toggleOrientation}
+              >
+                <AppText style={styles.orientationText}>{isLandscape ? '⛶' : '⛶'}</AppText>
+              </TouchableOpacity>
               <View style={styles.controlCenter} pointerEvents="box-none">
                 <View style={styles.seekButtons}>
                   <TouchableOpacity
@@ -404,7 +434,6 @@ const FullscreenPlayer = ({
               </AppText>
             </View>
           )}
-          </Pressable>
         </View>
       ) : null}
 

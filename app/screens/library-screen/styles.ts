@@ -12,18 +12,23 @@ export const styles = StyleSheet.create({
     header: {
         paddingHorizontal: spacing.md,
         paddingTop: spacing.lg,
-        paddingBottom: spacing.md,
+        paddingBottom: spacing.lg,
     },
 
     // Oyun kartlarının ekrana yapışmasını engelleyen çerçeve
     cardWrapper: {
-        paddingHorizontal: spacing.md,
-        paddingBottom: spacing.md,
+        width: '48%',
+        marginBottom: spacing.md,
     },
 
     // Listenin en altında, Bottom Tab Bar'ın (Alt sekme menüsü) arkasında 
     // oyun kartlarının gizli kalmasını engelleyen boşluk
     listContent: {
-        paddingBottom: 100,
-    }
+        paddingHorizontal: spacing.md,
+        paddingBottom: 110,
+    },
+
+    row: {
+        justifyContent: 'space-between',
+    },
 });

@@ -22,13 +22,32 @@ export const styles = StyleSheet.create({
         height: '100%',
     },
 
-    videoSurface: {
+    touchSurface: {
         ...StyleSheet.absoluteFill,
+        zIndex: 1,
     },
 
     controls: {
         ...StyleSheet.absoluteFill,
         justifyContent: 'center',
+        zIndex: 2,
+    },
+
+    orientationButton: {
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        width: 42,
+        height: 42,
+        borderRadius: 21,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.68)',
+    },
+
+    orientationText: {
+        color: '#FFFFFF',
+        fontSize: 22,
     },
 
     controlCenter: {
