@@ -1,5 +1,5 @@
 import { entityService } from "@services";
-import { ICreator, ICreatorResponse, IDeveloperResponse } from "@types";
+import { ICreator, ICreatorResponse, IDeveloper, IDeveloperResponse } from "@types";
 import { createAppAsyncThunk } from "@utils";
 
 export const getCreatorsProcess = createAppAsyncThunk<ICreatorResponse, { page?: number, pageSize: number }>(
@@ -14,7 +14,7 @@ export const getDevelopersProcess = createAppAsyncThunk<IDeveloperResponse, { pa
     'entity/getDevelopersProcess',
     ({ page }) => entityService.getDevelopers(page)
 );
-export const getDeveloperDetailProcess = createAppAsyncThunk<IDeveloperResponse, number>(
+export const getDeveloperDetailProcess = createAppAsyncThunk<IDeveloper, number>(
     'entity/getDeveloperDetailProcess',
     (id) => entityService.getDeveloperDetail(id)
 );
