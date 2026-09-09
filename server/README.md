@@ -2,6 +2,12 @@
 
 Bu küçük servis RAWG anahtarını mobil uygulamadan çıkarır. Mobil uygulama `/api/*` adreslerine istek gönderir; proxy anahtarı sunucu tarafında ekleyip isteği RAWG'ye iletir.
 
+Proxy yalnızca göreli RAWG yollarını kabul eder. Mutlak host, yol geçişi ve
+ters bölü içeren yollar reddedilir. İstemciden gelen `key` parametresi yok
+sayılır; yalnızca server `.env` içindeki anahtar kullanılır. RAWG yanıtlarında
+`next` veya `previous` içinde bulunan anahtarlar da mobil istemciye iletilmeden
+temizlenir.
+
 ## İlk çalıştırma
 
 1. `server/.env.example` dosyasını `server/.env` olarak kopyala.
