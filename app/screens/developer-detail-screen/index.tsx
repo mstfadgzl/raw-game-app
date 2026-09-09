@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, TouchableOpacity, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { Container, AppText, GameCard, Skeleton } from '@components';
+import { Container, AppText, GameCard, Skeleton, StudioBrand } from '@components';
 import { entityService, gameService } from '@services';
 import { translateText } from '@utils';
 import type { CompanyDetailRouteProp, DiscoverScreenNavigationProp, IDeveloper, IGame } from '@types';
@@ -81,7 +81,19 @@ const DeveloperContent = ({ id, kind }: { id: number; kind: CompanyKind }) => {
                 {developer.image_background && !imageFailed ? <Image source={{ uri: developer.image_background }} style={styles.heroImage} onError={() => setImageFailed(true)} /> : <AppText style={styles.monogram}>{developer.name.charAt(0)}</AppText>}
                 <View style={styles.shade} />
                 <TouchableOpacity accessibilityRole="button" accessibilityLabel="Geri dön" style={styles.back} onPress={() => navigation.goBack()}><AppText bold>‹ Geri</AppText></TouchableOpacity>
-                <View style={styles.heroText}><AppText style={styles.eyebrow}>{kind === 'publisher' ? 'YAYINCI' : 'GELİŞTİRİCİ STÜDYO'}</AppText><AppText style={styles.title}>{developer.name}</AppText></View>
+                <View style={styles.heroText}>
+                    <View style={styles.brandRow}>
+                        <StudioBrand
+                            name={developer.name}
+                            imageBackground={developer.image_background}
+                            size={58}
+                        />
+                        <View style={styles.brandCopy}>
+                            <AppText style={styles.eyebrow}>{kind === 'publisher' ? 'YAYINCI' : 'GELİŞTİRİCİ STÜDYO'}</AppText>
+                            <AppText style={styles.title} numberOfLines={2}>{developer.name}</AppText>
+                        </View>
+                    </View>
+                </View>
             </View>
             <View style={styles.content}>
                 <View style={styles.stat}><AppText style={styles.statNumber}>{developer.games_count}</AppText><AppText style={styles.muted}>Bu zamana kadar yapılan oyun </AppText></View>

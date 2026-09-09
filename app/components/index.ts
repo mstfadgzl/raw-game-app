@@ -13,7 +13,8 @@ export * from './video-player';
 export * from './creator-card';
 export * from './reddit-post-item';
 export * from './compact-game-item';
-export * from './app-mark';
+export * from './studio-brand';
+export * from './studio-card';
 export {
     GameSortFilter,
     DEFAULT_GAME_FILTERS,

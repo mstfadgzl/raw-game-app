@@ -27,6 +27,7 @@ import {
     AppText,
     Container,
     CreatorCard,
+    StudioCard,
     Skeleton,
 } from '@components';
 
@@ -325,11 +326,16 @@ export const DiscoverMainScreen = () => {
 
     const fetchDevelopers = useCallback(
         async (page: number = 1, reset: boolean = true) => {
-            if (!reset && !developersLock.current) return;
+            if (developersLock.current) return;
             if (!reset && !developersHasNext.current) return;
 
             const requestId = ++developersRequestId.current;
             developersLock.current = true;
+            if (reset) {
+                developersPage.current = 0;
+                developersHasNext.current = false;
+                setDevelopers([]);
+            }
             setDevelopersLoading(true);
             setDevelopersError(false);
             try {
@@ -361,6 +367,7 @@ export const DiscoverMainScreen = () => {
                 }
             } finally {
                 if (requestId === developersRequestId.current) {
+                    developersLock.current = false;
                     setDevelopersLoading(false);
                 }
             }
@@ -425,9 +432,25 @@ export const DiscoverMainScreen = () => {
                         keyExtractor={item => `developer-${item.id}`}
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.horizontalPadding}
+                        initialNumToRender={4}
+                        maxToRenderPerBatch={4}
+                        windowSize={5}
+                        onEndReached={() => {
+                            if (
+                                !developersLoading &&
+                                !developersError &&
+                                developersHasNext.current
+                            ) {
+                                void fetchDevelopers(
+                                    developersPage.current + 1,
+                                    false,
+                                );
+                            }
+                        }}
+                        onEndReachedThreshold={0.5}
                         renderItem={({ item }) => (
-                            <CreatorCard
-                                creator={item}
+                            <StudioCard
+                                studio={item}
                                 onPress={() =>
                                     navigation.navigate('DeveloperDetail', {
                                         id: item.id,
@@ -436,6 +459,13 @@ export const DiscoverMainScreen = () => {
                                 }
                             />
                         )}
+                        ListFooterComponent={
+                            developersLoading && developers.length > 0 ? (
+                                <View style={styles.creatorFooter}>
+                                    <ActivityIndicator color={colors.primary} />
+                                </View>
+                            ) : undefined
+                        }
                         ListEmptyComponent={
                             !developersError ? (
                                 <AppText color={colors.secondary}>

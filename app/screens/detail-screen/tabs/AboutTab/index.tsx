@@ -13,7 +13,7 @@ import {
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, GenreChip } from '@components';
+import { AppText, GenreChip, StudioBrand } from '@components';
 import { translateText } from '@utils';
 import { colors } from '@theme';
 import type { IGameDetail, GameRelationNavigationParamList } from '@types';
@@ -24,12 +24,23 @@ import { gameService } from '../../../../api/services/gameService';
 type Props = {
     detail: IGameDetail;
 };
-type RelationItem = { id: number; name: string };
+type RelationItem = {
+    id: number;
+    name: string;
+    image?: string | null;
+    image_background?: string | null;
+};
 type SelectorState = {
     title: string;
     items: RelationItem[];
     onSelect: (item: RelationItem) => void;
 } | null;
+type Fact = {
+    label: string;
+    value: string;
+    onPress?: () => void;
+    brand?: RelationItem;
+};
 
 const translationCache = new Map<string, string>();
 
@@ -39,7 +50,7 @@ export const AboutTab = ({ detail }: Props) => {
 
     const source = detail?.description_raw?.trim() || '';
     const stores = useMemo(() => detail.stores?.map(item => item.store) ?? [], [detail.stores]);
-    const [developmentTeam, setDevelopmentTeam] = useState<{ id: number; name: string }[]>([]);
+    const [developmentTeam, setDevelopmentTeam] = useState<RelationItem[]>([]);
     const [selector, setSelector] = useState<SelectorState>(null);
 
     useEffect(() => {
@@ -161,15 +172,17 @@ export const AboutTab = ({ detail }: Props) => {
     ) => {
         if (items.length > 0) setSelector({ title, items, onSelect });
     };
-    const facts: { label: string; value: string; onPress?: () => void }[] = [
+    const facts: Fact[] = [
         {
             label: 'GELİŞTİRİCİ',
             value: developers.map(item => item.name).join(', ') || 'Bilinmiyor',
+            brand: developers[0],
             onPress: developers.length > 0 ? () => openSelector('Geliştiriciler', developers, item => navigation.navigate('DeveloperDetail', item)) : undefined,
         },
         {
             label: 'YAYINCI',
             value: publishers.map(item => item.name).join(', ') || 'Bilinmiyor',
+            brand: publishers[0],
             onPress: publishers.length > 0 ? () => openSelector('Yayıncılar', publishers, item => navigation.navigate('PublisherDetail', item)) : undefined,
         },
         {
@@ -270,7 +283,15 @@ export const AboutTab = ({ detail }: Props) => {
                         activeOpacity={0.75}
                         onPress={item.onPress}
                     >
-                        <AppText style={localStyles.factLabel}>
+                        {!!item.brand && (
+                            <StudioBrand
+                                name={item.brand.name}
+                                image={item.brand.image}
+                                imageBackground={item.brand.image_background}
+                                size={34}
+                            />
+                        )}
+                        <AppText style={item.brand ? [localStyles.factLabel, localStyles.factLabelWithBrand] : localStyles.factLabel}>
                             {item.label}
                         </AppText>
 
@@ -319,6 +340,12 @@ export const AboutTab = ({ detail }: Props) => {
                                         current?.onSelect(item);
                                     }}
                                 >
+                                    <StudioBrand
+                                        name={item.name}
+                                        image={item.image}
+                                        imageBackground={item.image_background}
+                                        size={44}
+                                    />
                                     <AppText bold numberOfLines={1} style={localStyles.selectorName}>{item.name}</AppText>
                                     <AppText color={colors.primary} style={localStyles.selectorArrow}>›</AppText>
                                 </Pressable>
@@ -407,6 +434,9 @@ const localStyles = StyleSheet.create({
         fontSize: 10,
         fontWeight: '700',
         marginBottom: 7,
+    },
+    factLabelWithBrand: {
+        marginTop: 8,
     },
     factValue: {
         fontSize: 13,

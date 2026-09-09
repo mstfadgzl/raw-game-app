@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Keyboard, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Keyboard, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { AppText } from '@components';
+import { AppText, StudioBrand } from '@components';
 import { entityService } from '@services';
 import type { IDeveloper, SearchScreenNavigationProp } from '@types';
 import { colors } from '@theme';
@@ -80,9 +80,7 @@ const DeveloperResults = ({ query }: { query: string }) => {
                         navigation.navigate('DeveloperDetail', { id: item.id, name: item.name });
                     }}
                 >
-                    {item.image_background ? <Image source={{ uri: item.image_background }} style={localStyles.avatar} /> : (
-                        <View style={localStyles.avatar}><AppText bold>{item.name.charAt(0)}</AppText></View>
-                    )}
+                    <StudioBrand name={item.name} imageBackground={item.image_background} size={56} />
                     <View style={localStyles.info}>
                         <AppText bold>{item.name}</AppText>
                         <AppText color={colors.secondary}>

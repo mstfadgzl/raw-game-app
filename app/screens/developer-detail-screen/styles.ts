@@ -10,6 +10,8 @@ export const styles = StyleSheet.create({
     monogram: { fontSize: 110, fontWeight: '800', color: colors.primary },
     back: { position: 'absolute', top: 16, left: 16, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 24, backgroundColor: 'rgba(10,15,23,0.8)' },
     heroText: { position: 'absolute', bottom: 28, left: 20, right: 20 },
+    brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    brandCopy: { flex: 1 },
     eyebrow: { color: colors.primary, fontSize: 10, fontWeight: '700', letterSpacing: 2, marginBottom: 10 },
     title: { color: '#FFFFFF', fontSize: 30, lineHeight: 36, fontWeight: '800' },
     content: { padding: 20 },
