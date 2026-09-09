@@ -92,7 +92,7 @@ async function cachedGet<T>(
     // Devam eden aynı ağ isteği varsa onu paylaş.
     const pending = pendingRequests.get(key);
 
-    if (pending) {
+    if (pending && !options.forceRefresh) {
         return pending as Promise<T>;
     }
 
@@ -108,7 +108,8 @@ async function cachedGet<T>(
 
     cache.delete(key);
 
-    const request = (async (): Promise<T> => {
+    let request!: Promise<T>;
+    request = (async (): Promise<T> => {
         const startedAt = Date.now();
 
         try {
@@ -116,7 +117,10 @@ async function cachedGet<T>(
                 params,
             });
 
-            saveToCache(key, response.data);
+            // A forced refresh may have superseded this request.
+            if (pendingRequests.get(key) === request) {
+                saveToCache(key, response.data);
+            }
 
             return response.data;
         } finally {
@@ -134,7 +138,9 @@ async function cachedGet<T>(
     try {
         return await request;
     } finally {
-        pendingRequests.delete(key);
+        if (pendingRequests.get(key) === request) {
+            pendingRequests.delete(key);
+        }
     }
 }
 
@@ -144,10 +150,9 @@ export const gameService = {
     getGames: async (
         params: GetGamesParams,
     ): Promise<IGameListResponse> => {
-        const response = await apiClient.get<IGameListResponse>(
+        return cachedGet<IGameListResponse>(
             '/games',
             {
-                params: {
 
                     page: params.page,
                     page_size: params.pageSize ?? 20,
@@ -158,10 +163,9 @@ export const gameService = {
                     dates: params.dates,
                     metacritic: params.metacritic,
                     creators: params.creators,
-                },
             },
+            { forceRefresh: params.forceRefresh },
         );
-        return response.data;
     },
 
     getGameDetail: (

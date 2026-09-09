@@ -3,10 +3,12 @@ import gameReducer from './slices/gameSlice';
 import genreReducer from './slices/genreSlice';
 import discoveryReducer from './slices/discoverySlice'
 import entityReducer from './slices/entitySlice';
+import { favoritesOnlyState } from './persistedGame';
 import AsyncStorage from '@react-native-async-storage/async-storage';;
 import {
     persistStore,
     persistReducer,
+    createTransform,
     FLUSH,
     REHYDRATE,
     PAUSE,
@@ -28,8 +30,9 @@ const persistConfig = {
     key: 'root',
     storage: AsyncStorage,
     whitelist: ['game'],
+    transforms: [createTransform(favoritesOnlyState, favoritesOnlyState, { whitelist: ['game'] })],
 };
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+const persistedReducer = persistReducer<ReturnType<typeof rootReducer>>(persistConfig, rootReducer);
 
 export const store = configureStore({
     reducer: persistedReducer,
