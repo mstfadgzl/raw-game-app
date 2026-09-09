@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer';
 import http from 'node:http';
+import { getUpstreamUrl, redactApiKeys } from './upstream-url.js';
 
 const port = Number(process.env.PORT || 3000);
 const rawgApiKey = process.env.RAWG_API_KEY?.trim();
@@ -11,10 +12,6 @@ if (!rawgApiKey || !rawgBaseUrl) {
     'RAWG_API_KEY ve RAWG_BASE_URL server/.env içinde tanımlanmalıdır.',
   );
 }
-
-const baseUrl = rawgBaseUrl.endsWith('/')
-  ? rawgBaseUrl
-  : `${rawgBaseUrl}/`;
 
 const writeJson = (response, statusCode, payload) => {
   const body = JSON.stringify(payload);
@@ -28,36 +25,6 @@ const writeJson = (response, statusCode, payload) => {
   });
 
   response.end(body);
-};
-
-const getUpstreamUrl = requestUrl => {
-  const incomingUrl = new URL(
-    requestUrl,
-    `http://localhost:${port}`,
-  );
-
-  if (!incomingUrl.pathname.startsWith('/api/')) {
-    return null;
-  }
-
-  const rawgPath = incomingUrl.pathname.slice('/api/'.length);
-
-  if (!rawgPath || rawgPath.includes('..')) {
-    return null;
-  }
-
-  const upstreamUrl = new URL(rawgPath, baseUrl);
-
-  incomingUrl.searchParams.forEach((value, key) => {
-    // RAWG anahtarının istemciden geçirilmesine izin vermiyoruz.
-    if (key !== 'key') {
-      upstreamUrl.searchParams.append(key, value);
-    }
-  });
-
-  upstreamUrl.searchParams.set('key', rawgApiKey);
-
-  return upstreamUrl;
 };
 
 const server = http.createServer(async (request, response) => {
@@ -86,7 +53,11 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
-  const upstreamUrl = getUpstreamUrl(request.url || '/');
+  const upstreamUrl = getUpstreamUrl(request.url || '/', {
+    baseUrl: rawgBaseUrl,
+    apiKey: rawgApiKey,
+    port,
+  });
 
   if (!upstreamUrl) {
     writeJson(response, 404, { message: 'Geçersiz API yolu.' });
@@ -104,7 +75,13 @@ const server = http.createServer(async (request, response) => {
       signal: controller.signal,
     });
 
-    const body = await upstreamResponse.text();
+    const rawBody = await upstreamResponse.text();
+    let body = rawBody;
+    try {
+      body = JSON.stringify(redactApiKeys(JSON.parse(rawBody)));
+    } catch {
+      // RAWG'nin JSON olmayan hata gövdesini olduğu gibi ilet.
+    }
     const contentType = upstreamResponse.headers.get('content-type') ||
       'application/json; charset=utf-8';
 
