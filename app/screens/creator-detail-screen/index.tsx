@@ -81,13 +81,31 @@ export const CreatorDetailScreen = () => {
 
         const fetchCreatorGames = async () => {
             try {
-                const response = await dispatch(
+                const action = await dispatch(
                     getGamesProcess({
-                        page: 1,
-                        creators: String(id),
-                        ordering: '-added',
+                        page: requestedPage,
+                        genres: slug,
+                        ...query,
                     }),
-                ).unwrap();
+                );
+
+                if (getGamesProcess.fulfilled.match(action)) {
+                    const response = action.payload;
+
+                    const incomingGames = response.results ?? [];
+
+                    setGames(previous =>
+                        requestedPage === 1
+                            ? incomingGames
+                            : mergeGames(previous, incomingGames),
+                    );
+
+                    queryRef.current = query;
+                    pageRef.current = requestedPage;
+                    hasMoreRef.current = Boolean(response.next);
+                } else {
+                    throw new Error('Oyunlar alınamadı.');
+                }
 
                 if (active) {
                     setGames(response.results ?? []);
