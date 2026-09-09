@@ -246,3 +246,56 @@ test('closing a search ignores its late response and invalid pages remain retrya
   await fresh.load(true);
   assert.equal(latest.items[0].id, 2);
 });
+
+test('store links fetch all pages without following next URLs and reuse cache', async () => {
+  const calls = [];
+  const { storeService: api } = load('app/api/services/storeService.ts', { get: async (url, { params }) => {
+    calls.push([url, params.page]);
+    return { data: { results: [{ id: params.page, game_id: 3498, store_id: params.page, url: 'https://example.com/game' }], next: params.page === 1 ? 'https://api.rawg.io/api/games/3498/stores?page=2&key=not-for-client' : null } };
+  } });
+  const links = await api.getGameLinks(3498);
+  assert.equal(links.length, 2);
+  assert.deepEqual(calls, [['/games/3498/stores', 1], ['/games/3498/stores', 2]]);
+  await api.getGameLinks(3498);
+  assert.equal(calls.length, 2);
+  await api.getGameLinks(3498, true);
+  assert.equal(calls.length, 4);
+});
+
+test('store catalog supports pagination and prevents repeated page loops', async () => {
+  let calls = 0;
+  const { storeService: api } = load('app/api/services/storeService.ts', { get: async () => {
+    calls++;
+    return { data: { results: [], next: 'same-page' } };
+  } });
+  await assert.rejects(api.getStores(), /tekrarlanıyor/);
+  assert.equal(calls, 2);
+});
+
+test('store options join numeric/string IDs, deduplicate and retain stores without product URLs', () => {
+  const { buildStoreOptions } = load('app/utils/store-links.ts', {});
+  const links = [
+    { store_id: '1', url: 'https://store.steampowered.com/app/123/' },
+    { store_id: 1, url: 'https://store.steampowered.com/app/123/' },
+    { store_id: 2, url: 'javascript:alert(1)' },
+    { store_id: 99, url: 'https://new-store.example/game' },
+  ];
+  const result = buildStoreOptions(links, [{ id: 1, name: 'Steam', slug: 'steam' }, { id: 2, name: 'Xbox' }]);
+  assert.equal(result.length, 3);
+  assert.equal(result[0].name, 'Steam');
+  assert.equal(result[1].name, 'new-store.example');
+  assert.equal(result[2].url, null);
+});
+
+test('only valid web store links are opened; operating-system failures reach the caller', async () => {
+  const { safeStoreUrl, openStoreLink } = load('app/utils/store-links.ts', {});
+  for (const url of ['javascript:alert(1)', 'intent://open', 'file:///tmp', 'https://user:pass@example.com', 'https://example.com\\evil', 'https://']) {
+    assert.equal(safeStoreUrl(url), null);
+  }
+  const calls = [];
+  await openStoreLink('https://store.steampowered.com/app/123/?x=1', async url => calls.push(url));
+  assert.equal(calls[0], 'https://store.steampowered.com/app/123/?x=1');
+  await assert.rejects(openStoreLink('javascript:alert(1)', async url => calls.push(url)));
+  assert.equal(calls.length, 1);
+  await assert.rejects(openStoreLink('https://example.com/game', async () => { throw new Error('no handler'); }), /no handler/);
+});

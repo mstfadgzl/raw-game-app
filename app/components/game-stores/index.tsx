@@ -49,7 +49,8 @@ export const GameStores = ({ gameId, gameName, stores }: Props) => {
                 }
             }
             setOptions(buildStoreOptions(links.value, [...metadata.values()]));
-        }).finally(() => { if (active) setLoading(false); });
+        }).catch(() => { if (active) setError(true); })
+            .finally(() => { if (active) setLoading(false); });
         return () => { active = false; };
     }, [expanded, gameId, retryKey, stores]);
 
