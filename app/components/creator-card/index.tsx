@@ -7,6 +7,7 @@ import {
 
 import { AppText } from '../app-text';
 import { styles } from './styles';
+import { cardImageUrl } from '../../utils/card-image';
 
 type CreatorGame = {
     id: number;
@@ -30,12 +31,14 @@ interface CreatorCardProps {
 
 export const CreatorCard = memo(
     ({ creator, onPress }: CreatorCardProps) => {
-        const [imageError, setImageError] = useState(false);
+        const [failedImages, setFailedImages] = useState<string[]>([]);
 
-        const imageUri =
+        const originalUri =
             creator.image ||
             creator.image_background ||
             '';
+        const thumbnail = cardImageUrl(originalUri);
+        const imageUri = failedImages.includes(thumbnail) ? originalUri : thumbnail;
 
         const creatorGames = Array.isArray(creator.games)
             ? creator.games
@@ -55,12 +58,13 @@ export const CreatorCard = memo(
                 accessibilityLabel={`${creator.name} detaylarını aç`}
             >
                 <View style={styles.imageContainer}>
-                    {imageUri && !imageError ? (
+                    {imageUri && !failedImages.includes(imageUri) ? (
                         <Image
                             source={{ uri: imageUri }}
                             style={styles.image}
                             resizeMode="cover"
-                            onError={() => setImageError(true)}
+                            resizeMethod="resize"
+                            onError={() => setFailedImages(previous => [...previous, imageUri])}
                         />
                     ) : (
                         <View style={styles.imagePlaceholder}>

@@ -8,6 +8,7 @@ import {
 
 import { IGame } from '@types';
 import { styles } from './styles';
+import { cardImageUrl } from '../../utils/card-image';
 
 type CardGame = IGame & {
     genres?: {
@@ -51,14 +52,15 @@ export const GameCard = memo(function GameCard({
     onPress,
     downloadCount,
 }: GameCardProps) {
-    const [failedImageUri, setFailedImageUri] = useState<
-        string | null
-    >(null);
+    const [failedImages, setFailedImages] = useState<string[]>([]);
 
-    const imageUri = game.background_image;
+    const thumbnail = cardImageUrl(game.background_image);
+    const imageUri = failedImages.includes(thumbnail)
+        ? game.background_image
+        : thumbnail;
 
     const hasImage = Boolean(
-        imageUri && imageUri !== failedImageUri,
+        imageUri && !failedImages.includes(imageUri),
     );
     const hasMetacritic =
         typeof game.metacritic === 'number' &&
@@ -114,8 +116,9 @@ export const GameCard = memo(function GameCard({
                         source={{ uri: imageUri }}
                         style={styles.image}
                         resizeMode="cover"
+                        resizeMethod="resize"
                         onError={() =>
-                            setFailedImageUri(imageUri || null)
+                            setFailedImages(previous => [...previous, imageUri || ''])
                         }
                     />
                 ) : (

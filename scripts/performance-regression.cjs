@@ -74,3 +74,14 @@ test('legacy persistence keeps favorites and removes transient API/loading data'
   assert.equal(favoritesOnlyState(null).data.favorites.length, 0);
 });
 
+
+test('card thumbnails resize RAWG originals without rewriting other URLs', () => {
+  const { cardImageUrl } = load('app/utils/card-image.ts');
+  const original = 'https://media.rawg.io/media/games/abc/cover.jpg';
+  assert.equal(cardImageUrl(original), 'https://media.rawg.io/media/resize/420/-/games/abc/cover.jpg');
+  const resized = 'https://media.rawg.io/media/resize/200/-/games/abc/cover.jpg';
+  assert.equal(cardImageUrl(resized), resized);
+  assert.equal(cardImageUrl(original + '?signature=example'), original + '?signature=example');
+  assert.equal(cardImageUrl('https://example.com/media/cover.jpg'), 'https://example.com/media/cover.jpg');
+  assert.equal(cardImageUrl(null), '');
+});

@@ -422,6 +422,12 @@ export const DiscoveryScreen = () => {
         [navigation],
     );
 
+    const renderGame = useCallback(({ item }: { item: IGame }) => (
+        <View style={styles.gameColumn}>
+            <GameCard game={item} onPress={handleGamePress} />
+        </View>
+    ), [handleGamePress]);
+
     const renderHeader = () => (
         <View>
             <View style={styles.header}>
@@ -654,20 +660,16 @@ export const DiscoveryScreen = () => {
         <Container style={styles.container}>
             <FlatList
                 data={games}
+                initialNumToRender={6}
+                maxToRenderPerBatch={6}
+                windowSize={7}
                 numColumns={2}
                 keyExtractor={item => `game-${item.id}`}
                 columnWrapperStyle={styles.row}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.listContent}
                 ListHeaderComponent={renderHeader()}
-                renderItem={({ item }) => (
-                    <View style={styles.gameColumn}>
-                        <GameCard
-                            game={item}
-                            onPress={handleGamePress}
-                        />
-                    </View>
-                )}
+                renderItem={renderGame}
                 ListEmptyComponent={renderEmpty()}
                 refreshControl={
                     <RefreshControl
