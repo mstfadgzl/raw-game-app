@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
     ScrollView,
     View,
@@ -14,6 +14,7 @@ import { translateText } from '@utils';
 import { colors } from '@theme';
 import type { IGameDetail, DiscoverStackParamList } from '@types';
 import { styles } from '../../styles';
+import { GameStores } from '../../../../components/game-stores';
 
 type Props = {
     detail: IGameDetail;
@@ -25,6 +26,7 @@ export const AboutTab = ({ detail }: Props) => {
     const navigation = useNavigation<NavigationProp<Pick<DiscoverStackParamList, 'TagDetail'>>>();
 
     const source = detail?.description_raw?.trim() || '';
+    const stores = useMemo(() => detail.stores?.map(item => item.store) ?? [], [detail.stores]);
 
     const [translation, setTranslation] = useState('');
     const [translating, setTranslating] = useState(false);
@@ -167,6 +169,7 @@ export const AboutTab = ({ detail }: Props) => {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
         >
+            <GameStores key={detail.id} gameId={detail.id} gameName={detail.name} stores={stores} />
             <AppText style={styles.sectionTitle}>
                 Oyun hakkında
             </AppText>
