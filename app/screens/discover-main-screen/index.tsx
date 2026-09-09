@@ -393,6 +393,57 @@ export const DiscoverMainScreen = () => {
                     Etiketleri incele, oyunların arkasındaki isimleri keşfet.
                 </AppText>
             </View>
+            <View style={styles.creatorSection}>
+                <View style={styles.sectionHeader}>
+                    <AppText style={styles.sectionTitle}>
+                        Geliştirici stüdyolar
+                    </AppText>
+                </View>
+
+                {developersLoading && developers.length === 0 ? (
+                    <View style={styles.creatorLoading}>
+                        <ActivityIndicator color={colors.primary} />
+                    </View>
+                ) : (
+                    <FlatList
+                        horizontal
+                        data={developers}
+                        keyExtractor={item => `developer-${item.id}`}
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.horizontalPadding}
+                        renderItem={({ item }) => (
+                            <CreatorCard
+                                creator={item}
+                                onPress={() =>
+                                    navigation.navigate('DeveloperDetail', {
+                                        id: item.id,
+                                        name: item.name,
+                                    })
+                                }
+                            />
+                        )}
+                        ListEmptyComponent={
+                            !developersError ? (
+                                <AppText color={colors.secondary}>
+                                    Geliştirici bulunamadı.
+                                </AppText>
+                            ) : null
+                        }
+                    />
+                )}
+
+                {developersError && (
+                    <TouchableOpacity
+                        accessibilityRole="button"
+                        style={styles.retryButton}
+                        onPress={() => void fetchDevelopers()}
+                    >
+                        <AppText style={styles.retryText}>
+                            Geliştiriciler yüklenemedi · Tekrar dene
+                        </AppText>
+                    </TouchableOpacity>
+                )}
+            </View>
 
             <View style={styles.creatorSection}>
                 <View style={styles.sectionHeader}>
