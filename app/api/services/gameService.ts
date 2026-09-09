@@ -176,7 +176,6 @@ export const gameService = {
             search_precise: false,
             search_exact: false,
             ordering: '-added',
-            metacritic: '1,100',
             page: 1,
             page_size: 20,
         });

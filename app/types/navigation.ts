@@ -28,6 +28,7 @@ export type DiscoverStackParamList = {
 
 export type SearchStackParamList = {
     SearchScreen: undefined;
+    CreatorDetail: { id: number; name: string };
     GameDetail: { gameId: number | string; gameName: string };
 };
 
