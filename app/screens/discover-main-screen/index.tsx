@@ -99,6 +99,9 @@ export const DiscoverMainScreen = () => {
     const [developersLoading, setDevelopersLoading] = useState(true);
     const [developersError, setDevelopersError] = useState(false);
     const developersRequestId = useRef(0);
+    const developersPage = useRef(0);
+    const developersHasNext = useRef(false);
+    const developersLock = useRef(false);
 
     const [tags, setTags] = useState<RawgTag[]>([]);
     const [creators, setCreators] =
@@ -320,29 +323,34 @@ export const DiscoverMainScreen = () => {
         [dispatch],
     );
 
-    const fetchDevelopers = useCallback(async () => {
-        const requestId = ++developersRequestId.current;
-        setDevelopersLoading(true);
-        setDevelopersError(false);
-        try {
-            const response = await dispatch(
-                getDevelopersProcess({ page: 1 }),
-            ).unwrap();
-            if (!Array.isArray(response.results)) {
-                throw new Error('Geçersiz geliştirici listesi');
+    const fetchDevelopers = useCallback(
+        async (page: number = 1, reset: boolean = true) => {
+            if (!reset && !developersLock.current) return;
+            if (!reset && !developersHasNext.current) return;
+
+            const requestId = ++developersRequestId.current;
+            developersLock.current = true;
+            setDevelopersLoading(true);
+            setDevelopersError(false);
+            try {
+                const response = await dispatch(
+                    getDevelopersProcess({ page: 1 }),
+                ).unwrap();
+                if (!Array.isArray(response.results)) {
+                    throw new Error('Geçersiz geliştirici listesi');
+                }
+                if (requestId !== developersRequestId.current) return;
+                setDevelopers(response.results);
+            } catch {
+                if (requestId === developersRequestId.current) {
+                    setDevelopersError(true);
+                }
+            } finally {
+                if (requestId === developersRequestId.current) {
+                    setDevelopersLoading(false);
+                }
             }
-            if (requestId !== developersRequestId.current) return;
-            setDevelopers(response.results);
-        } catch {
-            if (requestId === developersRequestId.current) {
-                setDevelopersError(true);
-            }
-        } finally {
-            if (requestId === developersRequestId.current) {
-                setDevelopersLoading(false);
-            }
-        }
-    }, [dispatch]);
+        }, [dispatch]);
 
     const fetchData = useCallback(async () => {
         await Promise.allSettled([
