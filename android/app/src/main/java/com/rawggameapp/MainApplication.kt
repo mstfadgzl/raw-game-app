@@ -1,6 +1,7 @@
 package com.rawggameapp
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
@@ -23,6 +24,8 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    // Uygulamanın koyu görünümüyle sistem çubuklarını aynı temada tut.
+    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
     registerActivityLifecycleCallbacks(OrientationActivityLifecycle.getInstance())
     loadReactNative(this)
   }

@@ -4,15 +4,25 @@ import { BottomTabParamList } from '@types';
 import { colors } from '../theme/colors';
 import { LibraryStack, SearchStack, DiscoverStack, HomeStack } from '@navigators';
 import { AnimatedTabIcon } from '../components/animated-tab-icon';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 export const BottomTabStack = () => {
+    const insets = useSafeAreaInsets();
 
     return (
         <Tab.Navigator
+            safeAreaInsets={{ bottom: insets.bottom }}
             screenOptions={({ route }) => ({
-                tabBarStyle: { backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: '#303636', paddingTop: 6 },
+                tabBarStyle: {
+                    backgroundColor: colors.surface,
+                    borderTopWidth: 1,
+                    borderTopColor: '#303636',
+                    height: 64 + insets.bottom,
+                    paddingTop: 6,
+                    paddingBottom: insets.bottom + 4,
+                },
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.secondary,
                 tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
