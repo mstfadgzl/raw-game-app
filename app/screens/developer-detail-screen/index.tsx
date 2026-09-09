@@ -113,7 +113,28 @@ const DeveloperGames = ({ id, ordering, header }: { id: number; ordering: '-adde
             .then(response => {
                 if (!Array.isArray(response.results)) throw new Error('Geçersiz oyun listesi');
                 if (!active) return;
-                setGames(previous => [...new Map([...previous, ...response.results].map(game => [game.id, game])).values()]);
+                setGames(previous => {
+                    const combined = [
+                        ...new Map(
+                            [...previous, ...response.results].map(game => [
+                                game.id,
+                                game,
+                            ]),
+                        ).values(),
+                    ];
+
+                    if (ordering === '-metacritic') {
+                        const score = (game: IGame): number =>
+                            typeof game.metacritic === 'number' &&
+                                game.metacritic > 0
+                                ? game.metacritic
+                                : -1;
+
+                        combined.sort((a, b) => score(b) - score(a));
+                    }
+
+                    return combined;
+                });
                 setHasNext(Boolean(response.next));
             })
             .catch(() => { if (active) setError(true); })
