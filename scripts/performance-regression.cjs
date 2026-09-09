@@ -179,3 +179,70 @@ test('incorrect profile identities are rejected and never cached', async () => {
   assert.equal(api.peekCreatorDetail(7).id, 7);
   assert.equal(calls, 2);
 });
+
+test('search pages keep popularity ordering and use independent cached requests', async () => {
+  const requests = [];
+  const { gameService: api } = load(serviceFile, { get: async (_url, options) => {
+    requests.push(options.params);
+    return response('page-' + options.params.page);
+  } });
+  await api.searchGames('wit');
+  await api.searchGames('wit', 2);
+  await api.searchGames('wit', 2);
+  assert.equal(requests.length, 2);
+  assert.deepEqual(requests.map(p => p.page), [1, 2]);
+  assert.ok(requests.every(p => p.search === 'wit' && p.ordering === '-added'));
+});
+
+test('pagination locks duplicate loads, retries failed page and removes overlapping games', async () => {
+  const { createPaginatedList } = load('app/utils/paginated-list.ts', {});
+  const pending = [];
+  const pages = [];
+  let latest;
+  const list = createPaginatedList(page => {
+    pages.push(page);
+    return new Promise((resolve, reject) => pending.push({ resolve, reject }));
+  }, state => { latest = state; });
+  const first = list.load();
+  await list.load();
+  assert.deepEqual(pages, [1]);
+  pending[0].resolve({ results: [{ id: 1 }], next: 'page2' });
+  await first;
+  const failed = list.load();
+  pending[1].reject(new Error('offline'));
+  await failed;
+  assert.equal(latest.items.length, 1);
+  assert.equal(latest.error, true);
+  await list.load();
+  assert.deepEqual(pages, [1, 2]);
+  const retried = list.load(true);
+  pending[2].resolve({ results: [{ id: 1 }, { id: 2 }], next: null });
+  await retried;
+  assert.deepEqual(pages, [1, 2, 2]);
+  assert.equal(latest.items.length, 2);
+  assert.equal(latest.hasMore, false);
+  await list.load();
+  assert.equal(pages.length, 3);
+});
+
+test('closing a search ignores its late response and invalid pages remain retryable', async () => {
+  const { createPaginatedList } = load('app/utils/paginated-list.ts', {});
+  let resolve;
+  const updates = [];
+  const old = createPaginatedList(() => new Promise(done => { resolve = done; }), state => updates.push(state));
+  const request = old.load();
+  old.dispose();
+  resolve({ results: [{ id: 99 }], next: null });
+  await request;
+  assert.equal(updates.length, 1);
+  let calls = 0, latest;
+  const fresh = createPaginatedList(async page => {
+    assert.equal(page, 1);
+    calls++;
+    return calls === 1 ? { results: null } : { results: [{ id: 2 }], next: null };
+  }, state => { latest = state; });
+  await fresh.load();
+  assert.equal(latest.error, true);
+  await fresh.load(true);
+  assert.equal(latest.items[0].id, 2);
+});

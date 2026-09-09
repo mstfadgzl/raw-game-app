@@ -205,7 +205,7 @@ const DetailContent = ({ gameId }: { gameId: number }) => {
                                     color={colors.primary}
                                     bold
                                 >
-                                    ★ {Number(detail.rating).toFixed(1)}
+                                    ★ Oyuncular {Number(detail.rating).toFixed(1)}/5
                                 </AppText>
                             </View>
                         )}
@@ -222,27 +222,6 @@ const DetailContent = ({ gameId }: { gameId: number }) => {
                             </View>
                         )}
 
-                        {!!detail.released && (
-                            <View style={styles.metaBox}>
-                                <AppText
-                                    variant="caption"
-                                    color="#FFFFFF"
-                                >
-                                    {detail.released.split('-')[0]}
-                                </AppText>
-                            </View>
-                        )}
-
-                        {detail.playtime > 0 && (
-                            <View style={styles.metaBox}>
-                                <AppText
-                                    variant="caption"
-                                    color="#FFFFFF"
-                                >
-                                    {detail.playtime} saat
-                                </AppText>
-                            </View>
-                        )}
                     </View>
                 </View>
             </View>

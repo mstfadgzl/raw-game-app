@@ -7,21 +7,22 @@ import {
     StyleSheet,
     TouchableOpacity,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
 
 import { AppText, GenreChip } from '@components';
 import { translateText } from '@utils';
 import { colors } from '@theme';
+import type { IGameDetail, DiscoverStackParamList } from '@types';
 import { styles } from '../../styles';
 
 type Props = {
-    detail: any;
+    detail: IGameDetail;
 };
 
 const translationCache = new Map<string, string>();
 
 export const AboutTab = ({ detail }: Props) => {
-    const navigation = useNavigation<any>();
+    const navigation = useNavigation<NavigationProp<Pick<DiscoverStackParamList, 'TagDetail'>>>();
 
     const source = detail?.description_raw?.trim() || '';
 
@@ -128,15 +129,23 @@ export const AboutTab = ({ detail }: Props) => {
             label: 'GELİŞTİRİCİ',
             value:
                 detail.developers
-                    ?.map((item: any) => item.name)
+                    ?.map(item => item.name)
                     .join(', ') || 'Bilinmiyor',
         },
         {
             label: 'YAYINCI',
             value:
                 detail.publishers
-                    ?.map((item: any) => item.name)
+                    ?.map(item => item.name)
                     .join(', ') || 'Bilinmiyor',
+        },
+        {
+            label: 'ÇIKIŞ TARİHİ',
+            value: detail.released ? detail.released.split('-').reverse().join('.') : 'Henüz açıklanmadı',
+        },
+        {
+            label: 'PLATFORMLAR',
+            value: detail.platforms?.map(item => item.platform.name).join(', ') || 'Belirtilmemiş',
         },
         {
             label: 'ORTALAMA SÜRE',
@@ -237,9 +246,9 @@ export const AboutTab = ({ detail }: Props) => {
 
                     <View style={localStyles.tags}>
                         {detail.tags
-                            .filter((tag: any) => Boolean(tag.slug))
+                            .filter(tag => Boolean(tag.slug))
                             .slice(0, 15)
-                            .map((tag: any) => (
+                            .map(tag => (
                                 <GenreChip
                                     key={tag.id}
                                     name={tag.name}
@@ -297,7 +306,9 @@ const localStyles = StyleSheet.create({
         width: '48%',
         padding: 13,
         borderRadius: 12,
-        backgroundColor: '#191E2B',
+        backgroundColor: '#1D2226',
+        borderWidth: 1,
+        borderColor: '#2D353B',
         marginBottom: 12,
     },
     factLabel: {

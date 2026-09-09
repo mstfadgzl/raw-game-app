@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -23,7 +23,6 @@ import {
 import { translateText } from '@utils';
 
 import {
-    IGame,
     ICreator,
     type CreatorDetailRouteProp,
     type DiscoverScreenNavigationProp,
@@ -31,6 +30,7 @@ import {
 
 import { colors } from '@theme';
 import { styles } from './styles';
+import { usePaginatedGames } from '../../hooks/usePaginatedGames';
 
 export const CreatorDetailScreen = () => {
     const { params } = useRoute<CreatorDetailRouteProp>();
@@ -51,9 +51,10 @@ const CreatorContent = ({ id, name }: { id: number; name: string }) => {
     const [expanded, setExpanded] = useState(false);
     const [imageFailed, setImageFailed] = useState(false);
 
-    const [games, setGames] = useState<IGame[]>([]);
-    const [gamesLoading, setGamesLoading] = useState(true);
-    const [gamesError, setGamesError] = useState(false);
+    const loadGames = useCallback((page: number) => gameService.getGames({
+        page, creators: String(id), ordering: '-added',
+    }), [id]);
+    const { items: games, loading: gamesLoading, error: gamesError, loadMore, retry } = usePaginatedGames(loadGames);
     const positions = creator?.positions ?? [];
 
     const description = (creator?.description ?? '')
@@ -101,42 +102,6 @@ const CreatorContent = ({ id, name }: { id: number; name: string }) => {
             active = false;
         };
     }, [id, retryCount]);
-
-    useEffect(() => {
-        let active = true;
-
-        setGames([]);
-        setGamesLoading(true);
-        setGamesError(false);
-
-        const fetchCreatorGames = async () => {
-            try {
-                const response = await gameService.getGames({
-                        page: 1,
-                        creators: String(id),
-                        ordering: '-added',
-                    });
-
-                if (active) {
-                    setGames(response.results ?? []);
-                }
-            } catch {
-                if (active) {
-                    setGamesError(true);
-                }
-            } finally {
-                if (active) {
-                    setGamesLoading(false);
-                }
-            }
-        };
-
-        void fetchCreatorGames();
-
-        return () => {
-            active = false;
-        };
-    }, [id]);
 
     useEffect(() => {
         let active = true;
@@ -340,6 +305,21 @@ const CreatorContent = ({ id, name }: { id: number; name: string }) => {
                         />
                     </View>
                 )}
+                initialNumToRender={6}
+                maxToRenderPerBatch={6}
+                windowSize={5}
+                onEndReached={loadMore}
+                onEndReachedThreshold={0.4}
+                ListFooterComponent={
+                    <View style={styles.emptyContainer}>
+                        {games.length > 0 && gamesLoading && <ActivityIndicator color={colors.primary} />}
+                        {gamesError && (
+                            <Pressable accessibilityRole="button" style={styles.retryButton} onPress={retry}>
+                                <AppText color={colors.primary}>Oyunları yüklemeyi tekrar dene</AppText>
+                            </Pressable>
+                        )}
+                    </View>
+                }
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         {gamesLoading ? (

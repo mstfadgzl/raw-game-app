@@ -58,13 +58,14 @@ export const gameService = {
 
     searchGames: (
         query: string,
+        page: number = 1,
     ): Promise<IGameListResponse> => {
         return cachedGet<IGameListResponse>('/games', {
             search: query.trim(),
             search_precise: false,
             search_exact: false,
             ordering: '-added',
-            page: 1,
+            page,
             page_size: 20,
         });
     },

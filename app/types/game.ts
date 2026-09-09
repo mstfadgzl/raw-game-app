@@ -36,6 +36,7 @@ export interface IGame {
 }
 
 export interface IGameDetail extends IGame {
+    esrb_rating?: { id: number; name: string; slug: string } | null;
     description_raw: string;
     achievement_count: number;
     reddit_url: string;

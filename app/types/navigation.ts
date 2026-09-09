@@ -13,7 +13,7 @@ export type HomeStackParamList = {
     PlatformDetail: { id: number; name: string };
     DiscoverMain: { id: number; name: string };
     GenreDetail: { slug: string; name: string; };
-    TagDetail: { id: number; name: string };
+    TagDetail: { slug: string; name: string };
 };
 
 export type DiscoverStackParamList = {
@@ -27,6 +27,7 @@ export type DiscoverStackParamList = {
 };
 
 export type SearchStackParamList = {
+    TagDetail: { slug: string; name: string };
     DeveloperDetail: { id: number; name: string };
     SearchScreen: undefined;
     CreatorDetail: { id: number; name: string };
@@ -34,6 +35,7 @@ export type SearchStackParamList = {
 };
 
 export type LibraryStackParamList = {
+    TagDetail: { slug: string; name: string };
     LibraryScreen: undefined;
     GameDetail: { gameId: number | string; gameName: string };
 };
