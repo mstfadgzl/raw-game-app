@@ -22,16 +22,16 @@ interface VideoPlayerProps {
 }
 
 export const VideoPlayer = ({ trailer }: VideoPlayerProps) => {
-  const sources = trailer?.data as
-    | { '480'?: string; max?: string }
-    | undefined;
+  const sources = trailer?.data as Record<string, unknown> | undefined;
 
-  const videoUrl =
-    [sources?.['480'], sources?.max].find(
-      value =>
-        typeof value === 'string' &&
-        /^https?:\/\//i.test(value.trim()),
-    )?.trim() || '';
+  // RAWG şu an 480/max döndürüyor; farklı kayıtlar ise aynı MP4 adresini
+  // başka bir anahtarla gönderebiliyor. Oynatmayı tek bir anahtara bağlamamak
+  // için tüm değerler arasından ilk HTTP(S) adresini seçiyoruz.
+  const videoUrl = (Object.values(sources || {}).find(
+    value =>
+      typeof value === 'string' &&
+      /^https?:\/\//i.test(value.trim()),
+  ) as string | undefined)?.trim() || '';
 
   if (!trailer) return null;
 
@@ -108,6 +108,10 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
           'landscape-right',
         ]}
         onRequestClose={() => setOpen(false)}
+        onDismiss={() => {
+          Orientation.lockToPortrait();
+          StatusBar.setHidden(false);
+        }}
       >
         {open && (
           <FullscreenPlayer
@@ -160,13 +164,20 @@ const FullscreenPlayer = ({
   }, [controlsVisible, paused, waiting]);
 
   useEffect(() => {
-    const subscription = AppState.addEventListener(
+    const appStateSubscription = AppState.addEventListener(
       'change',
       state => setAppActive(state === 'active'),
     );
 
+    const orientationListener = (orientation: string) => {
+      setIsLandscape(orientation.startsWith('LANDSCAPE'));
+    };
+
+    Orientation.addOrientationListener(orientationListener);
+
     return () => {
-      subscription.remove();
+      appStateSubscription.remove();
+      Orientation.removeOrientationListener(orientationListener);
       StatusBar.setHidden(false);
     };
   }, []);
@@ -200,10 +211,8 @@ const FullscreenPlayer = ({
     if (isLandscape) {
       Orientation.lockToPortrait();
     } else {
-      Orientation.lockToLandscape();
+      Orientation.lockToLandscapeLeft();
     }
-
-    setIsLandscape(value => !value);
     showControls();
   };
 
@@ -295,62 +304,63 @@ const FullscreenPlayer = ({
 
           }}
         >
-          <Video
-            key={attempt}
-            ref={videoRef}
-            source={{ uri: videoUrl }}
-            style={styles.fill}
-            resizeMode="cover"
-            controls={false}
-            paused={!appActive || paused}
-            repeat={false}
-            playInBackground={false}
-            playWhenInactive={false}
-            onLoadStart={() => setLoading(true)}
-            onLoad={({ naturalSize, duration: loadedDuration }) => {
-              const { width, height } = naturalSize;
-
-              if (width > 0 && height > 0) {
-                setVideoRatio(width / height);
-              }
-
-              setLoading(false);
-              setDuration(loadedDuration || 0);
-            }}
-            onProgress={({ currentTime: nextTime }) => setCurrentTime(nextTime)}
-            onReadyForDisplay={() => {
-              setLoading(false);
-              setBuffering(false);
-            }}
-            onBuffer={({ isBuffering }) => {
-              setBuffering(isBuffering);
-            }}
-            onEnd={() => {
-              setPaused(true);
-              setCurrentTime(duration);
-              showControls();
-            }}
-            onError={event => {
-              if (__DEV__) {
-                console.log(
-                  '[VideoPlayer hata]',
-                  event.error,
-                );
-              }
-
-              setError(
-                'Video oynatılamadı. Bağlantını kontrol edip tekrar dene.',
-              );
-              setLoading(false);
-              setBuffering(false);
-            }}
-          />
-
           <Pressable
             accessibilityLabel="Video kontrollerini göster veya gizle"
             style={styles.touchSurface}
             onPress={toggleControls}
-          />
+          >
+            <Video
+              key={attempt}
+              ref={videoRef}
+              source={{ uri: videoUrl }}
+              style={styles.fill}
+              pointerEvents="none"
+              resizeMode="cover"
+              controls={false}
+              paused={!appActive || paused}
+              repeat={false}
+              playInBackground={false}
+              playWhenInactive={false}
+              onLoadStart={() => setLoading(true)}
+              onLoad={({ naturalSize, duration: loadedDuration }) => {
+                const { width, height } = naturalSize;
+
+                if (width > 0 && height > 0) {
+                  setVideoRatio(width / height);
+                }
+
+                setLoading(false);
+                setDuration(loadedDuration || 0);
+              }}
+              onProgress={({ currentTime: nextTime }) => setCurrentTime(nextTime)}
+              onReadyForDisplay={() => {
+                setLoading(false);
+                setBuffering(false);
+              }}
+              onBuffer={({ isBuffering }) => {
+                setBuffering(isBuffering);
+              }}
+              onEnd={() => {
+                setPaused(true);
+                setCurrentTime(duration);
+                showControls();
+              }}
+              onError={event => {
+                if (__DEV__) {
+                  console.log(
+                    '[VideoPlayer hata]',
+                    event.error,
+                  );
+                }
+
+                setError(
+                  'Video oynatılamadı. Bağlantını kontrol edip tekrar dene.',
+                );
+                setLoading(false);
+                setBuffering(false);
+              }}
+            />
+          </Pressable>
 
           {controlsVisible && !error && (
             <View style={styles.controls} pointerEvents="box-none">
