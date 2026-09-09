@@ -121,6 +121,7 @@ const FullscreenPlayer = ({
   const videoRef = React.useRef<VideoRef>(null);
   const [paused, setPaused] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
+  const [controlsInteraction, setControlsInteraction] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [barWidth, setBarWidth] = useState(0);
@@ -134,11 +135,11 @@ const FullscreenPlayer = ({
   const waiting = loading || buffering;
 
   useEffect(() => {
-    if (!controlsVisible || paused || waiting) return;
+    if (!controlsVisible || paused || waiting || !appActive || error) return;
 
     const timer = setTimeout(() => setControlsVisible(false), 4000);
     return () => clearTimeout(timer);
-  }, [controlsVisible, paused, waiting]);
+  }, [controlsVisible, controlsInteraction, paused, waiting, appActive, error]);
 
   useEffect(() => {
     const appStateSubscription = AppState.addEventListener(
@@ -177,7 +178,10 @@ const FullscreenPlayer = ({
     showControls();
   };
 
-  const showControls = () => setControlsVisible(true);
+  const showControls = () => {
+    setControlsVisible(true);
+    setControlsInteraction(value => value + 1);
+  };
 
   const toggleControls = () => {
     setControlsVisible(value => !value);
@@ -240,6 +244,15 @@ const FullscreenPlayer = ({
         style={styles.backgroundShade}
       />
 
+      {!error && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={controlsVisible ? 'Video kontrollerini gizle' : 'Video kontrollerini göster'}
+          style={styles.touchSurface}
+          onPress={toggleControls}
+        />
+      )}
+
       {error ? (
         <View style={styles.errorContent}>
           <AppText style={styles.message}>
@@ -258,18 +271,16 @@ const FullscreenPlayer = ({
         </View>
       ) : size.width > 0 && size.height > 0 ? (
         <View
+          pointerEvents="box-none"
           style={{
             width: playerWidth,
             height: playerHeight,
             backgroundColor: '#000000',
+            zIndex: 2,
 
           }}
         >
-          <Pressable
-            accessibilityLabel="Video kontrollerini göster veya gizle"
-            style={styles.touchSurface}
-            onPress={toggleControls}
-          >
+          <View style={styles.fill} pointerEvents="none" collapsable={false}>
             <Video
               key={attempt}
               ref={videoRef}
@@ -321,7 +332,7 @@ const FullscreenPlayer = ({
                 setBuffering(false);
               }}
             />
-          </Pressable>
+          </View>
 
           {controlsVisible && !error && (
             <View style={styles.controls} pointerEvents="box-none">
@@ -334,7 +345,7 @@ const FullscreenPlayer = ({
                 <AppText style={styles.orientationText}>{landscape ? '⛶' : '⛶'}</AppText>
               </TouchableOpacity>
               <View style={styles.controlCenter} pointerEvents="box-none">
-                <View style={styles.seekButtons}>
+                <View style={styles.seekButtons} pointerEvents="box-none">
                   <TouchableOpacity
                     accessibilityRole="button"
                     accessibilityLabel="10 saniye geri al"
@@ -364,7 +375,7 @@ const FullscreenPlayer = ({
                 >
                   <AppText style={styles.controlIcon}>{paused ? '▶' : 'Ⅱ'}</AppText>
                 </TouchableOpacity>
-                <View style={styles.seekButtons}>
+                <View style={styles.seekButtons} pointerEvents="box-none">
                   <TouchableOpacity
                     accessibilityRole="button"
                     accessibilityLabel="10 saniye ileri al"
@@ -380,7 +391,7 @@ const FullscreenPlayer = ({
                   </TouchableOpacity>
                 </View>
               </View>
-              <View style={styles.bottomControls}>
+              <View style={styles.bottomControls} pointerEvents="box-none">
                 <AppText style={styles.timeText}>{formatTime(currentTime)}</AppText>
                 <Pressable
                   style={styles.seekTrack}
