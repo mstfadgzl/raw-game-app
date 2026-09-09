@@ -325,7 +325,7 @@ export const DiscoverMainScreen = () => {
 
     const fetchDevelopers = useCallback(
         async (page: number = 1, reset: boolean = true) => {
-            if (!reset && !developersLock.current) return;
+            if (!reset && developersLock.current) return;
             if (!reset && !developersHasNext.current) return;
 
             const requestId = ++developersRequestId.current;
@@ -352,14 +352,15 @@ export const DiscoverMainScreen = () => {
                         ).values(),
                     ];
                 });
-
-
+                developersPage.current = page;
+                developersHasNext.current = Boolean(response.next);
             } catch {
                 if (requestId === developersRequestId.current) {
                     setDevelopersError(true);
                 }
             } finally {
                 if (requestId === developersRequestId.current) {
+                    developersLock.current = false;
                     setDevelopersLoading(false);
                 }
             }
@@ -421,6 +422,22 @@ export const DiscoverMainScreen = () => {
                     <FlatList
                         horizontal
                         data={developers}
+                        onEndReached={() => {
+                            if (!developersLoading && !developersError) {
+                                void fetchDevelopers(
+                                    developersPage.current + 1,
+                                    false,
+                                );
+                            }
+                        }}
+                        onEndReachedThreshold={0.5}
+                        ListFooterComponent={
+                            developersLoading && developers.length > 0 ? (
+                                <View style={styles.creatorFooter}>
+                                    <ActivityIndicator color={colors.primary} />
+                                </View>
+                            ) : undefined
+                        }
                         keyExtractor={item => `developer-${item.id}`}
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.horizontalPadding}
@@ -449,7 +466,14 @@ export const DiscoverMainScreen = () => {
                     <TouchableOpacity
                         accessibilityRole="button"
                         style={styles.retryButton}
-                        onPress={() => void fetchDevelopers()}
+                        onPress={() =>
+                            void fetchDevelopers(
+                                developersPage.current === 0
+                                    ? 1
+                                    : developersPage.current + 1,
+                                developersPage.current === 0,
+                            )
+                        }
                     >
                         <AppText style={styles.retryText}>
                             Geliştiriciler yüklenemedi · Tekrar dene
