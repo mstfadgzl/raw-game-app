@@ -381,16 +381,8 @@ export const DiscoverMainScreen = () => {
     const renderHeader = () => (
         <View>
             <View style={styles.header}>
-                <AppText style={styles.eyebrow}>
-                    OYUN DÜNYASI
-                </AppText>
-
                 <AppText style={styles.mainTitle}>
-                    Keşfetmenin başka yolları.
-                </AppText>
-
-                <AppText style={styles.subtitle}>
-                    Etiketleri incele, oyunların arkasındaki isimleri keşfet.
+                    Keşfet
                 </AppText>
             </View>
             <View style={styles.creatorSection}>
@@ -427,7 +419,7 @@ export const DiscoverMainScreen = () => {
                                 <AppText color={colors.secondary}>
                                     Geliştirici bulunamadı.
                                 </AppText>
-                            ) : null
+                            ) : undefined
                         }
                     />
                 )}
