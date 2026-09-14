@@ -219,6 +219,7 @@ const FullscreenPlayer = ({
   onToggleOrientation,
 }: FullscreenPlayerProps) => {
   const [size, setSize] = useState({ width: 0, height: 0 });
+  const [videoRatio, setVideoRatio] = useState(16 / 9);
 
   const [loading, setLoading] = useState(true);
   const [buffering, setBuffering] = useState(false);
@@ -344,11 +345,15 @@ const FullscreenPlayer = ({
     }),
   ).current;
 
-  // Tam ekran oynatıcı her iki yönde de viewport'u doldurur. Böylece dikey
-  // ekranda video küçük bir kutuya sıkışmaz; inline önizlemedeki dolu görüntü
-  // davranışı korunur.
+  // Tam ekranda kaynağın tamamı görünür; cover kullanımı dikey ekranda
+  // görüntüyü büyütüp kırptığı için burada contain ve gerçek oran kullanılır.
   const playerWidth = size.width;
-  const playerHeight = size.height;
+  const playerHeight = landscape
+    ? size.height
+    : Math.min(
+      size.height * 0.72,
+      playerWidth / videoRatio,
+    );
 
   return (
     <View
@@ -425,14 +430,20 @@ const FullscreenPlayer = ({
               source={{ uri: videoUrl }}
               style={styles.fill}
               pointerEvents="none"
-              resizeMode="cover"
+              resizeMode="contain"
               controls={false}
               paused={!appActive || paused}
               repeat={false}
               playInBackground={false}
               playWhenInactive={false}
               onLoadStart={() => setLoading(true)}
-              onLoad={({ duration: loadedDuration }) => {
+              onLoad={({ naturalSize, duration: loadedDuration }) => {
+                const { width, height } = naturalSize;
+
+                if (width > 0 && height > 0) {
+                  setVideoRatio(width / height);
+                }
+
                 setLoading(false);
                 setDuration(loadedDuration || 0);
               }}
