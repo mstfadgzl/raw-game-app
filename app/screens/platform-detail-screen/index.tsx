@@ -18,7 +18,7 @@ import {
     useRoute,
 } from '@react-navigation/native';
 
-import { useAppDispatch } from '@hooks';
+import { useAppDispatch, useSettings } from '@hooks';
 import { getGamesProcess } from '@actions';
 
 import {
@@ -41,7 +41,7 @@ import type {
     PlatformDetailRouteProp,
 } from '@types';
 
-import { colors } from '@theme';
+
 import { useStyles } from './styles';
 
 type LoadMode = 'initial' | 'refresh' | 'more';
@@ -73,6 +73,7 @@ const PlatformGames = ({
     name,
 }: PlatformGamesProps) => {
     const styles = useStyles();
+    const { colors } = useSettings();
     const dispatch = useAppDispatch();
 
     const navigation =

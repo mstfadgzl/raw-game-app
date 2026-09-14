@@ -6,7 +6,7 @@ import { entityService, gameService } from '@services';
 import { translateText } from '@utils';
 import { useSettings } from '@hooks';
 import type { CompanyDetailRouteProp, DiscoverScreenNavigationProp, IDeveloper, IGame } from '@types';
-import { colors } from '@theme';
+
 import { useStyles } from './styles';
 
 export const DeveloperDetailScreen = () => {
@@ -19,6 +19,7 @@ type CompanyKind = 'developer' | 'publisher';
 
 const DeveloperContent = ({ id, kind }: { id: number; kind: CompanyKind }) => {
     const styles = useStyles();
+    const { colors } = useSettings();
     const navigation = useNavigation<DiscoverScreenNavigationProp>();
     const { language } = useSettings();
     const readProfile = useCallback(() => kind === 'publisher' ? entityService.peekPublisherDetail(id) : entityService.peekDeveloperDetail(id), [id, kind]);
@@ -83,7 +84,7 @@ const DeveloperContent = ({ id, kind }: { id: number; kind: CompanyKind }) => {
             <View style={styles.hero}>
                 {developer.image_background && !imageFailed ? <Image source={{ uri: developer.image_background }} style={styles.heroImage} onError={() => setImageFailed(true)} /> : <AppText style={styles.monogram}>{developer.name.charAt(0)}</AppText>}
                 <View style={styles.shade} />
-                <TouchableOpacity accessibilityRole="button" accessibilityLabel="Geri dön" style={styles.back} onPress={() => navigation.goBack()}><AppText bold>‹ Geri</AppText></TouchableOpacity>
+                <TouchableOpacity accessibilityRole="button" accessibilityLabel="Geri dön" style={styles.back} onPress={() => navigation.goBack()}><AppText bold color="#FFFFFF">‹ Geri</AppText></TouchableOpacity>
                 <View style={styles.heroText}>
                     <View style={styles.brandRow}>
                         <StudioBrand
@@ -118,6 +119,7 @@ const DeveloperContent = ({ id, kind }: { id: number; kind: CompanyKind }) => {
 
 const DeveloperGames = ({ id, kind, ordering, header }: { id: number; kind: CompanyKind; ordering: '-added' | '-metacritic'; header: React.ReactElement }) => {
     const styles = useStyles();
+    const { colors } = useSettings();
     const navigation = useNavigation<DiscoverScreenNavigationProp>();
     const [games, setGames] = useState<IGame[]>([]);
     const [page, setPage] = useState(1);

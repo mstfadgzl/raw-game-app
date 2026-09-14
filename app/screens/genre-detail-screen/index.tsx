@@ -41,7 +41,7 @@ import type {
     IGame,
 } from '@types';
 
-import { colors } from '@theme';
+
 import { useStyles } from './style';
 
 type LoadMode = 'initial' | 'refresh' | 'more';
@@ -76,6 +76,7 @@ const mergeGames = (
 const GenreGames = ({ slug, name }: GenreGamesProps) => {
     const { language } = useSettings();
     const styles = useStyles();
+    const { colors } = useSettings();
     const dispatch = useAppDispatch();
 
     const navigation =

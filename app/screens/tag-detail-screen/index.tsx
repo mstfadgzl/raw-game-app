@@ -40,7 +40,7 @@ import type {
     TagDetailRouteProp,
 } from '@types';
 
-import { colors } from '@theme';
+
 import { useStyles } from './styles';
 
 type LoadMode = 'initial' | 'refresh' | 'more';
@@ -75,6 +75,7 @@ const mergeGames = (
 const TagGames = ({ slug, name }: TagGamesProps) => {
     const { language } = useSettings();
     const styles = useStyles();
+    const { colors } = useSettings();
     const dispatch = useAppDispatch();
 
     const navigation =
