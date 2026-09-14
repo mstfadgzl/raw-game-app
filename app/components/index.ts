@@ -15,6 +15,7 @@ export * from './reddit-post-item';
 export * from './compact-game-item';
 export * from './studio-brand';
 export * from './studio-card';
+export * from './app-mark';
 export {
     GameSortFilter,
     DEFAULT_GAME_FILTERS,
