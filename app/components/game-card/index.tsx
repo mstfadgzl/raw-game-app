@@ -9,6 +9,8 @@ import { IGame } from '@types';
 import { styles } from './styles';
 import { cardImageUrl } from '../../utils/card-image';
 import { AppText } from '../app-text';
+import { useSettings } from '../../context/settings-context';
+import { localizeCatalogName } from '../../i18n';
 
 type CardGame = IGame & {
     genres?: {
@@ -53,6 +55,7 @@ export const GameCard = memo(function GameCard({
     downloadCount,
 }: GameCardProps) {
     const [failedImages, setFailedImages] = useState<string[]>([]);
+    const { language, colors } = useSettings();
 
     const thumbnail = cardImageUrl(game.background_image);
     const imageUri = failedImages.includes(thumbnail)
@@ -75,7 +78,7 @@ export const GameCard = memo(function GameCard({
 
     const genreText = game.genres
         ?.slice(0, 2)
-        .map(genre => genre.name)
+        .map(genre => localizeCatalogName(language, genre.name))
         .join(' · ');
 
     const validDownloadCount =
@@ -92,7 +95,7 @@ export const GameCard = memo(function GameCard({
 
     return (
         <TouchableOpacity
-            style={styles.container}
+            style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}
             activeOpacity={0.85}
             onPress={() => onPress(game.id, game.name)}
             accessibilityRole="button"
@@ -110,7 +113,7 @@ export const GameCard = memo(function GameCard({
                 .join('. ')}
             accessibilityHint="Oyun detaylarını açar"
         >
-            <View style={styles.imageContainer}>
+            <View style={[styles.imageContainer, { backgroundColor: colors.surface }]}>
                 {hasImage ? (
                     <Image
                         source={{ uri: imageUri }}
@@ -123,25 +126,25 @@ export const GameCard = memo(function GameCard({
                     />
                 ) : (
                     <View style={styles.imagePlaceholder}>
-                        <AppText style={styles.placeholderSymbol}>
+                        <AppText style={[styles.placeholderSymbol, { color: colors.secondary }]}>
                             ◇
                         </AppText>
 
-                        <AppText style={styles.placeholderText}>
+                        <AppText style={[styles.placeholderText, { color: colors.secondary }]}>
                             Görsel bulunmuyor
                         </AppText>
                     </View>
                 )}
 
                 <View style={styles.ratingBadge}>
-                    <AppText style={styles.starIcon}>★</AppText>
+                    <AppText style={[styles.starIcon, { color: colors.primary }]}>★</AppText>
 
-                    <AppText style={styles.ratingText}>
+                    <AppText style={[styles.ratingText, { color: colors.white }]}>
                         {metacriticDisplay}
                     </AppText>
 
                     {hasMetacritic && (
-                        <AppText style={styles.ratingLimit}>
+                        <AppText style={[styles.ratingLimit, { color: colors.secondary }]}>
                             / 100
                         </AppText>
                     )}
@@ -150,7 +153,7 @@ export const GameCard = memo(function GameCard({
 
             <View style={styles.content}>
                 <AppText
-                    style={styles.title}
+                    style={[styles.title, { color: colors.text }]}
                     numberOfLines={2}
                     ellipsizeMode="tail"
                 >
@@ -159,21 +162,21 @@ export const GameCard = memo(function GameCard({
 
                 {!!genreText && (
                     <AppText
-                        style={styles.genre}
+                        style={[styles.genre, { color: colors.secondary }]}
                         numberOfLines={1}
                     >
                         {genreText}
                     </AppText>
                 )}
 
-                <View style={styles.divider} />
+                <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
                 <View style={styles.infoRow}>
-                    <AppText style={styles.infoLabel}>
+                    <AppText style={[styles.infoLabel, { color: colors.secondary }]}>
                         Çıkış
                     </AppText>
 
-                    <AppText style={styles.dateText}>
+                    <AppText style={[styles.dateText, { color: colors.text }]}>
                         {releaseDate}
                     </AppText>
                 </View>
@@ -185,11 +188,11 @@ export const GameCard = memo(function GameCard({
                             styles.downloadRow,
                         ]}
                     >
-                    <AppText style={styles.infoLabel}>
+                    <AppText style={[styles.infoLabel, { color: colors.secondary }]}>
                         İndirme
                     </AppText>
 
-                    <AppText style={styles.downloadText}>
+                    <AppText style={[styles.downloadText, { color: colors.primary }]}>
                         {downloadDisplay}
                     </AppText>
                     </View>
