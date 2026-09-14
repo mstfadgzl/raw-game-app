@@ -14,17 +14,23 @@ import {
     getGameScreenshotsProcess,
     getGameTrailersProcess,
 } from '@actions';
-import { AppText, EmptyState, VideoPlayer } from '@components';
+import { AppText, EmptyState, ImageViewer, VideoPlayer } from '@components';
 import { colors } from '@theme';
 import type { IScreenshot, ITrailer } from '@types';
 import { styles } from '../../styles';
 
-const Screenshot = ({ uri }: { uri: string }) => {
+const Screenshot = ({ uri, onPress }: { uri: string; onPress: () => void }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
     return (
-        <View style={localStyles.imageBox}>
+        <TouchableOpacity
+            style={localStyles.imageBox}
+            activeOpacity={0.9}
+            accessibilityRole="button"
+            accessibilityLabel="Görseli tam ekranda aç"
+            onPress={onPress}
+        >
             <Image
                 source={{ uri }}
                 style={localStyles.image}
@@ -50,7 +56,7 @@ const Screenshot = ({ uri }: { uri: string }) => {
                     </AppText>
                 </View>
             )}
-        </View>
+        </TouchableOpacity>
     );
 };
 
@@ -69,6 +75,7 @@ export const MediaTab = () => {
 
     const [shotsError, setShotsError] = useState(false);
     const [trailerError, setTrailerError] = useState(false);
+    const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
     const [shotsRetry, setShotsRetry] = useState(0);
     const [trailerRetry, setTrailerRetry] = useState(0);
@@ -206,10 +213,11 @@ export const MediaTab = () => {
                         </AppText>
                     </>
                 }
-                renderItem={({ item }) => (
+                renderItem={({ item, index }) => (
                     <Screenshot
                         key={item.image}
                         uri={item.image}
+                        onPress={() => setViewerIndex(index)}
                     />
                 )}
                 ListEmptyComponent={
@@ -228,6 +236,14 @@ export const MediaTab = () => {
                     )
                 }
             />
+
+            {viewerIndex !== null && (
+                <ImageViewer
+                    images={screenshots.map(item => item.image)}
+                    initialIndex={viewerIndex}
+                    onClose={() => setViewerIndex(null)}
+                />
+            )}
         </View>
     );
 };

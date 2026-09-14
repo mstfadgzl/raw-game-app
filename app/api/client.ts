@@ -2,11 +2,6 @@ import axios, { AxiosResponse } from 'axios';
 import { API_BASE_URL } from '@env';
 import { runtimeApiKey } from '../services/runtime-api-key';
 
-const isDirectRawgApi = /https:\/\/api\.rawg\.io\/api\/?$/i.test(
-    API_BASE_URL.trim(),
-);
-
-
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
     timeout: 10000,

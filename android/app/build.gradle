@@ -96,8 +96,7 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
-            // Yerel geliştirme proxy'si HTTP kullanır; release her zaman HTTPS olmalı.
-            manifestPlaceholders = [usesCleartextTraffic: true]
+            manifestPlaceholders = [usesCleartextTraffic: false]
         }
         release {
             // Caution! In production, you need to generate your own keystore file.

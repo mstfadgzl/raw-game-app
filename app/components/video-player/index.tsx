@@ -25,14 +25,23 @@ interface VideoPlayerProps {
 export const VideoPlayer = ({ trailer }: VideoPlayerProps) => {
   const sources = trailer?.data as Record<string, unknown> | undefined;
 
-  // RAWG şu an 480/max döndürüyor; farklı kayıtlar ise aynı MP4 adresini
-  // başka bir anahtarla gönderebiliyor. Oynatmayı tek bir anahtara bağlamamak
-  // için tüm değerler arasından ilk HTTP(S) adresini seçiyoruz.
-  const videoUrl = (Object.values(sources || {}).find(
-    value =>
-      typeof value === 'string' &&
-      /^https?:\/\//i.test(value.trim()),
-  ) as string | undefined)?.trim() || '';
+  // RAWG yanıtında 480 adresi çoğu zaman max adresinden önce gelir. İlk
+  // değeri almak videoyu gereksiz yere düşük kalitede başlatıyordu; mevcut
+  // en yüksek kaliteyi seçip yalnızca o yoksa düşük kaliteye düşüyoruz.
+  const videoUrl = Object.entries(sources || {})
+    .filter(([, value]) =>
+      typeof value === 'string' && /^https?:\/\//i.test(value.trim()),
+    )
+    .sort(([firstQuality], [secondQuality]) => {
+      const qualityValue = (quality: string) => {
+        if (quality.toLowerCase() === 'max') return Number.POSITIVE_INFINITY;
+        const numericQuality = Number.parseInt(quality, 10);
+        return Number.isFinite(numericQuality) ? numericQuality : 0;
+      };
+
+      return qualityValue(secondQuality) - qualityValue(firstQuality);
+    })
+    .map(([, value]) => (value as string).trim())[0] || '';
 
   if (!trailer) return null;
 
