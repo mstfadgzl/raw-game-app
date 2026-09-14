@@ -47,7 +47,9 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
 
     useEffect(() => {
         if (preferencesReady) {
-            void preferencesStorage.save(preferences);
+            void preferencesStorage.save(preferences).catch(() => {
+                console.warn('Preferences could not be saved to this device.');
+            });
         }
     }, [preferences, preferencesReady]);
 

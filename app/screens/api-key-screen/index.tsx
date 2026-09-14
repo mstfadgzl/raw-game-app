@@ -34,6 +34,7 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
     const mounted = useRef(true);
 
     React.useEffect(() => {
+        mounted.current = true;
         return () => {
             mounted.current = false;
         };
@@ -70,8 +71,8 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                 throw new Error('Geçersiz API key');
             }
 
-            runtimeApiKey.set(cleanKey);
             await apiKeyStorage.save(cleanKey);
+            runtimeApiKey.set(cleanKey);
 
             if (mounted.current) {
                 onAuthenticated();

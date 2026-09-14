@@ -60,7 +60,12 @@ export const SettingsScreen = () => {
                     style: 'destructive',
                     onPress: () => {
                         setLoggingOut(true);
-                        void logout().finally(() => setLoggingOut(false));
+                        void logout().catch(() => {
+                            Alert.alert(
+                                language === 'tr' ? 'Çıkış yapılamadı' : 'Could not sign out',
+                                language === 'tr' ? 'Lütfen tekrar dene.' : 'Please try again.',
+                            );
+                        }).finally(() => setLoggingOut(false));
                     },
                 },
             ],

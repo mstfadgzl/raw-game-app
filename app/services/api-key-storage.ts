@@ -10,27 +10,25 @@ type StoredApiKey = {
 
 export const apiKeyStorage = {
     async get(): Promise<string | null> {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-
-        if (!raw) {
-            return null;
-        }
-
         try {
+            const raw = await AsyncStorage.getItem(STORAGE_KEY);
+            if (!raw) return null;
             const session = JSON.parse(raw) as StoredApiKey;
 
             if (
-                !session.key ||
-                !session.expiresAt ||
+                !session ||
+                typeof session.key !== 'string' ||
+                !session.key.trim() ||
+                typeof session.expiresAt !== 'number' ||
+                !Number.isFinite(session.expiresAt) ||
                 session.expiresAt <= Date.now()
             ) {
                 await AsyncStorage.removeItem(STORAGE_KEY);
                 return null;
             }
 
-            return session.key;
+            return session.key.trim();
         } catch {
-            await AsyncStorage.removeItem(STORAGE_KEY);
             return null;
         }
     },

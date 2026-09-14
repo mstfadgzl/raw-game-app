@@ -2,9 +2,8 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import gameReducer from './slices/gameSlice';
 import genreReducer from './slices/genreSlice';
 import discoveryReducer from './slices/discoverySlice'
-import entityReducer from './slices/entitySlice';
 import { favoritesOnlyState } from './persistedGame';
-import AsyncStorage from '@react-native-async-storage/async-storage';;
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
     persistStore,
     persistReducer,
@@ -24,7 +23,6 @@ const rootReducer = combineReducers({
     game: gameReducer,
     genre: genreReducer,
     discovery: discoveryReducer,
-    entity: entityReducer
 });
 const persistConfig = {
     key: 'root',

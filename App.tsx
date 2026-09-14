@@ -20,14 +20,17 @@ const AppRoot = () => {
 
   useEffect(() => {
     const loadKey = async () => {
-      const key = await apiKeyStorage.get();
-
-      if (key) {
-        runtimeApiKey.set(key);
-        setAuthenticated(true);
+      try {
+        const key = await apiKeyStorage.get();
+        if (key) {
+          runtimeApiKey.set(key);
+          setAuthenticated(true);
+        }
+      } catch {
+        runtimeApiKey.clear();
+      } finally {
+        setCheckingKey(false);
       }
-
-      setCheckingKey(false);
     };
 
     void loadKey();

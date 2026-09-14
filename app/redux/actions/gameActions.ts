@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { AchievementParams, IAchievementResponse, IGameDetail, IGameListResponse, IRedditResponse, IScreenshotResponse, ITrailerResponse } from "@types";
-import { gameService, screenshotService } from "@services";
+import { AchievementParams, IAchievementResponse, IGameListResponse, IRedditResponse, IScreenshotResponse, ITrailerResponse } from "@types";
+import { gameService } from "@services";
 import { createAppAsyncThunk } from "@utils";
 
 
@@ -34,17 +34,6 @@ export const getGamesProcess = createAsyncThunk<
     },
 );
 
-export const getGameDetailProcess = createAsyncThunk<IGameDetail, number>(
-    'game/getGameDetailProcess',
-    async (id, { rejectWithValue }) => {
-        try {
-            return await gameService.getGameDetail(id);
-        } catch (error: any) {
-            return rejectWithValue(error);
-        }
-    },
-);
-
 export const searchGamesProcess = createAsyncThunk<IGameListResponse, string>(
     'game/searchGamesProcess',
     async (query, { rejectWithValue }) => {
@@ -60,18 +49,12 @@ export const getGameScreenshotsProcess = createAsyncThunk<IScreenshotResponse, n
     'game/getGameScreenshotsProcess',
     async (id, { rejectWithValue }) => {
         try {
-            return await screenshotService.getGameScreenshots(id);
+            return await gameService.getGameScreenshots(id);
         } catch (error: any) {
             return rejectWithValue(error);
         }
     }
 );
-export const getGamesByGenreProcess = createAppAsyncThunk<IGameListResponse, { genreSlug: string, page: number }>(
-    'game/getGamesByGenreProcess',
-    ({ genreSlug, page }) => gameService.getGamesByGenre(genreSlug, page)
-);
-
-
 export const getGameTrailersProcess = createAsyncThunk<ITrailerResponse, number>(
     'game/getGameTrailerProcess',
     async (id, { rejectWithValue }) => {
