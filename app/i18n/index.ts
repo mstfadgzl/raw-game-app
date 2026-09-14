@@ -319,9 +319,10 @@ export const translateKey = (language: Language, key: TranslationKey) =>
 export const localizeUiText = (language: Language, text: string) => {
     if (language === 'tr') return text;
 
-    const exact = uiTextTranslations[text.trim()];
+    const trimmed = text.trim();
+    const exact = uiTextTranslations[trimmed] ?? uiTextTranslations[trimmed.replace(/\s+/g, ' ')];
     if (exact) {
-        return text === text.trim() ? exact : text.replace(text.trim(), exact);
+        return text === trimmed ? exact : text.replace(trimmed, exact);
     }
 
     return text

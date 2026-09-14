@@ -8,6 +8,7 @@ import {
 import { AppText } from '../app-text';
 import { styles } from './styles';
 import { cardImageUrl } from '../../utils/card-image';
+import { useSettings } from '../../context/settings-context';
 
 type CreatorGame = {
     id: number;
@@ -32,6 +33,7 @@ interface CreatorCardProps {
 export const CreatorCard = memo(
     ({ creator, onPress }: CreatorCardProps) => {
         const [failedImages, setFailedImages] = useState<string[]>([]);
+        const { colors } = useSettings();
 
         const originalUri =
             creator.image ||
@@ -51,13 +53,13 @@ export const CreatorCard = memo(
 
         return (
             <TouchableOpacity
-                style={styles.container}
+                style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}
                 onPress={onPress}
                 activeOpacity={0.85}
                 accessibilityRole="button"
                 accessibilityLabel={`${creator.name} detaylarını aç`}
             >
-                <View style={styles.imageContainer}>
+                <View style={[styles.imageContainer, { backgroundColor: colors.surface }]}>
                     {imageUri && !failedImages.includes(imageUri) ? (
                         <Image
                             source={{ uri: imageUri }}
@@ -68,11 +70,11 @@ export const CreatorCard = memo(
                         />
                     ) : (
                         <View style={styles.imagePlaceholder}>
-                            <AppText style={styles.placeholderIcon}>
+                            <AppText style={[styles.placeholderIcon, { color: colors.primary }]}>
                                 ◇
                             </AppText>
 
-                            <AppText style={styles.placeholderText}>
+                            <AppText style={[styles.placeholderText, { color: colors.secondary }]}>
                                 Görsel bulunmuyor
                             </AppText>
                         </View>
@@ -81,7 +83,7 @@ export const CreatorCard = memo(
 
                 <View style={styles.content}>
                     <AppText
-                        style={styles.name}
+                        style={[styles.name, { color: colors.text }]}
                         numberOfLines={1}
                         bold
                     >
@@ -93,7 +95,7 @@ export const CreatorCard = memo(
                             {creatorGames.slice(0, 2).map(game => (
                                 <AppText
                                     key={game.id}
-                                    style={styles.gameTag}
+                                    style={[styles.gameTag, { color: colors.secondary }]}
                                     numberOfLines={1}
                                 >
                                     • {game.name}
@@ -101,7 +103,7 @@ export const CreatorCard = memo(
                             ))}
                         </View>
                     ) : (
-                        <AppText style={styles.gamesCount}>
+                        <AppText style={[styles.gamesCount, { color: colors.secondary }]}>
                             {gamesCount > 0
                                 ? `${gamesCount} oyun`
                                 : 'Oyun bilgisi yok'}

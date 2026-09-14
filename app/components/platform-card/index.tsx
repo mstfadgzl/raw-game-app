@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import { TouchableOpacity, ImageBackground, View } from 'react-native';
 import { AppText } from '../app-text';
 import { styles } from './style';
+import { useSettings } from '../../context/settings-context';
 
 interface PlatformCardProps {
     name: string;
@@ -11,8 +12,10 @@ interface PlatformCardProps {
 }
 
 export const PlatformCard: React.FC<PlatformCardProps> = memo(({ name, image, gamesCount, onPress }) => {
+    const { colors } = useSettings();
+
     return (
-        <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={onPress}>
+        <TouchableOpacity style={[styles.container, { borderColor: colors.border }]} activeOpacity={0.8} onPress={onPress}>
             <ImageBackground
                 source={{ uri: image }}
                 style={styles.image}
