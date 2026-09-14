@@ -237,6 +237,8 @@ export const ImageViewer = ({ images, initialIndex, onClose }: Props) => {
             visible
             transparent
             animationType="fade"
+            presentationStyle="fullScreen"
+            allowSwipeDismissal={false}
             statusBarTranslucent
             onRequestClose={onClose}
         >
