@@ -68,6 +68,51 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const videoRef = React.useRef<VideoRef>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [barWidth, setBarWidth] = useState(0);
+  const durationRef = React.useRef(0);
+  const barWidthRef = React.useRef(0);
+
+  durationRef.current = duration;
+  barWidthRef.current = barWidth;
+
+  const seekFromBar = (locationX: number) => {
+    const currentBarWidth = barWidthRef.current;
+    const currentDuration = durationRef.current;
+
+    if (!currentBarWidth || !currentDuration) return;
+
+    const nextTime = Math.max(
+      0,
+      Math.min(
+        currentDuration,
+        (Math.max(0, Math.min(currentBarWidth, locationX)) / currentBarWidth) *
+          currentDuration,
+      ),
+    );
+
+    videoRef.current?.seek(nextTime);
+    setCurrentTime(nextTime);
+  };
+
+  const inlineSeekResponder = React.useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () =>
+        durationRef.current > 0 && barWidthRef.current > 0,
+      onMoveShouldSetPanResponder: () =>
+        durationRef.current > 0 && barWidthRef.current > 0,
+      onPanResponderGrant: event => {
+        seekFromBar(event.nativeEvent.locationX);
+      },
+      onPanResponderMove: event => {
+        seekFromBar(event.nativeEvent.locationX);
+      },
+      onPanResponderRelease: event => {
+        seekFromBar(event.nativeEvent.locationX);
+      },
+    }),
+  ).current;
 
   const openFullscreen = () => {
     navigation.navigate('Video', { videoUrl, preview });
@@ -128,9 +173,17 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
               setLoading(true);
               setError(false);
             }}
+            onLoad={({ duration: loadedDuration }) => {
+              setDuration(loadedDuration || 0);
+              setLoading(false);
+            }}
+            onProgress={({ currentTime: nextTime }) => setCurrentTime(nextTime)}
             onReadyForDisplay={() => setLoading(false)}
             onBuffer={({ isBuffering }) => setLoading(isBuffering)}
-            onEnd={() => setPaused(true)}
+            onEnd={() => {
+              setPaused(true);
+              setCurrentTime(durationRef.current);
+            }}
             onError={() => {
               setLoading(false);
               setError(true);
@@ -178,6 +231,37 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
         </View>
       )}
 
+      {inlinePlaying && (
+        <View style={styles.inlineSeekContainer}>
+          <View
+            {...inlineSeekResponder.panHandlers}
+            style={styles.inlineSeekTrack}
+            onLayout={event => setBarWidth(event.nativeEvent.layout.width)}
+          >
+            <View
+              style={[
+                styles.inlineSeekProgress,
+                {
+                  width: duration
+                    ? `${Math.min(100, (currentTime / duration) * 100)}%`
+                    : '0%',
+                },
+              ]}
+            />
+            {!!duration && (
+              <View
+                style={[
+                  styles.inlineSeekThumb,
+                  {
+                    left: `${Math.min(100, (currentTime / duration) * 100)}%`,
+                  },
+                ]}
+              />
+            )}
+          </View>
+        </View>
+      )}
+
 
     </View>
   );
@@ -208,12 +292,8 @@ const FullscreenPlayer = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [barWidth, setBarWidth] = useState(0);
-  const durationRef = React.useRef(0);
-  const barWidthRef = React.useRef(0);
   const heightRef = React.useRef(0);
 
-  durationRef.current = duration;
-  barWidthRef.current = barWidth;
   heightRef.current = size.height;
 
 
@@ -278,40 +358,20 @@ const FullscreenPlayer = ({
   };
 
   const seekFromBar = (locationX: number) => {
-    const currentBarWidth = barWidthRef.current;
-    const currentDuration = durationRef.current;
-
-    if (!currentBarWidth || !currentDuration) return;
+    if (!barWidth || !duration) return;
     const nextTime = Math.max(
       0,
-      Math.min(
-        currentDuration,
-        (Math.max(0, Math.min(currentBarWidth, locationX)) / currentBarWidth) *
-          currentDuration,
-      ),
+      Math.min(duration, (locationX / barWidth) * duration),
     );
     videoRef.current?.seek(nextTime);
     setCurrentTime(nextTime);
     showControls();
   };
 
-  const seekResponder = React.useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () =>
-        durationRef.current > 0 && barWidthRef.current > 0,
-      onMoveShouldSetPanResponder: () =>
-        durationRef.current > 0 && barWidthRef.current > 0,
-      onPanResponderGrant: event => {
-        seekFromBar(event.nativeEvent.locationX);
-      },
-      onPanResponderMove: event => {
-        seekFromBar(event.nativeEvent.locationX);
-      },
-      onPanResponderRelease: event => {
-        seekFromBar(event.nativeEvent.locationX);
-      },
-    }),
-  ).current;
+  const formatTime = (value: number) => {
+    const seconds = Math.max(0, Math.floor(value));
+    return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+  };
 
   const backSwipeResponder = React.useRef(
     PanResponder.create({
@@ -491,6 +551,21 @@ const FullscreenPlayer = ({
                 <AppText style={styles.orientationText}>{landscape ? '⛶' : '⛶'}</AppText>
               </TouchableOpacity>
               <View style={styles.controlCenter} pointerEvents="box-none">
+                <View style={styles.seekButtons} pointerEvents="box-none">
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel="10 saniye geri al"
+                    style={styles.skipButton}
+                    onPress={() => {
+                      const nextTime = Math.max(0, currentTime - 10);
+                      videoRef.current?.seek(nextTime);
+                      setCurrentTime(nextTime);
+                      showControls();
+                    }}
+                  >
+                    <AppText style={styles.skipText}>↺ 10</AppText>
+                  </TouchableOpacity>
+                </View>
                 <TouchableOpacity
                   accessibilityRole="button"
                   accessibilityLabel={paused ? 'Videoyu oynat' : 'Videoyu durdur'}
@@ -506,12 +581,28 @@ const FullscreenPlayer = ({
                 >
                   <AppText style={styles.controlIcon}>{paused ? '▶' : 'Ⅱ'}</AppText>
                 </TouchableOpacity>
+                <View style={styles.seekButtons} pointerEvents="box-none">
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityLabel="10 saniye ileri al"
+                    style={styles.skipButton}
+                    onPress={() => {
+                      const nextTime = Math.min(duration, currentTime + 10);
+                      videoRef.current?.seek(nextTime);
+                      setCurrentTime(nextTime);
+                      showControls();
+                    }}
+                  >
+                    <AppText style={styles.skipText}>10 ↻</AppText>
+                  </TouchableOpacity>
+                </View>
               </View>
               <View style={styles.bottomControls} pointerEvents="box-none">
-                <View
-                  {...seekResponder.panHandlers}
+                <AppText style={styles.timeText}>{formatTime(currentTime)}</AppText>
+                <Pressable
                   style={styles.seekTrack}
                   onLayout={event => setBarWidth(event.nativeEvent.layout.width)}
+                  onPress={event => seekFromBar(event.nativeEvent.locationX)}
                 >
                   <View
                     style={[
@@ -523,17 +614,8 @@ const FullscreenPlayer = ({
                       },
                     ]}
                   />
-                  {!!duration && (
-                    <View
-                      style={[
-                        styles.seekThumb,
-                        {
-                          left: `${Math.min(100, (currentTime / duration) * 100)}%`,
-                        },
-                      ]}
-                    />
-                  )}
-                </View>
+                </Pressable>
+                <AppText style={styles.timeText}>{formatTime(duration)}</AppText>
               </View>
             </View>
           )}

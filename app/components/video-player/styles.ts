@@ -57,6 +57,24 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 
+    seekButtons: {
+        width: 70,
+        alignItems: 'center',
+    },
+
+    skipButton: {
+        paddingHorizontal: 8,
+        paddingVertical: 10,
+        borderRadius: 10,
+        backgroundColor: 'rgba(0,0,0,0.62)',
+    },
+
+    skipText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        fontWeight: '700',
+    },
+
     playPauseButton: {
         width: 58,
         height: 58,
@@ -88,6 +106,13 @@ export const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.72)',
     },
 
+    timeText: {
+        color: '#FFFFFF',
+        fontSize: 11,
+        minWidth: 34,
+        textAlign: 'center',
+    },
+
     seekTrack: {
         flex: 1,
         height: 28,
@@ -100,18 +125,6 @@ export const styles = StyleSheet.create({
         height: 5,
         borderRadius: 3,
         backgroundColor: colors.primary,
-    },
-
-    seekThumb: {
-        position: 'absolute',
-        top: 7,
-        width: 14,
-        height: 14,
-        marginLeft: -7,
-        borderRadius: 7,
-        backgroundColor: colors.primary,
-        borderWidth: 2,
-        borderColor: '#FFFFFF',
     },
 
     previewShade: {
@@ -205,6 +218,38 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(0,0,0,0.58)',
+    },
+
+    inlineSeekContainer: {
+        width: '100%',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+    },
+
+    inlineSeekTrack: {
+        width: '100%',
+        height: 24,
+        justifyContent: 'center',
+        paddingVertical: 9,
+        position: 'relative',
+    },
+
+    inlineSeekProgress: {
+        height: 5,
+        borderRadius: 3,
+        backgroundColor: colors.primary,
+    },
+
+    inlineSeekThumb: {
+        position: 'absolute',
+        top: 5,
+        width: 14,
+        height: 14,
+        marginLeft: -7,
+        borderRadius: 7,
+        backgroundColor: colors.primary,
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
     },
 
     fullscreen: {
