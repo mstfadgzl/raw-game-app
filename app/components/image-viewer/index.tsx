@@ -299,11 +299,7 @@ export const ImageViewer = ({ images, initialIndex, onClose }: Props) => {
                     </View>
                 </View>
 
-                <View style={styles.hint} pointerEvents="none">
-                    <AppText style={styles.hintText}>
-                        Sağa/sola kaydır · İki parmakla yakınlaştır
-                    </AppText>
-                </View>
+
             </View>
         </Modal>
     );
