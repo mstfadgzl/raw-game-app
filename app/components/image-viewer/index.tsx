@@ -190,6 +190,20 @@ export const ImageViewer = ({ images, initialIndex, onClose }: Props) => {
                 const isTap =
                     Math.abs(gesture.dx) < 8 &&
                     Math.abs(gesture.dy) < 8;
+                const bottomEdge = Math.min(140, height * 0.2);
+                const dismissDistance = Math.min(
+                    220,
+                    Math.max(90, height * 0.14),
+                );
+
+                if (
+                    gesture.y0 >= height - bottomEdge &&
+                    gesture.dy <= -dismissDistance &&
+                    Math.abs(gesture.dy) > Math.abs(gesture.dx)
+                ) {
+                    onClose();
+                    return;
+                }
 
                 if (isTap && now - lastTap.current < 280) {
                     lastTap.current = 0;

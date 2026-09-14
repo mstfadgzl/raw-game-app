@@ -57,24 +57,6 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 
-    seekButtons: {
-        width: 70,
-        alignItems: 'center',
-    },
-
-    skipButton: {
-        paddingHorizontal: 8,
-        paddingVertical: 10,
-        borderRadius: 10,
-        backgroundColor: 'rgba(0,0,0,0.62)',
-    },
-
-    skipText: {
-        color: '#FFFFFF',
-        fontSize: 12,
-        fontWeight: '700',
-    },
-
     playPauseButton: {
         width: 58,
         height: 58,
@@ -106,24 +88,30 @@ export const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.72)',
     },
 
-    timeText: {
-        color: '#FFFFFF',
-        fontSize: 11,
-        minWidth: 34,
-        textAlign: 'center',
-    },
-
     seekTrack: {
         flex: 1,
-        height: 24,
+        height: 28,
         justifyContent: 'center',
-        paddingVertical: 9,
+        paddingVertical: 10,
+        position: 'relative',
     },
 
     seekProgress: {
         height: 5,
         borderRadius: 3,
         backgroundColor: colors.primary,
+    },
+
+    seekThumb: {
+        position: 'absolute',
+        top: 7,
+        width: 14,
+        height: 14,
+        marginLeft: -7,
+        borderRadius: 7,
+        backgroundColor: colors.primary,
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
     },
 
     previewShade: {
