@@ -367,7 +367,9 @@ export const localizeUiText = (language: Language, text: string) => {
         .replace(/(\d+) yüklenen kişi içinde aranır\. Daha fazla kişi yükleyerek aramayı genişletebilirsin\./g, 'Search within $1 loaded creators. Load more creators to broaden the search.')
         .replace(/Tüm oyunlar gösteriliyor · (\d+)/g, 'All games are shown · $1')
         .replace(/Yıl (\d{4}) oyunları/g, 'Games from $1')
+        .replace(/“([^”]+)” için oyun bulamadık\.\s*Daha kısa veya farklı bir adla deneyebilirsin\./g, 'We could not find games for "$1".\nTry a shorter or different name.')
         .replace(/“([^”]+)” için oyun bulamadık\./g, 'We could not find games for "$1".')
+        .replace(/(\d+) oyunda yer aldı/g, 'Worked on $1 games')
         .replace(/(\d+) stüdyo$/g, '$1 studios');
 };
 

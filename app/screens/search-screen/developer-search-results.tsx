@@ -11,20 +11,20 @@ export const DeveloperSearchResults = ({ query, debouncedQuery }: {
     query: string;
     debouncedQuery: string;
 }) => {
-    const { colors } = useSettings();
+    const { colors: themeColors } = useSettings();
 
     if (query.length < 3) {
         return <AppText style={localStyles.prompt}>Stüdyo aramak için en az 3 karakter yaz. Örneğin: rockstar</AppText>;
     }
     if (query !== debouncedQuery) {
-        return <ActivityIndicator color={colors.primary} />;
+        return <ActivityIndicator color={themeColors.primary} />;
     }
     return <DeveloperResults key={debouncedQuery.toLowerCase()} query={debouncedQuery.toLowerCase()} />;
 };
 
 const DeveloperResults = ({ query }: { query: string }) => {
     const navigation = useNavigation<SearchScreenNavigationProp>();
-    const { colors } = useSettings();
+    const { colors: themeColors } = useSettings();
     const [creators, setCreators] = useState<IDeveloper[]>([]);
     const [page, setPage] = useState(1);
     const [retry, setRetry] = useState(0);
@@ -87,7 +87,7 @@ const DeveloperResults = ({ query }: { query: string }) => {
                     <StudioBrand name={item.name} imageBackground={item.image_background} size={56} />
                     <View style={localStyles.info}>
                         <AppText bold>{item.name}</AppText>
-                        <AppText color={colors.secondary}>
+                        <AppText color={themeColors.secondary}>
                             {item.games_count} oyun
                         </AppText>
                     </View>
@@ -99,7 +99,7 @@ const DeveloperResults = ({ query }: { query: string }) => {
                 </AppText>
             }
             ListFooterComponent={
-                loading ? <ActivityIndicator color={colors.primary} /> : (
+            loading ? <ActivityIndicator color={themeColors.primary} /> : (
                     <View>
                         {error && <AppText style={localStyles.hint}>Stüdyolar alınamadı. Bağlantını kontrol edip tekrar deneyebilirsin.</AppText>}
                         {(error || hasNext) && (
@@ -113,7 +113,7 @@ const DeveloperResults = ({ query }: { query: string }) => {
                                     else setPage(value => value + 1);
                                 }}
                             >
-                                <AppText color={colors.primary} bold>{error ? 'Tekrar dene' : 'Daha fazla stüdyo yükle'}</AppText>
+                                <AppText color={themeColors.primary} bold>{error ? 'Tekrar dene' : 'Daha fazla stüdyo yükle'}</AppText>
                             </TouchableOpacity>
                         )}
                     </View>

@@ -9,7 +9,7 @@ import {
     View,
 } from 'react-native';
 
-import { AppText } from '@components';
+import { AppText } from '../app-text';
 
 
 import {

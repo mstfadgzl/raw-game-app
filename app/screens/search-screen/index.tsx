@@ -239,8 +239,7 @@ export const SearchScreen = () => {
                 </AppText>
 
                 <AppText style={styles.feedbackDescription}>
-                    “{query}” için oyun bulamadık.
-                    {'\n'}Daha kısa veya farklı bir adla deneyebilirsin.
+                    {`“${query}” için oyun bulamadık.\nDaha kısa veya farklı bir adla deneyebilirsin.`}
                 </AppText>
             </View>
         );

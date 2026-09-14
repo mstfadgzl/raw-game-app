@@ -12,7 +12,7 @@ export const CreatorSearchResults = ({ query, debouncedQuery }: {
     debouncedQuery: string;
 }) => {
     const navigation = useNavigation<SearchScreenNavigationProp>();
-    const { colors } = useSettings();
+    const { colors: themeColors } = useSettings();
     const [creators, setCreators] = useState<ICreator[]>([]);
     const [page, setPage] = useState(1);
     const [retry, setRetry] = useState(0);
@@ -83,7 +83,7 @@ export const CreatorSearchResults = ({ query, debouncedQuery }: {
                     )}
                     <View style={localStyles.info}>
                         <AppText bold>{item.name}</AppText>
-                        <AppText color={colors.secondary}>
+                <AppText color={themeColors.secondary}>
                             {item.positions?.map(position => position.name).join(' · ') || `${item.games_count} oyunda yer aldı`}
                         </AppText>
                     </View>
@@ -97,7 +97,7 @@ export const CreatorSearchResults = ({ query, debouncedQuery }: {
                 </AppText>
             }
             ListFooterComponent={
-                loading ? <ActivityIndicator color={colors.primary} /> : (
+            loading ? <ActivityIndicator color={themeColors.primary} /> : (
                     <View>
                         {error && <AppText style={localStyles.hint}>Kişiler alınamadı. Bağlantını kontrol edip tekrar deneyebilirsin.</AppText>}
                         {(error || hasNext) && (
@@ -111,7 +111,7 @@ export const CreatorSearchResults = ({ query, debouncedQuery }: {
                                     else setPage(value => value + 1);
                                 }}
                             >
-                                <AppText color={colors.primary} bold>{error ? 'Tekrar dene' : 'Daha fazla kişi yükle'}</AppText>
+                                <AppText color={themeColors.primary} bold>{error ? 'Tekrar dene' : 'Daha fazla kişi yükle'}</AppText>
                             </TouchableOpacity>
                         )}
                     </View>
