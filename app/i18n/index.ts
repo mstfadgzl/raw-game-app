@@ -350,6 +350,7 @@ const catalogNameTranslations: Record<string, string> = {
     'Story Rich': 'Hikâye Odaklı',
     Atmospheric: 'Atmosferik',
     Fantasy: 'Fantezi',
+    Horror: 'Korku',
     'Sci-Fi': 'Bilim Kurgu',
     'Third Person': 'Üçüncü Şahıs',
     'First-Person': 'Birinci Şahıs',
