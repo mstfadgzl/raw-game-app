@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
+import { AppText } from '../app-text';
 import { styles } from './styles';
 
 interface ErrorStateProps {
@@ -9,11 +10,11 @@ interface ErrorStateProps {
 
 export const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry }) => (
     <View style={styles.container}>
-        <Text style={styles.icon}>⚠️</Text>
-        <Text style={styles.title}>Hata Oluştu</Text>
-        <Text style={styles.message}>{message || 'Veriler yüklenirken bir sorun oluştu.'}</Text>
+        <AppText style={styles.icon}>⚠️</AppText>
+        <AppText style={styles.title}>Hata Oluştu</AppText>
+        <AppText style={styles.message}>{message || 'Veriler yüklenirken bir sorun oluştu.'}</AppText>
         <TouchableOpacity style={styles.button} onPress={onRetry}>
-            <Text style={styles.buttonText}>Yeniden Dene</Text>
+            <AppText style={styles.buttonText}>Yeniden Dene</AppText>
         </TouchableOpacity>
     </View>
 );

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
+import { AppText } from '../app-text';
 import { styles } from './styles';
 
 interface EmptyStateProps {
@@ -8,8 +9,8 @@ interface EmptyStateProps {
 
 export const EmptyState: React.FC<EmptyStateProps> = ({ message }) => (
     <View style={styles.container}>
-        <Text style={styles.icon}>🔍</Text>
-        <Text style={styles.title}>Sonuç Bulunamadı</Text>
-        <Text style={styles.message}>{message || 'Aradığınız kriterlere uygun oyun bulunamadı.'}</Text>
+        <AppText style={styles.icon}>🔍</AppText>
+        <AppText style={styles.title}>Sonuç Bulunamadı</AppText>
+        <AppText style={styles.message}>{message || 'Aradığınız kriterlere uygun oyun bulunamadı.'}</AppText>
     </View>
 );

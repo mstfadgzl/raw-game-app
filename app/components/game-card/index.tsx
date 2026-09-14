@@ -1,7 +1,6 @@
 import React, { memo, useState } from 'react';
 import {
     View,
-    Text,
     Image,
     TouchableOpacity,
 } from 'react-native';
@@ -9,6 +8,7 @@ import {
 import { IGame } from '@types';
 import { styles } from './styles';
 import { cardImageUrl } from '../../utils/card-image';
+import { AppText } from '../app-text';
 
 type CardGame = IGame & {
     genres?: {
@@ -123,59 +123,59 @@ export const GameCard = memo(function GameCard({
                     />
                 ) : (
                     <View style={styles.imagePlaceholder}>
-                        <Text style={styles.placeholderSymbol}>
+                        <AppText style={styles.placeholderSymbol}>
                             ◇
-                        </Text>
+                        </AppText>
 
-                        <Text style={styles.placeholderText}>
+                        <AppText style={styles.placeholderText}>
                             Görsel bulunmuyor
-                        </Text>
+                        </AppText>
                     </View>
                 )}
 
                 <View style={styles.ratingBadge}>
-                    <Text style={styles.starIcon}>★</Text>
+                    <AppText style={styles.starIcon}>★</AppText>
 
-                    <Text style={styles.ratingText}>
+                    <AppText style={styles.ratingText}>
                         {metacriticDisplay}
-                    </Text>
+                    </AppText>
 
                     {hasMetacritic && (
-                        <Text style={styles.ratingLimit}>
+                        <AppText style={styles.ratingLimit}>
                             / 100
-                        </Text>
+                        </AppText>
                     )}
                 </View>
             </View>
 
             <View style={styles.content}>
-                <Text
+                <AppText
                     style={styles.title}
                     numberOfLines={2}
                     ellipsizeMode="tail"
                 >
                     {game.name}
-                </Text>
+                </AppText>
 
                 {!!genreText && (
-                    <Text
+                    <AppText
                         style={styles.genre}
                         numberOfLines={1}
                     >
                         {genreText}
-                    </Text>
+                    </AppText>
                 )}
 
                 <View style={styles.divider} />
 
                 <View style={styles.infoRow}>
-                    <Text style={styles.infoLabel}>
+                    <AppText style={styles.infoLabel}>
                         Çıkış
-                    </Text>
+                    </AppText>
 
-                    <Text style={styles.dateText}>
+                    <AppText style={styles.dateText}>
                         {releaseDate}
-                    </Text>
+                    </AppText>
                 </View>
 
                 {downloadDisplay !== null && (
@@ -185,13 +185,13 @@ export const GameCard = memo(function GameCard({
                             styles.downloadRow,
                         ]}
                     >
-                        <Text style={styles.infoLabel}>
-                            İndirme
-                        </Text>
+                    <AppText style={styles.infoLabel}>
+                        İndirme
+                    </AppText>
 
-                        <Text style={styles.downloadText}>
-                            {downloadDisplay}
-                        </Text>
+                    <AppText style={styles.downloadText}>
+                        {downloadDisplay}
+                    </AppText>
                     </View>
                 )}
             </View>
