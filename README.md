@@ -27,19 +27,16 @@ babel de anlaması için {npm i babel-plugin-module-resolver} kullanıyoruz sonr
 3.action ları yaz ve actionları tekrar yazmamak için createAppAsyncThunk helperı yaz
 4. sliceları yaz ve store.ts içine aktar
 
-## RAWG proxy ile yerel çalışma
+## RAWG API key ile çalışma
 
-RAWG anahtarı mobil uygulamada tutulmaz. Proxy anahtarı `server/.env` içinden okur.
+Uygulama doğrudan RAWG API'ye bağlanır. Kullanıcı ilk açılışta kendi API key'ini
+girer; key cihazda saklanır ve belirlenen süre sonunda yeniden istenir.
 
-```text
-cd server
-npm run dev
-```
-
-Debug Android cihazı için portu ADB üzerinden yönlendir:
+Kök `.env` dosyasında yalnızca RAWG'nin temel adresi bulunmalıdır:
 
 ```text
-adb reverse tcp:3000 tcp:3000
+API_BASE_URL=https://api.rawg.io/api/
 ```
 
-Mobil uygulamanın kök `.env` dosyası debug ortamında `API_BASE_URL=http://127.0.0.1:3000/api/` kullanır. Üretimde bu adres HTTPS kullanan yayınlanmış backend adresiyle değiştirilmelidir.
+API key kaynak koduna veya `.env.example` dosyasına yazılmaz. Uygulama açılışta
+key ekranını gösterir ve geçerli key ile istekleri otomatik olarak tamamlar.

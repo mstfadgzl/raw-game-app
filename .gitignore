@@ -77,8 +77,5 @@ yarn-error.log
 node_modules/
 .env
 
-# Backend secrets
-server/.env
-server/node_modules/
 android/.gradle-home/
 .gradle/
