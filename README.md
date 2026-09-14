@@ -1,4 +1,16 @@
- 
+ şimdi bütün kodları satırları dosyaları teker teker kontrol et her bir detayı en iyi şekilde bak ve kontrol et acelemiz yok sonra gereksiz bulduğun yerleri satırları dosyaları klasörleri sil  kontrollerin bitince uygulama şuan kullanıma hazırmı kontrolünü sağla en sonunda tüm kontroller doğru ve iyiyse bunun apksını nasıl çıkaracağım açıkla
+
+
+
+
+
+
+
+
+
+
+
+
  ---  başlangıç
 npx [@react-native-community/cli@latest init GameCodex] yazarak klasör oluşturdum
 app klasörü oluşturup içerisine api/assets/compnents/hooks/navigators/redux/screens/types/utils klasörleri oluşturdum
