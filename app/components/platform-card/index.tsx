@@ -12,7 +12,7 @@ interface PlatformCardProps {
 }
 
 export const PlatformCard: React.FC<PlatformCardProps> = memo(({ name, image, gamesCount, onPress }) => {
-    const { colors } = useSettings();
+    const { colors, language } = useSettings();
 
     return (
         <TouchableOpacity style={[styles.container, { borderColor: colors.border }]} activeOpacity={0.8} onPress={onPress}>
@@ -27,7 +27,7 @@ export const PlatformCard: React.FC<PlatformCardProps> = memo(({ name, image, ga
                     </AppText>
                     {gamesCount && (
                         <AppText variant="caption" style={styles.count}>
-                            {gamesCount.toLocaleString()} Oyun
+                            {`${gamesCount.toLocaleString(language === 'tr' ? 'tr-TR' : 'en-US')} ${language === 'tr' ? 'oyun' : 'games'}`}
                         </AppText>
                     )}
                 </View>

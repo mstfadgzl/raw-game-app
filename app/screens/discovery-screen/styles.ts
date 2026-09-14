@@ -1,7 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '@theme';
+import type { ThemeColors } from '@theme';
+import { useMemo } from 'react';
+import { useSettings } from '@hooks';
 
-export const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 0,
@@ -107,7 +109,7 @@ export const styles = StyleSheet.create({
     },
 
     selectedFilterText: {
-        color: '#081014',
+        color: colors.background === '#151515' ? '#081014' : '#FFFFFF',
         fontWeight: '700',
     },
 
@@ -221,3 +223,7 @@ export const styles = StyleSheet.create({
         height: 24,
     },
 });
+export const useStyles = () => {
+    const { colors } = useSettings();
+    return useMemo(() => createStyles(colors), [colors]);
+};

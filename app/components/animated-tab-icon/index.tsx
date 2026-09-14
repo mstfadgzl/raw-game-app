@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, StyleSheet, View } from 'react-native';
+import { useSettings } from '../../context/settings-context';
 
 type Props = {
     name: 'home' | 'discover' | 'search' | 'library' | 'settings';
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export const AnimatedTabIcon = ({ name, focused, color }: Props) => {
+    const { themeMode } = useSettings();
     const progress = useRef(new Animated.Value(focused ? 1 : 0)).current;
     const [reduceMotion, setReduceMotion] = useState(true);
 
@@ -34,7 +36,7 @@ export const AnimatedTabIcon = ({ name, focused, color }: Props) => {
     const stroke = { borderColor: color };
     return (
         <View style={styles.frame} accessible={false} importantForAccessibility="no-hide-descendants">
-            <Animated.View style={[styles.highlight, { opacity: progress, transform: [{ scaleX: progress.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }] }]} />
+            <Animated.View style={[styles.highlight, { backgroundColor: themeMode === 'light' ? '#D9EFE9' : '#203B37', opacity: progress, transform: [{ scaleX: progress.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }] }]} />
             <Animated.View style={[styles.icon, { transform: [{ translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [0, -1] }) }] }]}>
                 {name === 'home' && <><View style={[styles.roof, stroke]} /><View style={[styles.house, stroke]} /></>}
                 {name === 'discover' && <><View style={[styles.compass, stroke]} /><View style={[styles.needle, { backgroundColor: color }]} /></>}

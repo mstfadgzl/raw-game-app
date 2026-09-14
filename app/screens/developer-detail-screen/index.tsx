@@ -7,7 +7,7 @@ import { translateText } from '@utils';
 import { useSettings } from '@hooks';
 import type { CompanyDetailRouteProp, DiscoverScreenNavigationProp, IDeveloper, IGame } from '@types';
 import { colors } from '@theme';
-import { styles } from './styles';
+import { useStyles } from './styles';
 
 export const DeveloperDetailScreen = () => {
     const { params, name } = useRoute<CompanyDetailRouteProp>();
@@ -18,6 +18,7 @@ export const DeveloperDetailScreen = () => {
 type CompanyKind = 'developer' | 'publisher';
 
 const DeveloperContent = ({ id, kind }: { id: number; kind: CompanyKind }) => {
+    const styles = useStyles();
     const navigation = useNavigation<DiscoverScreenNavigationProp>();
     const { language } = useSettings();
     const readProfile = useCallback(() => kind === 'publisher' ? entityService.peekPublisherDetail(id) : entityService.peekDeveloperDetail(id), [id, kind]);
@@ -116,6 +117,7 @@ const DeveloperContent = ({ id, kind }: { id: number; kind: CompanyKind }) => {
 };
 
 const DeveloperGames = ({ id, kind, ordering, header }: { id: number; kind: CompanyKind; ordering: '-added' | '-metacritic'; header: React.ReactElement }) => {
+    const styles = useStyles();
     const navigation = useNavigation<DiscoverScreenNavigationProp>();
     const [games, setGames] = useState<IGame[]>([]);
     const [page, setPage] = useState(1);

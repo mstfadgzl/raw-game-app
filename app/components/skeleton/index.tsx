@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, ViewStyle } from 'react-native';
-import { styles } from './styles';
+import { useStyles } from './styles';
 
 interface SkeletonProps {
     style?: ViewStyle;
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({ style }) => {
+    const styles = useStyles();
     const opacity = useRef(new Animated.Value(0.3)).current;
 
     useEffect(() => {
@@ -23,6 +24,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({ style }) => {
                     toValue: 0.3,
                     duration: 1000,
                     useNativeDriver: true,
+                    isInteraction: false,
                 }),
             ])
         );

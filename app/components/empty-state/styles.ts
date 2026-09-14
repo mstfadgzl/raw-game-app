@@ -1,8 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '@theme';
+import type { ThemeColors } from '@theme';
+import { useMemo } from 'react';
+import { useSettings } from '@hooks';
 import { spacing } from '@theme';
 
-export const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
@@ -21,3 +23,7 @@ export const styles = StyleSheet.create({
         textAlign: 'center',
     },
 });
+export const useStyles = () => {
+    const { colors } = useSettings();
+    return useMemo(() => createStyles(colors), [colors]);
+};

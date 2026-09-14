@@ -1,7 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '@theme';
+import type { ThemeColors } from '@theme';
+import { useMemo } from 'react';
+import { useSettings } from '@hooks';
 
-export const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         marginVertical: 12,
     },
@@ -75,7 +77,7 @@ export const styles = StyleSheet.create({
     },
 
     badgeText: {
-        color: '#081014',
+        color: colors.background === '#151515' ? '#081014' : '#FFFFFF',
         fontSize: 11,
         fontWeight: '800',
     },
@@ -188,7 +190,7 @@ export const styles = StyleSheet.create({
     },
 
     choiceTextSelected: {
-        color: '#081014',
+        color: colors.background === '#151515' ? '#081014' : '#FFFFFF',
         fontWeight: '700',
     },
 
@@ -228,7 +230,7 @@ export const styles = StyleSheet.create({
     },
 
     error: {
-        color: '#FF9B9B',
+        color: colors.error,
         fontSize: 13,
         lineHeight: 19,
         marginBottom: 12,
@@ -283,8 +285,12 @@ export const styles = StyleSheet.create({
     },
 
     applyText: {
-        color: '#081014',
+        color: colors.background === '#151515' ? '#081014' : '#FFFFFF',
         fontSize: 14,
         fontWeight: '800',
     },
 });
+export const useStyles = () => {
+    const { colors } = useSettings();
+    return useMemo(() => createStyles(colors), [colors]);
+};

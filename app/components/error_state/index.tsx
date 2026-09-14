@@ -1,14 +1,16 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { AppText } from '../app-text';
-import { styles } from './styles';
+import { useStyles } from './styles';
 
 interface ErrorStateProps {
     message?: string;
     onRetry: () => void;
 }
 
-export const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry }) => (
+export const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry }) => {
+    const styles = useStyles();
+    return (
     <View style={styles.container}>
         <AppText style={styles.icon}>⚠️</AppText>
         <AppText style={styles.title}>Hata Oluştu</AppText>
@@ -18,3 +20,4 @@ export const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry }) => (
         </TouchableOpacity>
     </View>
 );
+};

@@ -11,7 +11,7 @@ import { gameService } from '../../api/services/gameService';
 import { colors } from '@theme';
 import { toggleFavorite } from '../../redux/slices/gameSlice';
 
-import { styles } from './styles';
+import { useStyles } from './styles';
 
 import { AboutTab } from './tabs/AboutTab';
 import { MediaTab } from './tabs/MediaTab';
@@ -22,6 +22,7 @@ import { RedditTab } from './tabs/RedditTab';
 const Tab = createMaterialTopTabNavigator();
 
 export const DetailScreen = () => {
+    const styles = useStyles();
     const route = useRoute<GameDetailRouteProp>();
     const gameId = Number(route.params.gameId);
 
@@ -39,6 +40,7 @@ export const DetailScreen = () => {
 };
 
 const DetailContent = ({ gameId }: { gameId: number }) => {
+    const styles = useStyles();
     const dispatch = useAppDispatch();
     const insets = useSafeAreaInsets();
 

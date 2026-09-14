@@ -16,9 +16,10 @@ import { useAppDispatch } from '@hooks';
 import { getGameAchievementsProcess } from '@actions';
 import { AchievementItem, AppText, EmptyState } from '@components';
 import { colors } from '@theme';
-import { styles } from '../../styles';
+import { useStyles } from '../../styles';
 
 export const AchievementsTab = () => {
+    const styles = useStyles();
     const route = useRoute<any>();
     const gameId = Number(route.params.gameId);
     const dispatch = useAppDispatch();

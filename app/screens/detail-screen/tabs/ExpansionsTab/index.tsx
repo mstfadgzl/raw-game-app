@@ -14,9 +14,10 @@ import {
 } from '@actions';
 import { CompactGameItem, AppText, EmptyState } from '@components';
 import { colors } from '@theme';
-import { styles } from '../../styles';
+import { useStyles } from '../../styles';
 
 export const ExpansionsTab = () => {
+    const styles = useStyles();
     const route = useRoute<any>();
     const navigation = useNavigation<any>();
     const dispatch = useAppDispatch();

@@ -21,7 +21,7 @@ import {
     getDevelopersProcess,
 } from '@actions';
 
-import { useAppDispatch } from '@hooks';
+import { useAppDispatch, useSettings } from '@hooks';
 
 import {
     AppText,
@@ -32,9 +32,9 @@ import {
 } from '@components';
 
 import { DiscoverMainNavigationProp, IDeveloper } from '@types';
-import { colors } from '@theme';
 
 import { styles } from './styles';
+import { localizeCatalogName } from '../../i18n';
 
 type RawgTag = {
     id: number;
@@ -91,6 +91,7 @@ const formatCount = (value?: number) => {
 
 export const DiscoverMainScreen = () => {
     const dispatch = useAppDispatch();
+    const { colors: themeColors, language } = useSettings();
 
     const navigation =
         useNavigation<DiscoverMainNavigationProp>();
@@ -410,20 +411,20 @@ export const DiscoverMainScreen = () => {
     const renderHeader = () => (
         <View>
             <View style={styles.header}>
-                <AppText style={styles.mainTitle}>
+                <AppText style={[styles.mainTitle, { color: themeColors.text }]}>
                     Keşfet
                 </AppText>
             </View>
             <View style={styles.creatorSection}>
                 <View style={styles.sectionHeader}>
-                    <AppText style={styles.sectionTitle}>
+                    <AppText style={[styles.sectionTitle, { color: themeColors.text }]}>
                         Geliştirici stüdyolar
                     </AppText>
                 </View>
 
                 {developersLoading && developers.length === 0 ? (
                     <View style={styles.creatorLoading}>
-                        <ActivityIndicator color={colors.primary} />
+                        <ActivityIndicator color={themeColors.primary} />
                     </View>
                 ) : (
                     <FlatList
@@ -462,13 +463,13 @@ export const DiscoverMainScreen = () => {
                         ListFooterComponent={
                             developersLoading && developers.length > 0 ? (
                                 <View style={styles.creatorFooter}>
-                                    <ActivityIndicator color={colors.primary} />
+                                    <ActivityIndicator color={themeColors.primary} />
                                 </View>
                             ) : undefined
                         }
                         ListEmptyComponent={
                             !developersError ? (
-                                <AppText color={colors.secondary}>
+                                <AppText color={themeColors.secondary}>
                                     Geliştirici bulunamadı.
                                 </AppText>
                             ) : undefined
@@ -492,7 +493,7 @@ export const DiscoverMainScreen = () => {
             <View style={styles.creatorSection}>
                 <View style={styles.sectionHeader}>
                     <View>
-                        <AppText style={styles.sectionTitle}>
+                        <AppText style={[styles.sectionTitle, { color: themeColors.text }]}>
                             Oyun Yaratıcıları
                         </AppText>
                     </View>
@@ -501,7 +502,7 @@ export const DiscoverMainScreen = () => {
                 {creatorLoading && creators.length === 0 ? (
                     <View style={styles.creatorLoading}>
                         <ActivityIndicator
-                            color={colors.primary}
+                            color={themeColors.primary}
                         />
                     </View>
                 ) : creatorError &&
@@ -564,7 +565,7 @@ export const DiscoverMainScreen = () => {
                                     }
                                 >
                                     <ActivityIndicator
-                                        color={colors.primary}
+                                        color={themeColors.primary}
                                     />
                                 </View>
                             ) : creatorError ? (
@@ -593,11 +594,11 @@ export const DiscoverMainScreen = () => {
             </View>
 
             <View style={styles.tagHeader}>
-                <AppText style={styles.sectionTitle}>
+                <AppText style={[styles.sectionTitle, { color: themeColors.text }]}>
                     Tüm etiketler
                 </AppText>
 
-                <AppText style={styles.sectionSubtitle}>
+                <AppText style={[styles.sectionSubtitle, { color: themeColors.secondary }]}>
                     Bir etikete dokunarak ilgili oyunları görüntüle.
                 </AppText>
             </View>
@@ -663,7 +664,7 @@ export const DiscoverMainScreen = () => {
 
     if (isInitialLoading) {
         return (
-            <Container style={styles.container}>
+            <Container style={[styles.container, { backgroundColor: themeColors.background }]}>
                 <View style={styles.loadingContainer}>
                     <Skeleton style={styles.fullSkeleton} />
                     <Skeleton style={styles.fullSkeleton} />
@@ -673,7 +674,7 @@ export const DiscoverMainScreen = () => {
     }
 
     return (
-        <Container style={styles.container}>
+        <Container style={[styles.container, { backgroundColor: themeColors.background }]}>
             <FlatList
                 key="all-tags-grid"
                 data={tags}
@@ -692,7 +693,7 @@ export const DiscoverMainScreen = () => {
                 renderItem={({ item }) => (
                     <View style={styles.tagColumn}>
                         <TouchableOpacity
-                            style={styles.tagCard}
+                            style={[styles.tagCard, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}
                             activeOpacity={0.8}
                             accessibilityRole="button"
                             accessibilityLabel={`${item.name} etiketini aç`}
@@ -708,7 +709,7 @@ export const DiscoverMainScreen = () => {
                         >
                             <View style={styles.tagIcon}>
                                 <AppText
-                                    style={styles.tagIconText}
+                                    style={[styles.tagIconText, { color: themeColors.primary }]}
                                 >
                                     #
                                 </AppText>
@@ -716,15 +717,15 @@ export const DiscoverMainScreen = () => {
 
                             <View style={styles.tagTextContainer}>
                                 <AppText
-                                    style={styles.tagName}
+                                    style={[styles.tagName, { color: themeColors.text }]}
                                     numberOfLines={2}
                                 >
-                                    {item.name}
+                                    {localizeCatalogName(language, item.name)}
                                 </AppText>
 
                                 {!!item.games_count && (
                                     <AppText
-                                        style={styles.tagGameCount}
+                                        style={[styles.tagGameCount, { color: themeColors.secondary }]}
                                     >
                                         {formatCount(
                                             item.games_count,
@@ -734,7 +735,7 @@ export const DiscoverMainScreen = () => {
                                 )}
                             </View>
 
-                            <AppText style={styles.tagArrow}>
+                            <AppText style={[styles.tagArrow, { color: themeColors.secondary }]}>
                                 ›
                             </AppText>
                         </TouchableOpacity>
@@ -756,15 +757,15 @@ export const DiscoverMainScreen = () => {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={handleRefresh}
-                        tintColor={colors.primary}
-                        colors={[colors.primary]}
+                        tintColor={themeColors.primary}
+                        colors={[themeColors.primary]}
                     />
                 }
                 ListFooterComponent={
                     tagsLoading &&
                         tags.length > 0 ? (
                         <ActivityIndicator
-                            color={colors.primary}
+                            color={themeColors.primary}
                             style={styles.footerLoader}
                         />
                     ) : tagsError &&

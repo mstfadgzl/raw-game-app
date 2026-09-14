@@ -2,10 +2,11 @@ import React from 'react';
 import { View, FlatList, Linking, TouchableOpacity } from 'react-native';
 import { useAppSelector } from '@hooks';
 import { AppText, EmptyState, Skeleton } from '@components';
-import { styles } from '../../styles';
+import { useStyles } from '../../styles';
 import { colors } from '@theme';
 
 export const CommunityTab = () => {
+    const styles = useStyles();
     // Redux'tan isLoading durumunu da çekiyoruz
     const { data, isLoading } = useAppSelector(state => state.game);
     const posts = data.getGameRedditPostsProcess?.results || [];

@@ -5,7 +5,7 @@ import { AppText } from '@components';
 import { entityService } from '@services';
 import type { ICreator, SearchScreenNavigationProp } from '@types';
 import { useSettings } from '@hooks';
-import { colors } from '@theme';
+import type { ThemeColors } from '@theme';
 
 export const CreatorSearchResults = ({ query, debouncedQuery }: {
     query: string;
@@ -13,6 +13,7 @@ export const CreatorSearchResults = ({ query, debouncedQuery }: {
 }) => {
     const navigation = useNavigation<SearchScreenNavigationProp>();
     const { colors: themeColors } = useSettings();
+    const localStyles = React.useMemo(() => createLocalStyles(themeColors), [themeColors]);
     const [creators, setCreators] = useState<ICreator[]>([]);
     const [page, setPage] = useState(1);
     const [retry, setRetry] = useState(0);
@@ -121,7 +122,7 @@ export const CreatorSearchResults = ({ query, debouncedQuery }: {
     );
 };
 
-const localStyles = StyleSheet.create({
+const createLocalStyles = (colors: ThemeColors) => StyleSheet.create({
     list: { padding: 18, paddingBottom: 32 },
     hint: { color: colors.secondary, marginBottom: 20, lineHeight: 22 },
     person: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, gap: 14 },

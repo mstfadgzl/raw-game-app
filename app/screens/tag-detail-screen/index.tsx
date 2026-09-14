@@ -18,7 +18,8 @@ import {
     useRoute,
 } from '@react-navigation/native';
 
-import { useAppDispatch } from '@hooks';
+import { useAppDispatch, useSettings } from '@hooks';
+import { localizeCatalogName } from '../../i18n';
 import { getGamesProcess } from '@actions';
 
 import {
@@ -40,7 +41,7 @@ import type {
 } from '@types';
 
 import { colors } from '@theme';
-import { styles } from './styles';
+import { useStyles } from './styles';
 
 type LoadMode = 'initial' | 'refresh' | 'more';
 
@@ -72,6 +73,8 @@ const mergeGames = (
 };
 
 const TagGames = ({ slug, name }: TagGamesProps) => {
+    const { language } = useSettings();
+    const styles = useStyles();
     const dispatch = useAppDispatch();
 
     const navigation =
@@ -271,7 +274,7 @@ const TagGames = ({ slug, name }: TagGamesProps) => {
                             style={styles.title}
                             numberOfLines={2}
                         >
-                            {name}
+                            {localizeCatalogName(language, name)}
                         </AppText>
 
                         <GameSortFilter

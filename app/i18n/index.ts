@@ -88,6 +88,14 @@ const dictionary: Record<Language, Record<TranslationKey, string>> = {
 };
 
 const uiTextTranslations: Record<string, string> = {
+    'Hakkında': 'About',
+    'Medya': 'Media',
+    'Kupalar': 'Achievements',
+    'Topluluk': 'Community',
+    'Etiketler': 'Tags',
+    'Oyunlar yenileniyor…': 'Refreshing games…',
+    'Oyunlar yüklenemedi': 'Games could not be loaded',
+    '‹ Geri': '‹ Back',
     'Kitaplığım': 'Library',
     'Oyun Kaydedildi': 'Games saved',
     'Ana Sayfa': 'Home',
@@ -218,6 +226,7 @@ const uiTextTranslations: Record<string, string> = {
     'Tümü': 'All',
     'Sınır yok': 'No limit',
     'Geliştirici stüdyolar': 'Developer studios',
+    'Oyun Yaratıcıları': 'Game creators',
     'Stüdyo aramak için en az 3 karakter yaz. Örneğin: rockstar': 'Type at least 3 characters to search studios. For example: rockstar',
     'Stüdyolar aranıyor…': 'Searching studios…',
     'Arama tamamlanamadı.': 'Search could not be completed.',
@@ -318,12 +327,18 @@ const uiTextTranslations: Record<string, string> = {
     'Bu etikette seçtiğin filtrelere uygun oyun bulunamadı.': 'No games in this tag match the selected filters.',
     'Liste filtresi bulunamadı.': 'List filter not found.',
     'Geçersiz oyun listesi.': 'Invalid game list.',
+    'Geçersiz oyun yanıtı': 'Invalid game response',
     'Geçersiz platform.': 'Invalid platform.',
+    'Geçersiz stüdyo': 'Invalid studio',
     'Geçersiz kişi kimliği': 'Invalid creator ID',
     'Geçersiz profil yanıtı': 'Invalid profile response',
     'Geçersiz geliştirici listesi': 'Invalid developer list',
     'Geçersiz stüdyo listesi': 'Invalid studio list',
     'Geçersiz oyun listesi': 'Invalid game list',
+    'Topluluk gönderileri yüklenemedi.': 'Community posts could not be loaded.',
+    'Reddit tartışmaları': 'Reddit discussions',
+    'Oyunlar yüklenemedi · Tekrar dene': 'Games could not be loaded · Try again',
+    'MAĞAZAYA GİT': 'OPEN STORE',
 };
 
 const catalogNameTranslations: Record<string, string> = {
@@ -343,6 +358,30 @@ const catalogNameTranslations: Record<string, string> = {
     Simulation: 'Simülasyon',
     Sports: 'Spor',
     Strategy: 'Strateji',
+    Educational: 'Eğitici',
+    Card: 'Kart',
+    'Board Games': 'Masa Oyunları',
+    'Free to Play': 'Ücretsiz Oynanabilir',
+    'Online Co-Op': 'Çevrim İçi İş Birliği',
+    'Local Co-Op': 'Yerel İş Birliği',
+    'Local Multiplayer': 'Yerel Çok Oyunculu',
+    'Controller': 'Oyun Kumandası',
+    'Full controller support': 'Tam Kumanda Desteği',
+    'Steam Achievements': 'Steam Başarımları',
+    'Steam Cloud': 'Steam Bulut Kayıtları',
+    'Steam Trading Cards': 'Steam Koleksiyon Kartları',
+    'Steam Workshop': 'Steam Atölyesi',
+    'Great Soundtrack': 'Etkileyici Müzikler',
+    'Difficult': 'Zorlu',
+    'Exploration': 'Keşif',
+    'Female Protagonist': 'Kadın Ana Karakter',
+    'Comedy': 'Komedi',
+    'Funny': 'Eğlenceli',
+    'Historical': 'Tarihî',
+    'Turn-Based': 'Sıra Tabanlı',
+    'Turn-Based Strategy': 'Sıra Tabanlı Strateji',
+    'Pixel Graphics': 'Piksel Grafikler',
+    'Retro': 'Retro',
     'Open World': 'Açık Dünya',
     Singleplayer: 'Tek Oyunculu',
     Multiplayer: 'Çok Oyunculu',
@@ -386,11 +425,18 @@ export const localizeUiText = (language: Language, text: string) => {
         .replace(/Tüm oyunlar gösteriliyor · (\d+)/g, 'All games are shown · $1')
         .replace(/Yıl (\d{4}) oyunları/g, 'Games from $1')
         .replace(/^(\d{4}) oyunları$/g, 'Games from $1')
+        .replace(/^(.*) türünde bu filtrelere uygun oyun bulunamadı\.$/g, 'No games in $1 match these filters.')
         .replace(/“([^”]+)” için oyun bulamadık\.\s*Daha kısa veya farklı bir adla deneyebilirsin\./g, 'We could not find games for "$1".\nTry a shorter or different name.')
         .replace(/“([^”]+)” için oyun bulamadık\./g, 'We could not find games for "$1".')
         .replace(/(\d+) oyunda yer aldı/g, 'Worked on $1 games')
         .replace(/(\d+) stüdyo$/g, '$1 studios');
 };
 
+const normalizedCatalogNames = new Map(Object.entries(catalogNameTranslations).map(
+    ([name, translated]) => [name.toLowerCase().replace(/[\s_-]+/g, ' ').trim(), translated],
+));
+
 export const localizeCatalogName = (language: Language, name: string) =>
-    language === 'tr' ? catalogNameTranslations[name] ?? name : name;
+    language === 'tr'
+        ? normalizedCatalogNames.get(name.toLowerCase().replace(/[\s_-]+/g, ' ').trim()) ?? name
+        : name;

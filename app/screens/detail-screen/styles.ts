@@ -1,7 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '@theme';
+import type { ThemeColors } from '@theme';
+import { useMemo } from 'react';
+import { useSettings } from '@hooks';
 
-export const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background,
@@ -9,7 +11,7 @@ export const styles = StyleSheet.create({
     headerContainer: {
         height: 260,
         width: '100%',
-        backgroundColor: '#1B2030',
+        backgroundColor: colors.surface,
     },
     heroImage: {
         width: '100%',
@@ -89,21 +91,21 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 15,
         paddingVertical: 10,
         borderRadius: 12,
-        backgroundColor: '#191E2B',
+        backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: '#2A3040',
+        borderColor: colors.border,
     },
     activePill: {
         backgroundColor: colors.primary,
         borderColor: colors.primary,
     },
     label: {
-        color: '#ADB5C9',
+        color: colors.secondary,
         fontSize: 13,
         fontWeight: '600',
     },
     activeLabel: {
-        color: '#0B0D14',
+        color: colors.background === '#151515' ? '#081014' : '#FFFFFF',
         fontWeight: '700',
     },
     sectionTitle: {
@@ -112,7 +114,7 @@ export const styles = StyleSheet.create({
         marginBottom: 14,
     },
     muted: {
-        color: '#A8B0C2',
+        color: colors.secondary,
         lineHeight: 21,
     },
     feedback: {
@@ -129,9 +131,9 @@ export const styles = StyleSheet.create({
     redditCard: {
         padding: 16,
         borderRadius: 14,
-        backgroundColor: '#191E2B',
+        backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: '#2A3040',
+        borderColor: colors.border,
         marginBottom: 12,
     },
     postMeta: {
@@ -141,3 +143,8 @@ export const styles = StyleSheet.create({
         marginTop: 10,
     },
 });
+
+export const useStyles = () => {
+    const { colors } = useSettings();
+    return useMemo(() => createStyles(colors), [colors]);
+};

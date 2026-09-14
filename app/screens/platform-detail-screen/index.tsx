@@ -42,7 +42,7 @@ import type {
 } from '@types';
 
 import { colors } from '@theme';
-import { styles } from './styles';
+import { useStyles } from './styles';
 
 type LoadMode = 'initial' | 'refresh' | 'more';
 
@@ -72,6 +72,7 @@ const PlatformGames = ({
     platformId,
     name,
 }: PlatformGamesProps) => {
+    const styles = useStyles();
     const dispatch = useAppDispatch();
 
     const navigation =

@@ -1,7 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '@theme';
+import type { ThemeColors } from '@theme';
+import { useMemo } from 'react';
+import { useSettings } from '@hooks';
 
-export const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 0,
@@ -23,7 +25,7 @@ export const styles = StyleSheet.create({
     },
 
     title: {
-        color: '#F5F7FC',
+        color: colors.text,
         fontSize: 28,
         lineHeight: 35,
         fontWeight: '800',
@@ -38,10 +40,10 @@ export const styles = StyleSheet.create({
         marginBottom: 18,
         paddingLeft: 14,
         paddingRight: 4,
-        backgroundColor: '#191E29',
+        backgroundColor: colors.surface,
         borderRadius: 15,
         borderWidth: 1,
-        borderColor: '#303849',
+        borderColor: colors.border,
     },
 
     searchBarFocused: {
@@ -56,7 +58,7 @@ export const styles = StyleSheet.create({
 
     searchInput: {
         flex: 1,
-        color: '#F2F5FB',
+        color: colors.text,
         fontSize: 15,
         paddingVertical: 14,
         paddingHorizontal: 0,
@@ -70,7 +72,7 @@ export const styles = StyleSheet.create({
     },
 
     clearText: {
-        color: '#B9C3D6',
+        color: colors.secondary,
         fontSize: 17,
     },
 
@@ -84,7 +86,7 @@ export const styles = StyleSheet.create({
     },
 
     sectionTitle: {
-        color: '#DCE3F0',
+        color: colors.text,
         fontSize: 16,
         fontWeight: '600',
         paddingHorizontal: 18,
@@ -114,7 +116,7 @@ export const styles = StyleSheet.create({
         width: 66,
         height: 66,
         borderRadius: 22,
-        backgroundColor: '#1B2430',
+        backgroundColor: colors.surface,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 20,
@@ -126,14 +128,14 @@ export const styles = StyleSheet.create({
     },
 
     emptyTitle: {
-        color: '#E8EDF7',
+        color: colors.text,
         fontSize: 18,
         fontWeight: '700',
         textAlign: 'center',
     },
 
     emptyDescription: {
-        color: '#99A5BC',
+        color: colors.secondary,
         fontSize: 13,
         lineHeight: 21,
         textAlign: 'center',
@@ -154,13 +156,13 @@ export const styles = StyleSheet.create({
         marginHorizontal: 4,
         marginBottom: 10,
         borderRadius: 11,
-        backgroundColor: '#191F2B',
+        backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: '#30394A',
+        borderColor: colors.border,
     },
 
     suggestionText: {
-        color: '#C8D2E4',
+        color: colors.secondary,
         fontSize: 12,
         fontWeight: '500',
     },
@@ -172,7 +174,7 @@ export const styles = StyleSheet.create({
     },
 
     feedbackDescription: {
-        color: '#99A5BC',
+        color: colors.secondary,
         fontSize: 13,
         lineHeight: 22,
         textAlign: 'center',
@@ -184,7 +186,7 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 12,
         borderRadius: 11,
-        backgroundColor: '#243039',
+        backgroundColor: colors.surface,
     },
 
     retryText: {
@@ -193,3 +195,7 @@ export const styles = StyleSheet.create({
         fontWeight: '700',
     },
 });
+export const useStyles = () => {
+    const { colors } = useSettings();
+    return useMemo(() => createStyles(colors), [colors]);
+};

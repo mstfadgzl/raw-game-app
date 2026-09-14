@@ -25,7 +25,7 @@ type Props = {
 };
 
 export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
-    const { colors: themeColors, language } = useSettings();
+    const { colors: themeColors, language, setLanguage, themeMode } = useSettings();
     const [apiKey, setApiKey] = useState('');
     const [showKey, setShowKey] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -93,6 +93,24 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
 
     return (
         <Container style={styles.container}>
+            <View style={styles.languageRow}>
+                <View style={[styles.languagePicker, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+                    {(['en', 'tr'] as const).map(value => (
+                        <Pressable
+                            key={value}
+                            accessibilityRole="radio"
+                            accessibilityLabel={value === 'en' ? 'English' : 'Türkçe'}
+                            accessibilityState={{ checked: language === value }}
+                            onPress={() => setLanguage(value)}
+                            style={[styles.languageOption, language === value && { backgroundColor: themeColors.primary }]}
+                        >
+                            <AppText bold style={styles.languageLabel} color={language === value ? (themeMode === 'light' ? '#FFFFFF' : '#07110F') : themeColors.secondary}>
+                                {value.toUpperCase()}
+                            </AppText>
+                        </Pressable>
+                    ))}
+                </View>
+            </View>
             <KeyboardAvoidingView
                 style={styles.keyboard}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -102,29 +120,29 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    <View style={styles.card}>
+                    <View style={[styles.card, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
                         <View style={styles.brand}>
                             <AppMark size={84} />
                         </View>
 
-                        <AppText style={styles.eyebrow}>
+                        <AppText style={[styles.eyebrow, { color: themeColors.primary }]}>
                             İLK KURULUM
                         </AppText>
 
-                        <AppText variant="h1" style={styles.title}>
+                        <AppText variant="h1" style={[styles.title, { color: themeColors.text }]}>
                             RAWG API key’inizi girin
                         </AppText>
 
-                        <AppText style={styles.description}>
+                        <AppText style={[styles.description, { color: themeColors.secondary }]}>
                             Oyunları ve geliştirici bilgilerini gösterebilmek
                             için kendi RAWG API key’inizi kullanmalısınız.
                         </AppText>
 
-                        <AppText style={styles.inputLabel}>
+                        <AppText style={[styles.inputLabel, { color: themeColors.secondary }]}>
                             API KEY
                         </AppText>
 
-                        <View style={styles.inputWrapper}>
+                        <View style={[styles.inputWrapper, { backgroundColor: themeColors.background, borderColor: themeColors.border }]}>
                             <TextInput
                                 value={apiKey}
                                 onChangeText={value => {
@@ -135,7 +153,7 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                                 }}
                                 style={[styles.input, { color: themeColors.text }]}
                                 placeholder={language === 'en' ? 'Enter your RAWG API key' : 'RAWG API key’inizi yazın'}
-                                placeholderTextColor="#68758A"
+                                placeholderTextColor={themeColors.secondary}
                                 autoCapitalize="none"
                                 autoCorrect={false}
                                 spellCheck={false}
@@ -163,7 +181,7 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                         </View>
 
                         {!!error && (
-                            <AppText style={styles.error}>
+                            <AppText style={[styles.error, { color: themeColors.error }]}>
                                 {error}
                             </AppText>
                         )}
@@ -173,15 +191,15 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                             disabled={isDisabled}
                             onPress={handleSubmit}
                             style={[
-                                styles.primaryButton,
+                                [styles.primaryButton, { backgroundColor: themeColors.primary }],
                                 isDisabled && styles.disabledButton,
                             ]}
                         >
                             {loading ? (
-                                <ActivityIndicator color="#101817" />
+                                <ActivityIndicator color={themeMode === 'light' ? '#FFFFFF' : '#101817'} />
                             ) : (
                                 <AppText
-                                    color="#101817"
+                                    color={themeMode === 'light' ? '#FFFFFF' : '#101817'}
                                     bold
                                     style={styles.primaryText}
                                 >
@@ -190,12 +208,12 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                             )}
                         </Pressable>
 
-                        <View style={styles.helpBox}>
-                            <AppText style={styles.helpTitle}>
+                        <View style={[styles.helpBox, { backgroundColor: themeColors.background, borderColor: themeColors.border }]}>
+                            <AppText style={[styles.helpTitle, { color: themeColors.text }]}>
                                 API key’iniz yok mu?
                             </AppText>
 
-                            <AppText style={styles.helpText}>
+                            <AppText style={[styles.helpText, { color: themeColors.secondary }]}>
                                 RAWG hesabınıza giriş yapıp ücretsiz API
                                 key’inizi alabilirsiniz.
                             </AppText>
@@ -211,7 +229,7 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                             </Pressable>
                         </View>
 
-                        <AppText style={styles.privacy}>
+                        <AppText style={[styles.privacy, { color: themeColors.secondary }]}>
                             Key yalnızca bu cihazda kullanılır ve 7 gün sonra
                             yeniden istenir.
                         </AppText>

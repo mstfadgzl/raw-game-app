@@ -5,13 +5,14 @@ import { AppText, StudioBrand } from '@components';
 import { entityService } from '@services';
 import type { IDeveloper, SearchScreenNavigationProp } from '@types';
 import { useSettings } from '@hooks';
-import { colors } from '@theme';
+import type { ThemeColors } from '@theme';
 
 export const DeveloperSearchResults = ({ query, debouncedQuery }: {
     query: string;
     debouncedQuery: string;
 }) => {
     const { colors: themeColors } = useSettings();
+    const localStyles = React.useMemo(() => createLocalStyles(themeColors), [themeColors]);
 
     if (query.length < 3) {
         return <AppText style={localStyles.prompt}>Stüdyo aramak için en az 3 karakter yaz. Örneğin: rockstar</AppText>;
@@ -25,6 +26,7 @@ export const DeveloperSearchResults = ({ query, debouncedQuery }: {
 const DeveloperResults = ({ query }: { query: string }) => {
     const navigation = useNavigation<SearchScreenNavigationProp>();
     const { colors: themeColors } = useSettings();
+    const localStyles = React.useMemo(() => createLocalStyles(themeColors), [themeColors]);
     const [creators, setCreators] = useState<IDeveloper[]>([]);
     const [page, setPage] = useState(1);
     const [retry, setRetry] = useState(0);
@@ -123,7 +125,7 @@ const DeveloperResults = ({ query }: { query: string }) => {
     );
 };
 
-const localStyles = StyleSheet.create({
+const createLocalStyles = (colors: ThemeColors) => StyleSheet.create({
     prompt: { padding: 18, color: colors.secondary, lineHeight: 22 },
     list: { padding: 18, paddingBottom: 32 },
     hint: { color: colors.secondary, marginBottom: 20, lineHeight: 22 },

@@ -18,7 +18,7 @@ import { useAppDispatch } from '@hooks';
 import { getGameRedditPostsProcess } from '@actions';
 import { AppText, EmptyState } from '@components';
 import { colors } from '@theme';
-import { styles } from '../../styles';
+import { useStyles } from '../../styles';
 
 const formatDate = (value?: string | number) => {
     if (value == null) return '';
@@ -35,6 +35,7 @@ const formatDate = (value?: string | number) => {
 };
 
 export const RedditTab = () => {
+    const styles = useStyles();
     const route = useRoute<any>();
     const gameId = Number(route.params.gameId);
     const dispatch = useAppDispatch();

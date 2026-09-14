@@ -16,9 +16,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText, GenreChip, StudioBrand } from '@components';
 import { translateText } from '@utils';
 import { useSettings } from '@hooks';
-import { colors } from '@theme';
+import type { ThemeColors } from '@theme';
 import type { IGameDetail, GameRelationNavigationParamList } from '@types';
-import { styles } from '../../styles';
+import { useStyles } from '../../styles';
 import { GameStores } from '../../../../components/game-stores';
 import { gameService } from '../../../../api/services/gameService';
 
@@ -46,9 +46,11 @@ type Fact = {
 const translationCache = new Map<string, string>();
 
 export const AboutTab = ({ detail }: Props) => {
+    const styles = useStyles();
     const navigation = useNavigation<NavigationProp<GameRelationNavigationParamList>>();
     const insets = useSafeAreaInsets();
-    const { language } = useSettings();
+    const { language, colors, localize } = useSettings();
+    const localStyles = useMemo(() => createLocalStyles(colors), [colors]);
 
     const source = detail?.description_raw?.trim() || '';
     const stores = useMemo(() => detail.stores?.map(item => item.store) ?? [], [detail.stores]);
@@ -149,7 +151,7 @@ export const AboutTab = ({ detail }: Props) => {
             /^[a-z][a-z\d+.-]*:/i.test(value) &&
             !/^https?:\/\//i.test(value)
         ) {
-            Alert.alert('Bağlantı açılamadı', 'Geçersiz web adresi.');
+            Alert.alert(localize('Bağlantı açılamadı'), localize('Geçersiz web adresi.'));
             return;
         }
 
@@ -391,11 +393,11 @@ export const AboutTab = ({ detail }: Props) => {
     );
 };
 
-const localStyles = StyleSheet.create({
+const createLocalStyles = (colors: ThemeColors) => StyleSheet.create({
     description: {
         fontSize: 14,
         lineHeight: 23,
-        color: '#D5DAE5',
+        color: colors.text,
     },
     actions: {
         flexDirection: 'row',
@@ -418,13 +420,13 @@ const localStyles = StyleSheet.create({
         width: '48%',
         padding: 13,
         borderRadius: 12,
-        backgroundColor: '#1D2226',
+        backgroundColor: colors.surface,
         borderWidth: 1,
-        borderColor: '#2D353B',
+        borderColor: colors.border,
         marginBottom: 12,
     },
     factLabel: {
-        color: '#98A3BC',
+        color: colors.secondary,
         fontSize: 10,
         fontWeight: '700',
         marginBottom: 7,
@@ -454,7 +456,7 @@ const localStyles = StyleSheet.create({
     },
     selectorSheet: {
         maxHeight: '72%',
-        backgroundColor: '#191E22',
+        backgroundColor: colors.surface,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         paddingTop: 16,
@@ -472,7 +474,7 @@ const localStyles = StyleSheet.create({
     },
     closeText: {
         fontSize: 28,
-        color: '#FFFFFF',
+        color: colors.text,
     },
     selectorList: {
         paddingHorizontal: 16,
@@ -484,7 +486,7 @@ const localStyles = StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 14,
         marginBottom: 8,
-        backgroundColor: '#242B30',
+        backgroundColor: colors.background,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -507,6 +509,6 @@ const localStyles = StyleSheet.create({
         padding: 15,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#343C50',
+        borderColor: colors.border,
     },
 });

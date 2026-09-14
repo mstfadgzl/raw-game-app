@@ -17,9 +17,10 @@ import {
 import { AppText, EmptyState, ImageViewer, VideoPlayer } from '@components';
 import { colors } from '@theme';
 import type { IScreenshot, ITrailer } from '@types';
-import { styles } from '../../styles';
+import { useStyles } from '../../styles';
 
 const Screenshot = ({ uri, onPress }: { uri: string; onPress: () => void }) => {
+    const styles = useStyles();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
@@ -61,6 +62,7 @@ const Screenshot = ({ uri, onPress }: { uri: string; onPress: () => void }) => {
 };
 
 export const MediaTab = () => {
+    const styles = useStyles();
     const route = useRoute<any>();
     const gameId = Number(route.params.gameId);
 

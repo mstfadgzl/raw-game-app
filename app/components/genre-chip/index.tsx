@@ -33,7 +33,7 @@ export const GenreChip: React.FC<GenreChipProps> = memo(({ name, isSelected, onP
                     { color: isSelected ? colors.primary : colors.secondary },
                 ]}
             >
-                {localizedName.toUpperCase()}
+                {localizedName.toLocaleUpperCase(language === 'tr' ? 'tr-TR' : 'en-US')}
             </AppText>
         </TouchableOpacity>
     );

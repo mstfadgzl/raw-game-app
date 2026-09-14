@@ -17,7 +17,8 @@ import {
 
 import { useNavigation } from '@react-navigation/native';
 
-import { useAppDispatch, useAppSelector } from '@hooks';
+import { useAppDispatch, useAppSelector, useSettings } from '@hooks';
+import { localizeCatalogName } from '../../i18n';
 
 import {
     getGamesProcess,
@@ -43,8 +44,7 @@ import type {
     IGame,
 } from '@types';
 
-import { colors } from '@theme';
-import { styles } from './styles';
+import { useStyles } from './styles';
 
 type PresetId =
     | 'weekly'
@@ -153,6 +153,8 @@ const mergeGames = (
 };
 
 export const DiscoveryScreen = () => {
+    const { colors, language } = useSettings();
+    const styles = useStyles();
     const dispatch = useAppDispatch();
 
     const navigation =
@@ -426,7 +428,7 @@ export const DiscoveryScreen = () => {
         <View style={styles.gameColumn}>
             <GameCard game={item} onPress={handleGamePress} />
         </View>
-    ), [handleGamePress]);
+    ), [handleGamePress, styles]);
 
     const renderHeader = () => (
         <View>
@@ -512,7 +514,7 @@ export const DiscoveryScreen = () => {
                                 }
                             >
                                 <AppText style={styles.genreText}>
-                                    {item.name}
+                                    {localizeCatalogName(language, item.name)}
                                 </AppText>
                             </TouchableOpacity>
                         )}

@@ -4,6 +4,7 @@ import { Image, StyleSheet, View } from 'react-native';
 import { colors } from '@theme';
 import { cardImageUrl } from '../../utils/card-image';
 import { AppText } from '../app-text';
+import { useSettings } from '../../context/settings-context';
 
 export type StudioBrandProps = {
     name: string;
@@ -26,6 +27,7 @@ export const StudioBrand = memo(({
     size = 56,
 }: StudioBrandProps) => {
     const [imageFailed, setImageFailed] = useState(false);
+    const { colors: themeColors } = useSettings();
     const originalUri = image?.trim() || imageBackground?.trim() || '';
     const imageUri = cardImageUrl(originalUri);
     const radius = Math.max(12, Math.round(size * 0.24));
@@ -45,8 +47,8 @@ export const StudioBrand = memo(({
                     onError={() => setImageFailed(true)}
                 />
             ) : (
-                <View style={localStyles.fallback}>
-                    <AppText style={[localStyles.initial, { fontSize: Math.max(20, size * 0.42) }]}>
+                <View style={[localStyles.fallback, { backgroundColor: themeColors.surface }]}>
+                    <AppText style={[localStyles.initial, { color: themeColors.primary, fontSize: Math.max(20, size * 0.42) }]}>
                         {getInitial(name)}
                     </AppText>
                 </View>

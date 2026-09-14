@@ -20,7 +20,7 @@ const Choice = ({
     selected: boolean;
     onPress: () => void;
 }) => {
-    const { colors } = useSettings();
+    const { colors, themeMode } = useSettings();
 
     return (
         <Pressable
@@ -35,7 +35,7 @@ const Choice = ({
         >
             <AppText
                 bold={selected}
-                color={selected ? '#07110F' : colors.text}
+                color={selected ? (themeMode === 'light' ? '#FFFFFF' : '#07110F') : colors.text}
                 style={styles.choiceText}
             >
                 {label}

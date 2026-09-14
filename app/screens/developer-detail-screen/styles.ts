@@ -1,7 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '@theme';
+import type { ThemeColors } from '@theme';
+import { useMemo } from 'react';
+import { useSettings } from '@hooks';
 
-export const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 0, backgroundColor: colors.background },
     list: { paddingBottom: 24 },
     hero: { height: 270, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center' },
@@ -33,3 +35,8 @@ export const styles = StyleSheet.create({
     bioSkeleton: { height: 180, borderRadius: 16 },
 });
 
+
+export const useStyles = () => {
+    const { colors } = useSettings();
+    return useMemo(() => createStyles(colors), [colors]);
+};

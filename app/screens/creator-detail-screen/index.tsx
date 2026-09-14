@@ -30,7 +30,7 @@ import {
 } from '@types';
 
 import { colors } from '@theme';
-import { styles } from './styles';
+import { useStyles } from './styles';
 import { usePaginatedGames } from '../../hooks/usePaginatedGames';
 
 export const CreatorDetailScreen = () => {
@@ -39,6 +39,7 @@ export const CreatorDetailScreen = () => {
 };
 
 const CreatorContent = ({ id, name }: { id: number; name: string }) => {
+    const styles = useStyles();
     const navigation =
         useNavigation<DiscoverScreenNavigationProp>();
     const { language } = useSettings();

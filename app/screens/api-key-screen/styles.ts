@@ -2,6 +2,10 @@ import { StyleSheet } from 'react-native';
 import { colors } from '@theme';
 
 export const styles = StyleSheet.create({
+    languageRow: { alignItems: 'flex-end', paddingHorizontal: 20, paddingTop: 8 },
+    languagePicker: { flexDirection: 'row', borderWidth: 1, borderRadius: 24, padding: 3 },
+    languageOption: { minWidth: 44, minHeight: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+    languageLabel: { fontSize: 11 },
     container: {
         flex: 1,
         backgroundColor: colors.background,

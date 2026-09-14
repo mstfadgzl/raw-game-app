@@ -14,7 +14,7 @@ import { searchGamesProcess } from '../../redux/actions/gameActions';
 import { Container, GameCard, AppText } from '@components';
 import { IGame, SearchScreenNavigationProp } from '@types';
 
-import { styles } from './styles';
+import { useStyles } from './styles';
 import { CreatorSearchResults } from './creator-search-results';
 import { DeveloperSearchResults } from './developer-search-results';
 
@@ -39,6 +39,7 @@ const SUGGESTIONS = [
 ];
 
 export const SearchScreen = () => {
+    const styles = useStyles();
     const dispatch = useAppDispatch();
     const navigation = useNavigation<SearchScreenNavigationProp>();
     const { colors: themeColors, language } = useSettings();

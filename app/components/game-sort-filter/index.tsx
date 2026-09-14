@@ -22,7 +22,8 @@ import {
 import type { GameFilterValue } from '@types';
 
 import { validateGameFilters } from '@utils';
-import { styles } from './styles';
+import { useStyles } from './styles';
+import { useSettings } from '../../context/settings-context';
 
 interface GameSortFilterProps {
     value: GameFilterValue;
@@ -40,7 +41,9 @@ const Choice = ({
     label,
     selected,
     onPress,
-}: ChoiceProps) => (
+}: ChoiceProps) => {
+    const styles = useStyles();
+    return (
     <Pressable
         accessibilityRole="radio"
         accessibilityState={{ checked: selected }}
@@ -62,6 +65,7 @@ const Choice = ({
         </AppText>
     </Pressable>
 );
+};
 
 export const GameSortFilter = memo(
     ({
@@ -69,6 +73,8 @@ export const GameSortFilter = memo(
         onChange,
         disabled = false,
     }: GameSortFilterProps) => {
+        const { language, colors } = useSettings();
+    const styles = useStyles();
         const [visible, setVisible] = useState(false);
         const [draft, setDraft] = useState<GameFilterValue>(value);
 
@@ -351,8 +357,8 @@ export const GameSortFilter = memo(
                                                 setStartYearText(text);
                                                 setError(null);
                                             }}
-                                            placeholder="Örn. 2015"
-                                            placeholderTextColor="#87909F"
+                                            placeholder={language === 'tr' ? 'Örn. 2015' : 'e.g. 2015'}
+                                            placeholderTextColor={colors.secondary}
                                             keyboardType="number-pad"
                                             maxLength={4}
                                             style={styles.input}
@@ -371,8 +377,8 @@ export const GameSortFilter = memo(
                                                 setEndYearText(text);
                                                 setError(null);
                                             }}
-                                            placeholder="Örn. 2025"
-                                            placeholderTextColor="#87909F"
+                                            placeholder={language === 'tr' ? 'Örn. 2025' : 'e.g. 2025'}
+                                            placeholderTextColor={colors.secondary}
                                             keyboardType="number-pad"
                                             maxLength={4}
                                             style={styles.input}

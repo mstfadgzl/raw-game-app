@@ -10,10 +10,14 @@ import {
   DetailScreen,
   CreatorDetailScreen
 } from '@screens';
+import { useSettings } from '@hooks';
 const Stack = createNativeStackNavigator<DiscoverStackParamList>();
 
-export const DiscoverStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+export const DiscoverStack = () => {
+  const { colors } = useSettings();
+
+  return (
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
     <Stack.Screen name="DiscoverMain" component={DiscoverMainScreen} />
     <Stack.Screen name="PlatformDetail" component={PlatformDetailScreen} />
     <Stack.Screen name="GenreDetail" component={GenreDetailScreen} />
@@ -22,4 +26,5 @@ export const DiscoverStack = () => (
     <Stack.Screen name="GameDetail" component={DetailScreen} />
     <Stack.Screen name="TagDetail" component={TagDetailScreen} />
   </Stack.Navigator>
-);
+  );
+};

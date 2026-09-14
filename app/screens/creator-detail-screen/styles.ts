@@ -1,7 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '@theme';
+import type { ThemeColors } from '@theme';
+import { useMemo } from 'react';
+import { useSettings } from '@hooks';
 
-export const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 0,
@@ -141,7 +143,7 @@ export const styles = StyleSheet.create({
     },
 
     errorText: {
-        color: '#FF9B9B',
+        color: colors.error,
         fontSize: 12,
         lineHeight: 19,
         marginTop: 12,
@@ -178,3 +180,7 @@ export const styles = StyleSheet.create({
         borderRadius: 16,
     },
 });
+export const useStyles = () => {
+    const { colors } = useSettings();
+    return useMemo(() => createStyles(colors), [colors]);
+};
