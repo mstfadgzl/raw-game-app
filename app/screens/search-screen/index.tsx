@@ -9,11 +9,10 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-import { useAppDispatch, useDebounce } from '@hooks';
+import { useAppDispatch, useDebounce, useSettings } from '@hooks';
 import { searchGamesProcess } from '../../redux/actions/gameActions';
 import { Container, GameCard, AppText } from '@components';
 import { IGame, SearchScreenNavigationProp } from '@types';
-import { colors } from '@theme';
 
 import { styles } from './styles';
 import { CreatorSearchResults } from './creator-search-results';
@@ -42,6 +41,7 @@ const SUGGESTIONS = [
 export const SearchScreen = () => {
     const dispatch = useAppDispatch();
     const navigation = useNavigation<SearchScreenNavigationProp>();
+    const { colors: themeColors, language } = useSettings();
     const [category, setCategory] = useState<SearchCategory>('games');
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -195,7 +195,7 @@ export const SearchScreen = () => {
             return (
                 <View style={styles.feedback}>
                     <ActivityIndicator
-                        color={colors.primary}
+                        color={themeColors.primary}
                         size="large"
                     />
 
@@ -247,13 +247,13 @@ export const SearchScreen = () => {
     };
 
     return (
-        <Container style={styles.container}>
+        <Container style={[styles.container, { backgroundColor: themeColors.background }]}>
             <View style={styles.header}>
-                <AppText style={styles.eyebrow}>
+                <AppText style={[styles.eyebrow, { color: themeColors.primary }]}>
                     OYUN KÜTÜPHANESİ
                 </AppText>
 
-                <AppText style={styles.title}>
+                <AppText style={[styles.title, { color: themeColors.text }]}>
                     {category === 'games' ? 'Oyununu bul.' : category === 'creators' ? 'Kişileri keşfet.' : 'Stüdyoları keşfet.'}
                 </AppText>
             </View>
@@ -261,19 +261,23 @@ export const SearchScreen = () => {
             <View
                 style={[
                     styles.searchBar,
-                    focused ? styles.searchBarFocused : {},
+                    focused ? { borderColor: themeColors.primary } : {},
                 ]}
             >
-                <AppText style={styles.searchIcon}>
+                <AppText style={[styles.searchIcon, { color: themeColors.primary }]}>
                     ⌕
                 </AppText>
 
                 <TextInput
-                    accessibilityLabel={category === 'games' ? 'Oyun adı' : category === 'creators' ? 'Kişi adı' : 'Stüdyo adı'}
-                    style={styles.searchInput}
-                    placeholder={category === 'games' ? 'Oyun adı yaz...' : category === 'creators' ? 'Kişi adı yaz...' : 'Stüdyo adı yaz...'}
+                    accessibilityLabel={language === 'en'
+                        ? category === 'games' ? 'Game name' : category === 'creators' ? 'Creator name' : 'Studio name'
+                        : category === 'games' ? 'Oyun adı' : category === 'creators' ? 'Kişi adı' : 'Stüdyo adı'}
+                    style={[styles.searchInput, { color: themeColors.text }]}
+                    placeholder={language === 'en'
+                        ? category === 'games' ? 'Type a game name...' : category === 'creators' ? 'Type a creator name...' : 'Type a studio name...'
+                        : category === 'games' ? 'Oyun adı yaz...' : category === 'creators' ? 'Kişi adı yaz...' : 'Stüdyo adı yaz...'}
                     placeholderTextColor="#8893A8"
-                    selectionColor={colors.primary}
+                    selectionColor={themeColors.primary}
                     value={searchTerm}
                     onChangeText={setSearchTerm}
                     onFocus={() => setFocused(true)}
@@ -293,7 +297,7 @@ export const SearchScreen = () => {
                         style={styles.clearButton}
                         onPress={clearSearch}
                     >
-                        <AppText style={styles.clearText}>
+                        <AppText style={[styles.clearText, { color: themeColors.secondary }]}>
                             ✕
                         </AppText>
                     </TouchableOpacity>
@@ -309,7 +313,7 @@ export const SearchScreen = () => {
                         style={styles.suggestionChip}
                         onPress={() => setCategory(value)}
                     >
-                        <AppText color={category === value ? colors.primary : colors.secondary} bold={category === value}>
+                        <AppText color={category === value ? themeColors.primary : themeColors.secondary} bold={category === value}>
                             {value === 'games' ? 'Oyunlar' : value === 'creators' ? 'Kişiler' : 'Stüdyolar'}
                         </AppText>
                     </TouchableOpacity>

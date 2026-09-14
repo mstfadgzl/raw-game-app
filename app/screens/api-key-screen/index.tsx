@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 import { AppMark, AppText, Container } from '@components';
-import { colors } from '@theme';
+import { useSettings } from '@hooks';
 
 import { apiKeyStorage } from '../../services/api-key-storage';
 import { runtimeApiKey } from '../../services/runtime-api-key';
@@ -25,6 +25,7 @@ type Props = {
 };
 
 export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
+    const { colors: themeColors, language } = useSettings();
     const [apiKey, setApiKey] = useState('');
     const [showKey, setShowKey] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -132,8 +133,8 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                                         setError('');
                                     }
                                 }}
-                                style={styles.input}
-                                placeholder="RAWG API key’inizi yazın"
+                                style={[styles.input, { color: themeColors.text }]}
+                                placeholder={language === 'en' ? 'Enter your RAWG API key' : 'RAWG API key’inizi yazın'}
                                 placeholderTextColor="#68758A"
                                 autoCapitalize="none"
                                 autoCorrect={false}
@@ -155,7 +156,7 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                                 onPress={() => setShowKey(value => !value)}
                                 style={styles.showButton}
                             >
-                                <AppText color={colors.primary} bold>
+                                <AppText color={themeColors.primary} bold>
                                     {showKey ? 'Gizle' : 'Göster'}
                                 </AppText>
                             </Pressable>
@@ -204,7 +205,7 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                                 onPress={openRawgPage}
                                 style={styles.linkButton}
                             >
-                                <AppText color={colors.primary} bold>
+                                <AppText color={themeColors.primary} bold>
                                     RAWG API key alma sayfasını aç ↗
                                 </AppText>
                             </Pressable>

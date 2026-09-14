@@ -4,12 +4,15 @@ import { useNavigation } from '@react-navigation/native';
 import { AppText, StudioBrand } from '@components';
 import { entityService } from '@services';
 import type { IDeveloper, SearchScreenNavigationProp } from '@types';
+import { useSettings } from '@hooks';
 import { colors } from '@theme';
 
 export const DeveloperSearchResults = ({ query, debouncedQuery }: {
     query: string;
     debouncedQuery: string;
 }) => {
+    const { colors } = useSettings();
+
     if (query.length < 3) {
         return <AppText style={localStyles.prompt}>Stüdyo aramak için en az 3 karakter yaz. Örneğin: rockstar</AppText>;
     }
@@ -21,6 +24,7 @@ export const DeveloperSearchResults = ({ query, debouncedQuery }: {
 
 const DeveloperResults = ({ query }: { query: string }) => {
     const navigation = useNavigation<SearchScreenNavigationProp>();
+    const { colors } = useSettings();
     const [creators, setCreators] = useState<IDeveloper[]>([]);
     const [page, setPage] = useState(1);
     const [retry, setRetry] = useState(0);

@@ -162,6 +162,11 @@ const uiTextTranslations: Record<string, string> = {
     'Son 30 gün': 'Last 30 days',
     'Bu yıl': 'This year',
     'Yakında': 'Coming soon',
+    'Son 7 günde çıkanlar': 'Released in the last 7 days',
+    'Son 30 günde çıkanlar': 'Released in the last 30 days',
+    'Yakında çıkacak oyunlar': 'Upcoming games',
+    'Popüler oyunlar': 'Popular games',
+    'Biraz daha yaz': 'Keep typing',
     'TÜMÜNÜ GÖR': 'SEE ALL',
     'RAWG ile güçlendirildi': 'Powered by RAWG',
     'Keşfet · Kaydet · Oyna': 'Discover · Save · Play',
@@ -201,6 +206,9 @@ const uiTextTranslations: Record<string, string> = {
     'Başlangıç yılı': 'Start year',
     'Bitiş yılı': 'End year',
     'Yılları dört haneli yaz veya alanı boş bırak.': 'Enter four-digit years or leave the fields empty.',
+    'Başlangıç yılı, bitiş yılından büyük olamaz.': 'The start year cannot be later than the end year.',
+    'Metacritic puanı 0–100 arasında olmalı.': 'The Metacritic score must be between 0 and 100.',
+    'Yıl aralığı, seçtiğin çıkış durumuyla uyuşmuyor.': 'The year range does not match the selected release status.',
     'Oyun bilgisi yok': 'No game information',
     'oyun': 'games',
     'Oyuncu puanı': 'Player rating',
@@ -239,7 +247,7 @@ const uiTextTranslations: Record<string, string> = {
     'Stüdyo yüklenemedi': 'Studio could not be loaded',
     'Yayıncı yüklenemedi': 'Publisher could not be loaded',
     'Stüdyo hakkında': 'About the studio',
-    'Bu zamana kadar yapılan oyun ': 'Games made so far ',
+    'Bu zamana kadar yapılan oyun': 'Games made so far',
     'Türkçeye çevriliyor…': 'Translating to Turkish…',
     'Profil bilgileri yükleniyor…': 'Loading profile information…',
     'Yer aldığı oyunlar': 'Games they worked on',
@@ -331,6 +339,10 @@ export const localizeUiText = (language: Language, text: string) => {
         .replace(/(\d+) stüdyo\b/g, '$1 studios')
         .replace(/(\d+) kişi/g, '$1 people')
         .replace(/(\d+) saat/g, '$1 hours')
+        .replace(/“([^”]+)” için (\d+) stüdyo/g, '"$1" · $2 studios')
+        .replace(/(\d+) yüklenen kişi içinde aranır\. Daha fazla kişi yükleyerek aramayı genişletebilirsin\./g, 'Search within $1 loaded creators. Load more creators to broaden the search.')
+        .replace(/Tüm oyunlar gösteriliyor · (\d+)/g, 'All games are shown · $1')
+        .replace(/Yıl (\d{4}) oyunları/g, 'Games from $1')
         .replace(/“([^”]+)” için oyun bulamadık\./g, 'We could not find games for "$1".')
         .replace(/(\d+) stüdyo$/g, '$1 studios');
 };

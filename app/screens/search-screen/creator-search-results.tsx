@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { AppText } from '@components';
 import { entityService } from '@services';
 import type { ICreator, SearchScreenNavigationProp } from '@types';
+import { useSettings } from '@hooks';
 import { colors } from '@theme';
 
 export const CreatorSearchResults = ({ query, debouncedQuery }: {
@@ -11,6 +12,7 @@ export const CreatorSearchResults = ({ query, debouncedQuery }: {
     debouncedQuery: string;
 }) => {
     const navigation = useNavigation<SearchScreenNavigationProp>();
+    const { colors } = useSettings();
     const [creators, setCreators] = useState<ICreator[]>([]);
     const [page, setPage] = useState(1);
     const [retry, setRetry] = useState(0);

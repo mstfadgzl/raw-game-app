@@ -43,7 +43,7 @@ const AppRoot = () => {
 
   if (checkingKey) {
     content = (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <ActivityIndicator color={colors.primary} size="large" />
       </View>
     );
