@@ -5,19 +5,21 @@ import { AppText } from '../app-text';
 import { storeService } from '../../api/services/storeService';
 import { storeIcons } from '../../assets/stores';
 import { buildStoreOptions, openStoreLink, type StoreMetadata, type StoreOption } from '../../utils/store-links';
-import { colors } from '../../theme/colors';
+import { useSettings } from '../../context/settings-context';
 
 type Props = { gameId: number; gameName: string; stores: StoreMetadata[] };
 
 const StoreIcon = ({ store }: { store: StoreMetadata }) => {
+    const { colors } = useSettings();
     const icon = storeIcons[store.slug ?? ''];
-    return <View style={styles.iconBox}>{icon
+    return <View style={[styles.iconBox, { backgroundColor: colors.background }]}>{icon
         ? <Image source={icon} style={styles.icon} resizeMode="contain" />
         : <AppText bold>{store.name.slice(0, 2).toUpperCase()}</AppText>}
     </View>;
 };
 
 export const GameStores = ({ gameId, gameName, stores }: Props) => {
+    const { colors } = useSettings();
     const insets = useSafeAreaInsets();
     const [expanded, setExpanded] = useState(false);
     const [options, setOptions] = useState<StoreOption[]>([]);
@@ -70,11 +72,11 @@ export const GameStores = ({ gameId, gameName, stores }: Props) => {
 
     return (
         <>
-            <Pressable accessibilityRole="button" accessibilityLabel="Satın alma seçenekleri, tüm mağazaları göster" accessibilityState={{ expanded }} onPress={() => setExpanded(true)} style={styles.summary}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Satın alma seçenekleri, tüm mağazaları göster" accessibilityState={{ expanded }} onPress={() => setExpanded(true)} style={[styles.summary, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                 <View style={styles.summaryTop}>
                     <View style={styles.textColumn}>
-                        <AppText style={styles.title}>Satın alma seçenekleri</AppText>
-                        <AppText style={styles.subtitle}>Tüm mağazaları gör</AppText>
+                        <AppText style={[styles.title, { color: colors.text }]}>Satın alma seçenekleri</AppText>
+                        <AppText style={[styles.subtitle, { color: colors.secondary }]}>Tüm mağazaları gör</AppText>
                     </View>
                     <AppText color={colors.primary} style={styles.arrow}>›</AppText>
                 </View>
@@ -87,16 +89,16 @@ export const GameStores = ({ gameId, gameName, stores }: Props) => {
             <Modal visible={expanded} transparent animationType="slide" onRequestClose={() => setExpanded(false)} statusBarTranslucent navigationBarTranslucent>
                 <View style={styles.modalRoot}>
                     <Pressable style={styles.backdrop} accessibilityRole="button" accessibilityLabel="Mağazaları kapat" onPress={() => setExpanded(false)} />
-                    <View accessibilityViewIsModal style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16), marginTop: insets.top + 16 }]}>
+                    <View accessibilityViewIsModal style={[styles.sheet, { backgroundColor: colors.surface, paddingBottom: Math.max(insets.bottom, 16), marginTop: insets.top + 16 }]}>
                         <View style={styles.sheetHeader}>
                             <View style={styles.textColumn}>
-                                <AppText style={styles.title}>Mağazalar</AppText>
-                                <AppText style={styles.subtitle} numberOfLines={2}>{gameName}</AppText>
+                                <AppText style={[styles.title, { color: colors.text }]}>Mağazalar</AppText>
+                                <AppText style={[styles.subtitle, { color: colors.secondary }]} numberOfLines={2}>{gameName}</AppText>
                             </View>
                             <Pressable accessibilityRole="button" accessibilityLabel="Mağazaları kapat" onPress={() => setExpanded(false)} style={styles.close}><AppText style={styles.arrow}>×</AppText></Pressable>
                         </View>
-                        <AppText style={styles.hint}>Mağaza seçerek oyunun ürün sayfasını aç.</AppText>
-                        {loading ? <View style={styles.feedback}><ActivityIndicator color={colors.primary} /><AppText style={styles.subtitle}>Mağazalar yükleniyor…</AppText></View>
+                        <AppText style={[styles.hint, { color: colors.secondary }]}>Mağaza seçerek oyunun ürün sayfasını aç.</AppText>
+                        {loading ? <View style={styles.feedback}><ActivityIndicator color={colors.primary} /><AppText style={[styles.subtitle, { color: colors.secondary }]}>Mağazalar yükleniyor…</AppText></View>
                             : error ? <View style={styles.feedback}>
                                 <AppText>Mağaza bağlantıları yüklenemedi.</AppText>
                                 <Pressable accessibilityRole="button" style={styles.retry} onPress={() => setRetryKey(value => value + 1)}><AppText color={colors.primary}>Tekrar dene</AppText></Pressable>
@@ -106,18 +108,18 @@ export const GameStores = ({ gameId, gameName, stores }: Props) => {
                                     keyExtractor={item => item.key}
                                     contentContainerStyle={styles.list}
                                     renderItem={({ item }) => (
-                                        <Pressable accessibilityRole="link" accessibilityLabel={`${item.name}, ${item.url ? 'oyunun mağaza sayfasını aç' : 'ürün bağlantısı bulunmuyor'}`} accessibilityState={{ disabled: !item.url || opening !== null, busy: opening === item.key }} disabled={!item.url || opening !== null} style={[styles.row, !item.url && styles.unavailable]} onPress={() => { void open(item); }}>
+                                        <Pressable accessibilityRole="link" accessibilityLabel={`${item.name}, ${item.url ? 'oyunun mağaza sayfasını aç' : 'ürün bağlantısı bulunmuyor'}`} accessibilityState={{ disabled: !item.url || opening !== null, busy: opening === item.key }} disabled={!item.url || opening !== null} style={[styles.row, { backgroundColor: colors.background }, !item.url && styles.unavailable]} onPress={() => { void open(item); }}>
                                             <StoreIcon store={item} />
                                             <View style={styles.textColumn}>
                                                 <AppText bold>{item.name}</AppText>
-                                                <AppText style={styles.subtitle}>{item.url ? 'Ürün sayfasına git' : 'Ürün bağlantısı bulunmuyor'}</AppText>
+                                                <AppText style={[styles.subtitle, { color: colors.secondary }]}>{item.url ? 'Ürün sayfasına git' : 'Ürün bağlantısı bulunmuyor'}</AppText>
                                             </View>
                                             {opening === item.key ? <ActivityIndicator color={colors.primary} /> : item.url && <AppText color={colors.primary}>↗</AppText>}
                                         </Pressable>
                                     )}
                                     ListEmptyComponent={<AppText style={styles.feedback}>Bu oyun için mağaza bilgisi bulunamadı.</AppText>}
                                 />}
-                        <AppText style={styles.footnote}>Mağaza bilgileri RAWG tarafından sağlanır. Bölgeye göre satış durumu değişebilir.</AppText>
+                        <AppText style={[styles.footnote, { color: colors.secondary }]}>Mağaza bilgileri RAWG tarafından sağlanır. Bölgeye göre satış durumu değişebilir.</AppText>
                     </View>
                 </View>
             </Modal>

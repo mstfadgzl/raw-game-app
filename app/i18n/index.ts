@@ -343,6 +343,23 @@ const catalogNameTranslations: Record<string, string> = {
     Simulation: 'Simülasyon',
     Sports: 'Spor',
     Strategy: 'Strateji',
+    'Open World': 'Açık Dünya',
+    Singleplayer: 'Tek Oyunculu',
+    Multiplayer: 'Çok Oyunculu',
+    'Online Multiplayer': 'Çevrim İçi Çok Oyunculu',
+    'Story Rich': 'Hikâye Odaklı',
+    Atmospheric: 'Atmosferik',
+    Fantasy: 'Fantezi',
+    'Sci-Fi': 'Bilim Kurgu',
+    'Third Person': 'Üçüncü Şahıs',
+    'First-Person': 'Birinci Şahıs',
+    'Action-Adventure': 'Aksiyon Macera',
+    'Co-op': 'İş Birlikli',
+    Sandbox: 'Kum Havuzu',
+    Survival: 'Hayatta Kalma',
+    Stealth: 'Gizlilik',
+    Zombies: 'Zombiler',
+    War: 'Savaş',
 };
 
 export const translateKey = (language: Language, key: TranslationKey) =>
