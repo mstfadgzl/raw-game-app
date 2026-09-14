@@ -253,7 +253,7 @@ const CreatorContent = ({ id, name }: { id: number; name: string }) => {
                                 style={styles.bio}
                                 numberOfLines={expanded ? undefined : 6}
                             >
-                                {trBio ||
+                                {(language === 'tr' && trBio) ||
                                     description ||
                                     'Bu kişi için biyografi bulunmuyor.'}
                             </AppText>

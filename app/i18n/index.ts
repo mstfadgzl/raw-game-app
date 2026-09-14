@@ -186,7 +186,7 @@ const uiTextTranslations: Record<string, string> = {
     'API key’i gizle': 'Hide API key',
     'API key’i göster': 'Show API key',
     'RAWG API key alma sayfasını aç ↗': 'Open the RAWG API key page ↗',
-    'Key yalnızca bu cihazda kullanılır ve 30 gün sonra yeniden istenir.': 'The key is stored on this device and requested again after 30 days.',
+    'Key yalnızca bu cihazda kullanılır ve 7 gün sonra yeniden istenir.': 'The key is stored on this device and requested again after 7 days.',
     'Sırala': 'Sort',
     'Filtrele': 'Filter',
     'Seç': 'Select',
@@ -367,6 +367,7 @@ export const localizeUiText = (language: Language, text: string) => {
         .replace(/(\d+) yüklenen kişi içinde aranır\. Daha fazla kişi yükleyerek aramayı genişletebilirsin\./g, 'Search within $1 loaded creators. Load more creators to broaden the search.')
         .replace(/Tüm oyunlar gösteriliyor · (\d+)/g, 'All games are shown · $1')
         .replace(/Yıl (\d{4}) oyunları/g, 'Games from $1')
+        .replace(/^(\d{4}) oyunları$/g, 'Games from $1')
         .replace(/“([^”]+)” için oyun bulamadık\.\s*Daha kısa veya farklı bir adla deneyebilirsin\./g, 'We could not find games for "$1".\nTry a shorter or different name.')
         .replace(/“([^”]+)” için oyun bulamadık\./g, 'We could not find games for "$1".')
         .replace(/(\d+) oyunda yer aldı/g, 'Worked on $1 games')

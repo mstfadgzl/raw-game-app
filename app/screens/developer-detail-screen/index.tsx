@@ -100,7 +100,7 @@ const DeveloperContent = ({ id, kind }: { id: number; kind: CompanyKind }) => {
             <View style={styles.content}>
                 <View style={styles.stat}><AppText style={styles.statNumber}>{developer.games_count}</AppText><AppText style={styles.muted}>Bu zamana kadar yapılan oyun </AppText></View>
                 <AppText style={styles.sectionTitle}>Stüdyo hakkında</AppText>
-                <AppText style={styles.bio} numberOfLines={expanded ? undefined : 5}>{translation || description || 'Bu stüdyo için henüz açıklama bulunmuyor.'}</AppText>
+                <AppText style={styles.bio} numberOfLines={expanded ? undefined : 5}>{(language === 'tr' && translation) || description || 'Bu stüdyo için henüz açıklama bulunmuyor.'}</AppText>
                 {translating && <AppText style={styles.muted}>Türkçeye çevriliyor…</AppText>}
                 {!!description && <TouchableOpacity accessibilityRole="button" accessibilityState={{ expanded }} style={styles.expand} onPress={() => setExpanded(value => !value)}><AppText color={colors.primary}>{expanded ? 'Daha az göster' : 'Devamını oku'}</AppText></TouchableOpacity>}
                 <View style={styles.gamesHeading}><AppText style={styles.sectionTitle}>{kind === 'publisher' ? 'Yayınladığı oyunlar' : 'Geliştirdiği oyunlar'}</AppText><AppText style={styles.muted}>Kaydırarak tüm oyunları keşfet.</AppText></View>

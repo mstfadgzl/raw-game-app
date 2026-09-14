@@ -212,7 +212,7 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                         </View>
 
                         <AppText style={styles.privacy}>
-                            Key yalnızca bu cihazda kullanılır ve 30 gün sonra
+                            Key yalnızca bu cihazda kullanılır ve 7 gün sonra
                             yeniden istenir.
                         </AppText>
                     </View>
