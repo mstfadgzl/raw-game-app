@@ -1,7 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BottomTabParamList } from '@types';
-import { colors } from '../theme/colors';
 import { LibraryStack, SearchStack, DiscoverStack, HomeStack } from '@navigators';
 import { AnimatedTabIcon } from '../components/animated-tab-icon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,6 +31,7 @@ export const BottomTabStack = () => {
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.secondary,
                 tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+                tabBarItemStyle: { flex: 1 },
                 tabBarLabelPosition: 'below-icon',
                 tabBarHideOnKeyboard: true,
                 animation: 'none',

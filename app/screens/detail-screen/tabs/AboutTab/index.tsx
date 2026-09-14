@@ -105,36 +105,40 @@ export const AboutTab = ({ detail }: Props) => {
         setTranslating(true);
         setTranslationError(false);
 
-        try {
-            const result = (await translateText(source))?.trim();
+        const translate = async () => {
+            try {
+                const result = (await translateText(source))?.trim();
 
-            if (!result) {
-                throw new Error('Boş çeviri');
-            }
+                if (!result) {
+                    throw new Error('Boş çeviri');
+                }
 
-            if (translationCache.size >= 20) {
-                const oldestKey = translationCache.keys().next().value;
+                if (translationCache.size >= 20) {
+                    const oldestKey = translationCache.keys().next().value;
 
-                if (oldestKey !== undefined) {
-                    translationCache.delete(oldestKey);
+                    if (oldestKey !== undefined) {
+                        translationCache.delete(oldestKey);
+                    }
+                }
+
+                translationCache.set(source, result);
+
+                if (current === generation.current) {
+                    setTranslation(result);
+                }
+            } catch {
+                if (current === generation.current) {
+                    setTranslationError(true);
+                }
+            } finally {
+                if (current === generation.current) {
+                    translationLock.current = false;
+                    setTranslating(false);
                 }
             }
+        };
 
-            translationCache.set(source, result);
-
-            if (current === generation.current) {
-                setTranslation(result);
-            }
-        } catch {
-            if (current === generation.current) {
-                setTranslationError(true);
-            }
-        } finally {
-            if (current === generation.current) {
-                translationLock.current = false;
-                setTranslating(false);
-            }
-        }
+        void translate();
     }, [language, source]);
 
     const handleWebsite = async () => {

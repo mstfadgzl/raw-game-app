@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, StatusBar, Platform } from 'react-native'; // Platform eklendi
 import { styles } from './styles';
-import { colors } from '@theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettings } from '../../context/settings-context';
 

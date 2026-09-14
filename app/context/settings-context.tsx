@@ -28,12 +28,16 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 export const SettingsProvider = ({ children }: { children: React.ReactNode }) => {
     const [preferences, setPreferences] = useState<AppPreferences>(defaultPreferences);
+    const [preferencesReady, setPreferencesReady] = useState(false);
 
     useEffect(() => {
         let active = true;
 
         void preferencesStorage.get().then(value => {
-            if (active) setPreferences(value);
+            if (active) {
+                setPreferences(value);
+                setPreferencesReady(true);
+            }
         });
 
         return () => {
@@ -42,8 +46,10 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
     }, []);
 
     useEffect(() => {
-        void preferencesStorage.save(preferences);
-    }, [preferences]);
+        if (preferencesReady) {
+            void preferencesStorage.save(preferences);
+        }
+    }, [preferences, preferencesReady]);
 
     const value = useMemo<SettingsContextValue>(() => ({
         language: preferences.language,

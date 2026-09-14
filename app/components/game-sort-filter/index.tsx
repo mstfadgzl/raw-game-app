@@ -5,10 +5,11 @@ import {
     Platform,
     Pressable,
     ScrollView,
-    Text,
     TextInput,
     View,
 } from 'react-native';
+
+import { AppText } from '@components';
 
 
 import {
@@ -51,14 +52,14 @@ const Choice = ({
             pressed ? styles.pressed : {},
         ]}
     >
-        <Text
+        <AppText
             style={[
                 styles.choiceText,
                 selected ? styles.choiceTextSelected : {},
             ]}
         >
             {label}
-        </Text>
+        </AppText>
     </Pressable>
 );
 
@@ -192,14 +193,14 @@ export const GameSortFilter = memo(
                             pressed ? styles.pressed : {},
                         ]}
                     >
-                        <Text
+                        <AppText
                             style={styles.sortButtonText}
                             numberOfLines={1}
                         >
                             {selectedSort?.label ?? 'Sırala'}
-                        </Text>
+                        </AppText>
 
-                        <Text style={styles.chevron}>⌄</Text>
+                        <AppText style={styles.chevron}>⌄</AppText>
                     </Pressable>
 
                     <Pressable
@@ -219,15 +220,15 @@ export const GameSortFilter = memo(
                             pressed ? styles.pressed : {},
                         ]}
                     >
-                        <Text style={styles.filterButtonText}>
+                        <AppText style={styles.filterButtonText}>
                             Filtrele
-                        </Text>
+                        </AppText>
 
                         {activeFilterCount > 0 && (
                             <View style={styles.badge}>
-                                <Text style={styles.badgeText}>
+                                <AppText style={styles.badgeText}>
                                     {activeFilterCount}
-                                </Text>
+                                </AppText>
                             </View>
                         )}
                     </Pressable>
@@ -262,12 +263,12 @@ export const GameSortFilter = memo(
                             accessibilityViewIsModal
                         >
                             <View style={styles.panelHeader}>
-                                <Text
+                                <AppText
                                     style={styles.panelTitle}
                                     accessibilityRole="header"
                                 >
                                     Sırala ve filtrele
-                                </Text>
+                                </AppText>
 
                                 <Pressable
                                     onPress={closePanel}
@@ -275,9 +276,9 @@ export const GameSortFilter = memo(
                                     accessibilityLabel="Paneli kapat"
                                     style={styles.closeButton}
                                 >
-                                    <Text style={styles.closeText}>
+                                    <AppText style={styles.closeText}>
                                         ×
-                                    </Text>
+                                    </AppText>
                                 </Pressable>
                             </View>
 
@@ -289,9 +290,9 @@ export const GameSortFilter = memo(
                                 showsVerticalScrollIndicator={false}
                                 keyboardShouldPersistTaps="handled"
                             >
-                                <Text style={styles.sectionTitle}>
+                                <AppText style={styles.sectionTitle}>
                                     Sıralama
-                                </Text>
+                                </AppText>
 
                                 <View style={styles.choices}>
                                     {SORT_OPTIONS.map(option => (
@@ -311,9 +312,9 @@ export const GameSortFilter = memo(
                                     ))}
                                 </View>
 
-                                <Text style={styles.sectionTitle}>
+                                <AppText style={styles.sectionTitle}>
                                     Çıkış durumu
-                                </Text>
+                                </AppText>
 
                                 <View style={styles.choices}>
                                     {RELEASE_OPTIONS.map(option => (
@@ -334,15 +335,15 @@ export const GameSortFilter = memo(
                                     ))}
                                 </View>
 
-                                <Text style={styles.sectionTitle}>
+                                <AppText style={styles.sectionTitle}>
                                     Çıkış yılı
-                                </Text>
+                                </AppText>
 
                                 <View style={styles.yearRow}>
                                     <View style={styles.yearField}>
-                                        <Text style={styles.inputLabel}>
+                                        <AppText style={styles.inputLabel}>
                                             Başlangıç
-                                        </Text>
+                                        </AppText>
 
                                         <TextInput
                                             value={startYearText}
@@ -360,9 +361,9 @@ export const GameSortFilter = memo(
                                     </View>
 
                                     <View style={styles.yearField}>
-                                        <Text style={styles.inputLabel}>
+                                        <AppText style={styles.inputLabel}>
                                             Bitiş
-                                        </Text>
+                                        </AppText>
 
                                         <TextInput
                                             value={endYearText}
@@ -380,14 +381,14 @@ export const GameSortFilter = memo(
                                     </View>
                                 </View>
 
-                                <Text style={styles.hint}>
+                                <AppText style={styles.hint}>
                                     Boş bıraktığın alan yıl sınırı koymaz.
                                     Çıkmış oyunlarda üst sınır bugündür.
-                                </Text>
+                                </AppText>
 
-                                <Text style={styles.sectionTitle}>
+                                <AppText style={styles.sectionTitle}>
                                     Minimum Metacritic
-                                </Text>
+                                </AppText>
 
                                 <View style={styles.choices}>
                                     {SCORE_OPTIONS.map(option => (
@@ -408,19 +409,19 @@ export const GameSortFilter = memo(
                                     ))}
                                 </View>
 
-                                <Text style={styles.hint}>
+                                <AppText style={styles.hint}>
                                     Puan sınırı seçildiğinde Metacritic
                                     puanı olmayan oyunlar da elenir.
-                                </Text>
+                                </AppText>
 
                                 {error !== null && (
-                                    <Text
+                                    <AppText
                                         style={styles.error}
                                         accessibilityRole="alert"
                                         accessibilityLiveRegion="polite"
                                     >
                                         {error}
-                                    </Text>
+                                    </AppText>
                                 )}
 
                                 <Pressable
@@ -428,9 +429,9 @@ export const GameSortFilter = memo(
                                     accessibilityRole="button"
                                     style={styles.resetButton}
                                 >
-                                    <Text style={styles.resetText}>
+                                    <AppText style={styles.resetText}>
                                         Varsayılanlara dön
-                                    </Text>
+                                    </AppText>
                                 </Pressable>
                             </ScrollView>
 
@@ -440,9 +441,9 @@ export const GameSortFilter = memo(
                                     accessibilityRole="button"
                                     style={styles.cancelButton}
                                 >
-                                    <Text style={styles.cancelText}>
+                                    <AppText style={styles.cancelText}>
                                         Vazgeç
-                                    </Text>
+                                    </AppText>
                                 </Pressable>
 
                                 <Pressable
@@ -450,9 +451,9 @@ export const GameSortFilter = memo(
                                     accessibilityRole="button"
                                     style={styles.applyButton}
                                 >
-                                    <Text style={styles.applyText}>
+                                    <AppText style={styles.applyText}>
                                         Uygula
-                                    </Text>
+                                    </AppText>
                                 </Pressable>
                             </View>
                         </View>
