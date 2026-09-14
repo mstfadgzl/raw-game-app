@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
-import { API_BASE_URL, RAWG_API_KEY } from '@env';
+import { API_BASE_URL } from '@env';
+import { runtimeApiKey } from '../services/runtime-api-key';
 
 const isDirectRawgApi = /https:\/\/api\.rawg\.io\/api\/?$/i.test(
     API_BASE_URL.trim(),
@@ -15,15 +16,19 @@ const apiClient = axios.create({
     },
 });
 
-// Doğrudan RAWG bağlantısında anahtar her isteğe eklenir. Proxy kullanılırsa
-// anahtar istemciden gönderilmez; proxy anahtarı sunucu tarafında ekler.
 apiClient.interceptors.request.use(config => {
-    if (isDirectRawgApi && RAWG_API_KEY?.trim()) {
-        config.params = {
-            ...(config.params || {}),
-            key: RAWG_API_KEY.trim(),
-        };
+    const key = runtimeApiKey.get();
+
+    if (!key) {
+        return Promise.reject(
+            new Error('RAWG API key bulunamadı.'),
+        );
     }
+
+    config.params = {
+        ...(config.params || {}),
+        key,
+    };
 
     return config;
 });
