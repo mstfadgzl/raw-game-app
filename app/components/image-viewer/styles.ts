@@ -20,6 +20,11 @@ export const styles = StyleSheet.create({
         position: 'absolute',
         zIndex: 1,
     },
+    errorText: {
+        position: 'absolute',
+        color: '#D7E1E5',
+        fontSize: 13,
+    },
     topBar: {
         position: 'absolute',
         top: 18,

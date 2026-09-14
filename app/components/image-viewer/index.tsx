@@ -45,6 +45,7 @@ export const ImageViewer = ({ images, initialIndex, onClose }: Props) => {
         clamp(initialIndex, 0, Math.max(0, images.length - 1)),
     );
     const [loaded, setLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     const scale = useRef(new Animated.Value(1)).current;
     const translateX = useRef(new Animated.Value(0)).current;
@@ -87,6 +88,7 @@ export const ImageViewer = ({ images, initialIndex, onClose }: Props) => {
         indexRef.current = nextIndex;
         setIndex(nextIndex);
         setLoaded(false);
+        setImageError(false);
         resetTransform();
     };
 
@@ -268,7 +270,16 @@ export const ImageViewer = ({ images, initialIndex, onClose }: Props) => {
                         resizeMode="contain"
                         onLoadStart={() => setLoaded(false)}
                         onLoad={() => setLoaded(true)}
+                        onError={() => {
+                            setLoaded(true);
+                            setImageError(true);
+                        }}
                     />
+                    {imageError && (
+                        <AppText style={styles.errorText}>
+                            Görsel yüklenemedi.
+                        </AppText>
+                    )}
                 </Animated.View>
 
                 <View style={styles.topBar} pointerEvents="box-none">
