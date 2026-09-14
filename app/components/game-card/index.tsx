@@ -11,6 +11,7 @@ import { cardImageUrl } from '../../utils/card-image';
 import { AppText } from '../app-text';
 import { useSettings } from '../../context/settings-context';
 import { localizeCatalogName } from '../../i18n';
+import { gameService } from '../../api/services/gameService';
 
 type CardGame = IGame & {
     genres?: {
@@ -97,6 +98,7 @@ export const GameCard = memo(function GameCard({
         <TouchableOpacity
             style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}
             activeOpacity={0.85}
+            onPressIn={() => { void gameService.getGameDetail(game.id).catch(() => {}); }}
             onPress={() => onPress(game.id, game.name)}
             accessibilityRole="button"
             accessibilityLabel={[

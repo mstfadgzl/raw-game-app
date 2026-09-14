@@ -48,7 +48,7 @@ export const SplashScreen = ({ onFinish }: Props) => {
                 <Animated.View style={[styles.brand, { transform: [{ scale }] }]}>
                     <AppMark />
                     <Animated.View style={[styles.copy, { opacity: contentOpacity }]}>
-                        <AppText style={styles.title}>OYUN KÜTÜPHANESİ</AppText>
+                        <AppText style={styles.title}>GameCodex</AppText>
                         <AppText style={styles.subtitle}>Keşfet · Kaydet · Oyna</AppText>
                     </Animated.View>
                 </Animated.View>

@@ -35,10 +35,7 @@ export const entityService = {
         });
     },
     getDevelopers: async (page: number = 1): Promise<IDeveloperResponse> => {
-        const response = await apiClient.get<IDeveloperResponse>('/developers', {
-            params: { page }
-        });
-        return response.data;
+        return cachedGet<IDeveloperResponse>('/developers', { page });
     },
     peekDeveloperDetail: (id: number): IDeveloper | null =>
         peekCached<IDeveloper>(`/developers/${id}`),
@@ -49,10 +46,7 @@ export const entityService = {
         });
     },
     getPublishers: async (page: number = 1): Promise<IDeveloperResponse> => {
-        const response = await apiClient.get<IDeveloperResponse>('/publishers', {
-            params: { page }
-        });
-        return response.data;
+        return cachedGet<IDeveloperResponse>('/publishers', { page });
     },
     peekPublisherDetail: (id: number): IDeveloper | null =>
         peekCached<IDeveloper>(`/publishers/${id}`),

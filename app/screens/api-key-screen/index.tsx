@@ -25,7 +25,7 @@ type Props = {
 };
 
 export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
-    const { colors: themeColors, language, setLanguage, themeMode } = useSettings();
+    const { colors: themeColors, language, setLanguage, themeMode, setThemeMode } = useSettings();
     const [apiKey, setApiKey] = useState('');
     const [showKey, setShowKey] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -92,8 +92,24 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
     const isDisabled = loading || apiKey.trim().length === 0;
 
     return (
-        <Container style={styles.container}>
+        <Container style={[styles.container, { backgroundColor: themeColors.background }]}>
             <View style={styles.languageRow}>
+                <View style={[styles.languagePicker, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
+                    {(['dark', 'light'] as const).map(value => (
+                        <Pressable
+                            key={value}
+                            accessibilityRole="radio"
+                            accessibilityLabel={value === 'dark' ? (language === 'tr' ? 'Karanlık mod' : 'Dark mode') : (language === 'tr' ? 'Aydınlık mod' : 'Light mode')}
+                            accessibilityState={{ checked: themeMode === value }}
+                            onPress={() => setThemeMode(value)}
+                            style={[styles.languageOption, themeMode === value && { backgroundColor: themeColors.primary }]}
+                        >
+                            <AppText style={styles.themeSymbol} color={themeMode === value ? (themeMode === 'light' ? '#FFFFFF' : '#07110F') : themeColors.secondary}>
+                                {value === 'dark' ? '☾' : '☀'}
+                            </AppText>
+                        </Pressable>
+                    ))}
+                </View>
                 <View style={[styles.languagePicker, { backgroundColor: themeColors.surface, borderColor: themeColors.border }]}>
                     {(['en', 'tr'] as const).map(value => (
                         <Pressable
@@ -126,7 +142,7 @@ export const ApiKeyScreen = ({ onAuthenticated }: Props) => {
                         </View>
 
                         <AppText style={[styles.eyebrow, { color: themeColors.primary }]}>
-                            İLK KURULUM
+                            GameCodex
                         </AppText>
 
                         <AppText variant="h1" style={[styles.title, { color: themeColors.text }]}>

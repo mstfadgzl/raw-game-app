@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.rawggameapp"
+    namespace "com.gamecodex"
     defaultConfig {
-        applicationId "com.rawggameapp"
+        applicationId "com.gamecodex"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

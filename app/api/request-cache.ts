@@ -16,6 +16,7 @@ type RequestOptions = {
 };
 
 const CACHE_TTL = 5 * 60 * 1000;
+const STALE_TTL = 30 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 80;
 
 const cache = new Map<string, CacheEntry>();
@@ -37,7 +38,7 @@ const saveToCache = (key: string, data: unknown) => {
 
     // Süresi dolmuş kayıtları temizle.
     for (const [entryKey, entry] of cache) {
-        if (entry.expiresAt <= now) {
+        if (entry.expiresAt + STALE_TTL <= now) {
             cache.delete(entryKey);
         }
     }
@@ -69,24 +70,28 @@ export async function cachedGet<T>(
         cache.delete(key);
     }
 
-    // Devam eden aynı ağ isteği varsa onu paylaş.
-    const pending = pendingRequests.get(key);
-
-    if (pending && !options.forceRefresh) {
-        if (__DEV__) console.log(`[API shared] ${url}`);
-        return pending as Promise<T>;
-    }
-
     const cached = cache.get(key);
 
-    if (cached && cached.expiresAt > Date.now()) {
+    if (!options.forceRefresh && cached && cached.expiresAt + STALE_TTL > Date.now()) {
         // Kullanılan kaydı sıranın sonuna taşı.
         cache.delete(key);
         cache.set(key, cached);
 
+        // Show recently loaded public data immediately; refresh without blocking the screen.
+        if (cached.expiresAt <= Date.now() && !pendingRequests.has(key)) {
+            void cachedGet<T>(url, params, { ...options, forceRefresh: true }).catch(() => {
+                // A transient network failure must not discard usable data.
+                if (!cache.has(key)) cache.set(key, cached);
+            });
+            cache.set(key, cached);
+        }
+
         if (__DEV__) console.log(`[API cache] ${url}`);
         return cached.data as T;
     }
+
+    const pending = pendingRequests.get(key);
+    if (pending && !options.forceRefresh) return pending as Promise<T>;
 
     cache.delete(key);
 
@@ -133,5 +138,5 @@ export async function cachedGet<T>(
 
 export function peekCached<T>(url: string): T | null {
     const entry = cache.get(createCacheKey(url, {}));
-    return entry && entry.expiresAt > Date.now() ? entry.data as T : null;
+    return entry && entry.expiresAt + STALE_TTL > Date.now() ? entry.data as T : null;
 }

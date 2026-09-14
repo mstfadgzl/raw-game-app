@@ -1,4 +1,4 @@
-package com.rawggameapp
+package com.gamecodex
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate

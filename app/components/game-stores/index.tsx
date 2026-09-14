@@ -13,7 +13,7 @@ const StoreIcon = ({ store }: { store: StoreMetadata }) => {
     const { colors } = useSettings();
     const icon = storeIcons[store.slug ?? ''];
     return <View style={[styles.iconBox, { backgroundColor: colors.background }]}>{icon
-        ? <Image source={icon} style={styles.icon} resizeMode="contain" />
+        ? <Image source={icon} style={[styles.icon, { tintColor: colors.text }]} resizeMode="contain" />
         : <AppText bold>{store.name.slice(0, 2).toUpperCase()}</AppText>}
     </View>;
 };

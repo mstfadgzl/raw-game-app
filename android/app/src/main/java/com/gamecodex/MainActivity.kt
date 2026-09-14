@@ -1,4 +1,4 @@
-package com.rawggameapp
+package com.gamecodex
 
 import android.content.Intent
 import android.content.res.Configuration
@@ -20,7 +20,7 @@ class MainActivity : ReactActivity() {
    * Returns the name of the main component registered from JavaScript. This is used to schedule
    * rendering of the component.
    */
-  override fun getMainComponentName(): String = "RawgGameApp"
+  override fun getMainComponentName(): String = "GameCodex"
 
   /**
    * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]

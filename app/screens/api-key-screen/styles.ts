@@ -2,7 +2,8 @@ import { StyleSheet } from 'react-native';
 import { colors } from '@theme';
 
 export const styles = StyleSheet.create({
-    languageRow: { alignItems: 'flex-end', paddingHorizontal: 20, paddingTop: 8 },
+    languageRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 8 },
+    themeSymbol: { fontSize: 23, lineHeight: 28 },
     languagePicker: { flexDirection: 'row', borderWidth: 1, borderRadius: 24, padding: 3 },
     languageOption: { minWidth: 44, minHeight: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
     languageLabel: { fontSize: 11 },
