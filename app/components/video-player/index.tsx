@@ -24,24 +24,36 @@ interface VideoPlayerProps {
   trailer: ITrailer;
 }
 
+const sourceQuality = (quality: string, uri: string) => {
+  if (/^max$/i.test(quality.trim())) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const keyResolution = Number.parseInt(quality, 10);
+  const urlResolution = uri.match(/(?:^|[^0-9])(\d{3,4})(?:p)?(?:[^0-9]|$)/i);
+  const parsedUrlResolution = urlResolution
+    ? Number.parseInt(urlResolution[1], 10)
+    : 0;
+
+  return Math.max(
+    Number.isFinite(keyResolution) ? keyResolution : 0,
+    parsedUrlResolution,
+  );
+};
+
 export const VideoPlayer = ({ trailer }: VideoPlayerProps) => {
   const sources = trailer?.data as Record<string, unknown> | undefined;
 
-  // RAWG yanıtında 480 adresi çoğu zaman max adresinden önce gelir. İlk
-  // değeri almak videoyu gereksiz yere düşük kalitede başlatıyordu; mevcut
-  // en yüksek kaliteyi seçip yalnızca o yoksa düşük kaliteye düşüyoruz.
+  // RAWG genellikle 480 ve max kaynaklarını birlikte döndürür. Anahtar sırası
+  // kaliteyi garanti etmediği için anahtarı ve URL içindeki çözünürlüğü
+  // karşılaştırıp mevcut en yüksek kaynağı seçiyoruz.
   const videoUrl = Object.entries(sources || {})
     .filter(([, value]) =>
       typeof value === 'string' && /^https?:\/\//i.test(value.trim()),
     )
-    .sort(([firstQuality], [secondQuality]) => {
-      const qualityValue = (quality: string) => {
-        if (quality.toLowerCase() === 'max') return Number.POSITIVE_INFINITY;
-        const numericQuality = Number.parseInt(quality, 10);
-        return Number.isFinite(numericQuality) ? numericQuality : 0;
-      };
-
-      return qualityValue(secondQuality) - qualityValue(firstQuality);
+    .sort(([firstQuality, firstUri], [secondQuality, secondUri]) => {
+      return sourceQuality(secondQuality, String(secondUri)) -
+        sourceQuality(firstQuality, String(firstUri));
     })
     .map(([, value]) => (value as string).trim())[0] || '';
 
@@ -70,49 +82,6 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
   const videoRef = React.useRef<VideoRef>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [barWidth, setBarWidth] = useState(0);
-  const durationRef = React.useRef(0);
-  const barWidthRef = React.useRef(0);
-
-  durationRef.current = duration;
-  barWidthRef.current = barWidth;
-
-  const seekFromBar = (locationX: number) => {
-    const currentBarWidth = barWidthRef.current;
-    const currentDuration = durationRef.current;
-
-    if (!currentBarWidth || !currentDuration) return;
-
-    const nextTime = Math.max(
-      0,
-      Math.min(
-        currentDuration,
-        (Math.max(0, Math.min(currentBarWidth, locationX)) / currentBarWidth) *
-          currentDuration,
-      ),
-    );
-
-    videoRef.current?.seek(nextTime);
-    setCurrentTime(nextTime);
-  };
-
-  const inlineSeekResponder = React.useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () =>
-        durationRef.current > 0 && barWidthRef.current > 0,
-      onMoveShouldSetPanResponder: () =>
-        durationRef.current > 0 && barWidthRef.current > 0,
-      onPanResponderGrant: event => {
-        seekFromBar(event.nativeEvent.locationX);
-      },
-      onPanResponderMove: event => {
-        seekFromBar(event.nativeEvent.locationX);
-      },
-      onPanResponderRelease: event => {
-        seekFromBar(event.nativeEvent.locationX);
-      },
-    }),
-  ).current;
 
   const openFullscreen = () => {
     navigation.navigate('Video', { videoUrl, preview });
@@ -165,7 +134,7 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
             source={{ uri: videoUrl }}
             style={styles.fill}
             pointerEvents="none"
-            resizeMode="contain"
+            resizeMode="cover"
             controls={false}
             paused={paused}
             repeat={false}
@@ -182,7 +151,7 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
             onBuffer={({ isBuffering }) => setLoading(isBuffering)}
             onEnd={() => {
               setPaused(true);
-              setCurrentTime(durationRef.current);
+              setCurrentTime(duration);
             }}
             onError={() => {
               setLoading(false);
@@ -190,21 +159,24 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
             }}
           />
 
-          {paused && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Fragmanı yeniden oynat"
-              style={styles.inlineTouchSurface}
-              onPress={() => {
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={paused ? 'Fragmanı oynat' : 'Fragmanı durdur'}
+            style={styles.inlineTouchSurface}
+            onPress={() => {
+              if (paused && duration > 0 && currentTime >= duration) {
                 videoRef.current?.seek(0);
-                setPaused(false);
-              }}
-            >
+                setCurrentTime(0);
+              }
+              setPaused(value => !value);
+            }}
+          >
+            {paused && (
               <View style={styles.inlinePlayButton}>
                 <AppText style={styles.playIcon}>▶</AppText>
               </View>
-            </Pressable>
-          )}
+            )}
+          </Pressable>
 
           <View pointerEvents="none" style={styles.inlineShade} />
 
@@ -230,38 +202,6 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
           )}
         </View>
       )}
-
-      {inlinePlaying && (
-        <View style={styles.inlineSeekContainer}>
-          <View
-            {...inlineSeekResponder.panHandlers}
-            style={styles.inlineSeekTrack}
-            onLayout={event => setBarWidth(event.nativeEvent.layout.width)}
-          >
-            <View
-              style={[
-                styles.inlineSeekProgress,
-                {
-                  width: duration
-                    ? `${Math.min(100, (currentTime / duration) * 100)}%`
-                    : '0%',
-                },
-              ]}
-            />
-            {!!duration && (
-              <View
-                style={[
-                  styles.inlineSeekThumb,
-                  {
-                    left: `${Math.min(100, (currentTime / duration) * 100)}%`,
-                  },
-                ]}
-              />
-            )}
-          </View>
-        </View>
-      )}
-
 
     </View>
   );
@@ -493,7 +433,7 @@ const FullscreenPlayer = ({
               source={{ uri: videoUrl }}
               style={styles.fill}
               pointerEvents="none"
-              resizeMode="contain"
+              resizeMode="cover"
               controls={false}
               paused={!appActive || paused}
               repeat={false}

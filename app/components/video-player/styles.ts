@@ -220,38 +220,6 @@ export const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.58)',
     },
 
-    inlineSeekContainer: {
-        width: '100%',
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-    },
-
-    inlineSeekTrack: {
-        width: '100%',
-        height: 24,
-        justifyContent: 'center',
-        paddingVertical: 9,
-        position: 'relative',
-    },
-
-    inlineSeekProgress: {
-        height: 5,
-        borderRadius: 3,
-        backgroundColor: colors.primary,
-    },
-
-    inlineSeekThumb: {
-        position: 'absolute',
-        top: 5,
-        width: 14,
-        height: 14,
-        marginLeft: -7,
-        borderRadius: 7,
-        backgroundColor: colors.primary,
-        borderWidth: 2,
-        borderColor: '#FFFFFF',
-    },
-
     fullscreen: {
         flex: 1,
         backgroundColor: '#080B10',
