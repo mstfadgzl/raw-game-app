@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextStyle, TextProps } from 'react-native';
-import { colors } from '@theme';
+import { useSettings } from '../../context/settings-context';
 
 interface AppTextProps extends TextProps {
     variant?: 'h1' | 'h2' | 'body' | 'caption';
@@ -11,12 +11,19 @@ interface AppTextProps extends TextProps {
 
 export const AppText: React.FC<AppTextProps> = ({
     variant = 'body',
-    color = colors.text,
+    color,
     bold,
     children,
     style,
     ...props
 }) => {
+    const { colors, localize } = useSettings();
+    const textColor = color ?? colors.text;
+
+    const localizedChildren = React.Children.map(children, child =>
+        typeof child === 'string' ? localize(child) : child,
+    );
+
     const getVariantStyle = (): TextStyle => {
         switch (variant) {
             case 'h1': return { fontSize: 24, fontWeight: 'bold' };
@@ -30,12 +37,12 @@ export const AppText: React.FC<AppTextProps> = ({
         <Text
             style={[
                 getVariantStyle(),
-                { color, fontWeight: bold ? 'bold' : 'normal' },
+                { color: textColor, fontWeight: bold ? 'bold' : 'normal' },
                 style
             ]}
             {...props}
         >
-            {children}
+            {localizedChildren}
         </Text>
     );
 };

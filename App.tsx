@@ -10,8 +10,11 @@ import { AppStack } from './app/navigators';
 import { ApiKeyScreen } from './app/screens/api-key-screen';
 import { apiKeyStorage } from './app/services/api-key-storage';
 import { runtimeApiKey } from './app/services/runtime-api-key';
+import { SettingsProvider, useSettings } from './app/context/settings-context';
+import { SessionProvider } from './app/context/session-context';
 
 const AppRoot = () => {
+  const { colors } = useSettings();
   const [checkingKey, setCheckingKey] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
@@ -30,26 +33,38 @@ const AppRoot = () => {
     void loadKey();
   }, []);
 
+  const logout = async () => {
+    await apiKeyStorage.clear();
+    runtimeApiKey.clear();
+    setAuthenticated(false);
+  };
+
+  let content: React.ReactNode;
+
   if (checkingKey) {
-    return (
+    content = (
       <View style={styles.loading}>
-        <ActivityIndicator color="#64ffda" size="large" />
+        <ActivityIndicator color={colors.primary} size="large" />
       </View>
     );
-  }
-
-  if (!authenticated) {
-    return (
+  } else if (!authenticated) {
+    content = (
       <ApiKeyScreen
         onAuthenticated={() => setAuthenticated(true)}
       />
     );
+  } else {
+    content = (
+      <NavigationContainer>
+        <AppStack />
+      </NavigationContainer>
+    );
   }
 
   return (
-    <NavigationContainer>
-      <AppStack />
-    </NavigationContainer>
+    <SessionProvider logout={logout}>
+      {content}
+    </SessionProvider>
   );
 };
 
@@ -57,7 +72,9 @@ const App = () => (
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <SafeAreaProvider>
-        <AppRoot />
+        <SettingsProvider>
+          <AppRoot />
+        </SettingsProvider>
       </SafeAreaProvider>
     </PersistGate>
   </Provider>

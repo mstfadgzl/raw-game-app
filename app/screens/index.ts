@@ -9,3 +9,4 @@ export * from './genre-detail-screen';
 export * from './platform-detail-screen';
 export * from './tag-detail-screen';
 export * from './api-key-screen';
+export * from './settings-screen';

@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText, GenreChip, StudioBrand } from '@components';
 import { translateText } from '@utils';
+import { useSettings } from '@hooks';
 import { colors } from '@theme';
 import type { IGameDetail, GameRelationNavigationParamList } from '@types';
 import { styles } from '../../styles';
@@ -47,6 +48,7 @@ const translationCache = new Map<string, string>();
 export const AboutTab = ({ detail }: Props) => {
     const navigation = useNavigation<NavigationProp<GameRelationNavigationParamList>>();
     const insets = useSafeAreaInsets();
+    const { language } = useSettings();
 
     const source = detail?.description_raw?.trim() || '';
     const stores = useMemo(() => detail.stores?.map(item => item.store) ?? [], [detail.stores]);
@@ -67,7 +69,6 @@ export const AboutTab = ({ detail }: Props) => {
     const [translation, setTranslation] = useState('');
     const [translating, setTranslating] = useState(false);
     const [translationError, setTranslationError] = useState(false);
-    const [showOriginal, setShowOriginal] = useState(false);
     const [expanded, setExpanded] = useState(false);
 
     const generation = useRef(0);
@@ -78,18 +79,24 @@ export const AboutTab = ({ detail }: Props) => {
         translationLock.current = false;
 
         setTranslation(translationCache.get(source) || '');
-        setTranslating(false);
+        setTranslating(language === 'tr' && Boolean(source));
         setTranslationError(false);
-        setShowOriginal(false);
         setExpanded(false);
 
         return () => {
             generation.current += 1;
         };
-    }, [detail?.id, source]);
+    }, [detail?.id, source, language]);
 
-    const handleTranslate = async () => {
-        if (!source || translationLock.current) return;
+    useEffect(() => {
+        if (language !== 'tr' || !source || translationLock.current) return;
+
+        const cached = translationCache.get(source);
+        if (cached) {
+            setTranslation(cached);
+            setTranslating(false);
+            return;
+        }
 
         translationLock.current = true;
 
@@ -117,7 +124,6 @@ export const AboutTab = ({ detail }: Props) => {
 
             if (current === generation.current) {
                 setTranslation(result);
-                setShowOriginal(false);
             }
         } catch {
             if (current === generation.current) {
@@ -129,7 +135,7 @@ export const AboutTab = ({ detail }: Props) => {
                 setTranslating(false);
             }
         }
-    };
+    }, [language, source]);
 
     const handleWebsite = async () => {
         const value = detail?.website?.trim();
@@ -160,7 +166,7 @@ export const AboutTab = ({ detail }: Props) => {
     if (!detail) return null;
 
     const description =
-        translation && !showOriginal ? translation : source;
+        language === 'tr' && translation ? translation : source;
 
     const developers = detail.developers ?? [];
     const publishers = detail.publishers ?? [];
@@ -243,34 +249,18 @@ export const AboutTab = ({ detail }: Props) => {
                         </AppText>
                     </TouchableOpacity>
 
-                    <TouchableOpacity
-                        accessibilityRole="button"
-                        style={localStyles.textButton}
-                        disabled={translating}
-                        onPress={() => {
-                            if (translation) {
-                                setShowOriginal(value => !value);
-                            } else {
-                                void handleTranslate();
-                            }
-                        }}
-                    >
-                        <AppText color={colors.primary}>
-                            {translating
-                                ? 'Çevriliyor…'
-                                : translation
-                                    ? showOriginal
-                                        ? 'Türkçesini göster'
-                                        : 'Orijinali göster'
-                                    : 'Türkçeye çevir'}
-                        </AppText>
-                    </TouchableOpacity>
                 </View>
             )}
 
-            {translationError && (
+            {translating && (
                 <AppText style={styles.muted}>
-                    Çeviri yapılamadı. Düğmeye basarak tekrar deneyebilirsin.
+                    Çeviri yükleniyor…
+                </AppText>
+            )}
+
+            {translationError && language === 'tr' && (
+                <AppText style={styles.muted}>
+                    Çeviri yapılamadı. Orijinal açıklama gösteriliyor.
                 </AppText>
             )}
 

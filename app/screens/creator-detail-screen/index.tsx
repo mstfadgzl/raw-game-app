@@ -21,6 +21,7 @@ import {
 } from '@components';
 
 import { translateText } from '@utils';
+import { useSettings } from '@hooks';
 
 import {
     ICreator,
@@ -40,6 +41,7 @@ export const CreatorDetailScreen = () => {
 const CreatorContent = ({ id, name }: { id: number; name: string }) => {
     const navigation =
         useNavigation<DiscoverScreenNavigationProp>();
+    const { language } = useSettings();
 
     const [creator, setCreator] = useState<ICreator | null>(() => entityService.peekCreatorDetail(id));
     const [loading, setLoading] = useState(() => !entityService.peekCreatorDetail(id));
@@ -108,9 +110,9 @@ const CreatorContent = ({ id, name }: { id: number; name: string }) => {
 
         setTrBio('');
         setExpanded(false);
-        setIsTranslating(Boolean(description));
+        setIsTranslating(language === 'tr' && Boolean(description));
 
-        if (!description) {
+        if (!description || language !== 'tr') {
             return;
         }
 
@@ -138,7 +140,7 @@ const CreatorContent = ({ id, name }: { id: number; name: string }) => {
         return () => {
             active = false;
         };
-    }, [description, id]);
+    }, [description, id, language]);
 
     const handleRetry = () => {
         setRetryCount(value => value + 1);

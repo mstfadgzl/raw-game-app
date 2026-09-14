@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Container, AppText, GameCard, Skeleton, StudioBrand } from '@components';
 import { entityService, gameService } from '@services';
 import { translateText } from '@utils';
+import { useSettings } from '@hooks';
 import type { CompanyDetailRouteProp, DiscoverScreenNavigationProp, IDeveloper, IGame } from '@types';
 import { colors } from '@theme';
 import { styles } from './styles';
@@ -18,6 +19,7 @@ type CompanyKind = 'developer' | 'publisher';
 
 const DeveloperContent = ({ id, kind }: { id: number; kind: CompanyKind }) => {
     const navigation = useNavigation<DiscoverScreenNavigationProp>();
+    const { language } = useSettings();
     const readProfile = useCallback(() => kind === 'publisher' ? entityService.peekPublisherDetail(id) : entityService.peekDeveloperDetail(id), [id, kind]);
     const [developer, setDeveloper] = useState<IDeveloper | null>(() => readProfile());
     const [loading, setLoading] = useState(() => !readProfile());
@@ -55,15 +57,15 @@ const DeveloperContent = ({ id, kind }: { id: number; kind: CompanyKind }) => {
     useEffect(() => {
         let active = true;
         setTranslation('');
-        setTranslating(Boolean(description));
-        if (description) {
+        setTranslating(language === 'tr' && Boolean(description));
+        if (description && language === 'tr') {
             translateText(description)
                 .then(value => { if (active) setTranslation(value?.trim() || ''); })
                 .catch(() => { /* Keep the original biography visible. */ })
                 .finally(() => { if (active) setTranslating(false); });
         }
         return () => { active = false; };
-    }, [description]);
+    }, [description, language]);
 
     if (loading) return <Container style={styles.container}><Skeleton style={styles.hero} /><View style={styles.content}><Skeleton style={styles.bioSkeleton} /></View></Container>;
     if (!developer) return (

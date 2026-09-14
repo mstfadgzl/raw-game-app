@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, StyleSheet, View } from 'react-native';
 
 type Props = {
-    name: 'home' | 'discover' | 'search' | 'library';
+    name: 'home' | 'discover' | 'search' | 'library' | 'settings';
     focused: boolean;
     color: string;
 };
@@ -40,6 +40,7 @@ export const AnimatedTabIcon = ({ name, focused, color }: Props) => {
                 {name === 'discover' && <><View style={[styles.compass, stroke]} /><View style={[styles.needle, { backgroundColor: color }]} /></>}
                 {name === 'search' && <><View style={[styles.lens, stroke]} /><View style={[styles.handle, { backgroundColor: color }]} /></>}
                 {name === 'library' && <View style={styles.books}>{[0, 1, 2].map(book => <View key={book} style={[styles.book, stroke, book === 2 && styles.tilted]} />)}</View>}
+                {name === 'settings' && <><View style={[styles.gear, stroke]} /><View style={[styles.gearCenter, { backgroundColor: color }]} /></>}
             </Animated.View>
         </View>
     );
@@ -58,4 +59,6 @@ const styles = StyleSheet.create({
     books: { flexDirection: 'row', gap: 3, paddingTop: 3 },
     book: { width: 5, height: 18, borderWidth: 1.5, borderRadius: 1 },
     tilted: { transform: [{ rotate: '-12deg' }] },
+    gear: { position: 'absolute', left: 2, top: 2, width: 20, height: 20, borderWidth: 2, borderRadius: 10 },
+    gearCenter: { position: 'absolute', left: 9, top: 9, width: 6, height: 6, borderRadius: 3 },
 });

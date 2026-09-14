@@ -55,6 +55,7 @@ export type BottomTabParamList = {
     DiscoverTab: NavigatorScreenParams<DiscoverStackParamList>;
     SearchTab: NavigatorScreenParams<SearchStackParamList>;
     LibraryTab: NavigatorScreenParams<LibraryStackParamList>;
+    SettingsTab: undefined;
 };
 
 export type AppStackParamList = {
