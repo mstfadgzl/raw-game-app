@@ -395,7 +395,7 @@ const catalogNameTranslations: Record<string, string> = {
     'First-Person': 'Birinci Şahıs',
     'Action-Adventure': 'Aksiyon Macera',
     'Co-op': 'İş Birlikli',
-    Sandbox: 'Kum Havuzu',
+    Sandbox: 'Sandbox',
     Survival: 'Hayatta Kalma',
     Stealth: 'Gizlilik',
     Zombies: 'Zombiler',
