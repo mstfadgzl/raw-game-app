@@ -153,6 +153,72 @@ export const styles = StyleSheet.create({
         marginTop: 12,
     },
 
+    inlinePlayer: {
+        width: '100%',
+        aspectRatio: 16 / 9,
+        borderRadius: 14,
+        overflow: 'hidden',
+        backgroundColor: '#080B10',
+    },
+
+    inlineTouchSurface: {
+        ...StyleSheet.absoluteFill,
+        zIndex: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    inlineShade: {
+        ...StyleSheet.absoluteFill,
+        zIndex: 1,
+        backgroundColor: 'rgba(0,0,0,0.08)',
+    },
+
+    inlinePlayButton: {
+        width: 52,
+        height: 52,
+        borderRadius: 26,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.68)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.7)',
+    },
+
+    inlineExpandButton: {
+        position: 'absolute',
+        right: 10,
+        bottom: 10,
+        zIndex: 4,
+        width: 42,
+        height: 42,
+        borderRadius: 21,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.74)',
+    },
+
+    inlineExpandText: {
+        color: '#FFFFFF',
+        fontSize: 22,
+    },
+
+    inlineLoading: {
+        ...StyleSheet.absoluteFill,
+        zIndex: 3,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.25)',
+    },
+
+    inlineError: {
+        ...StyleSheet.absoluteFill,
+        zIndex: 3,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.58)',
+    },
+
     fullscreen: {
         flex: 1,
         backgroundColor: '#080B10',

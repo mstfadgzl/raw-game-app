@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import Video, { type VideoRef } from 'react-native-video';
+import Orientation from 'react-native-orientation-locker';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AppStackParamList } from '../../types/navigation';
@@ -61,48 +62,116 @@ interface PlayerProps {
 
 const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const [inlinePlaying, setInlinePlaying] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const videoRef = React.useRef<VideoRef>(null);
+
+  const openFullscreen = () => {
+    navigation.navigate('Video', { videoUrl, preview });
+  };
 
   return (
     <View style={styles.wrapper}>
-      <TouchableOpacity
-        accessibilityRole="button"
-        accessibilityLabel="Fragmanı oynat"
-        activeOpacity={0.85}
-        disabled={!videoUrl}
-        style={styles.previewContainer}
-        onPress={() => navigation.navigate('Video', { videoUrl, preview })}
-      >
-        {!!preview && (
-          <Image
-            source={{ uri: preview }}
-            style={styles.fill}
-            resizeMode="cover"
-          />
-        )}
+      {!inlinePlaying ? (
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Fragmanı küçük oynatıcıda oynat"
+          activeOpacity={0.85}
+          disabled={!videoUrl}
+          style={styles.previewContainer}
+          onPress={() => {
+            setInlinePlaying(true);
+            setPaused(false);
+            setError(false);
+          }}
+        >
+          {!!preview && (
+            <Image
+              source={{ uri: preview }}
+              style={styles.fill}
+              resizeMode="cover"
+            />
+          )}
 
-        <View
-          pointerEvents="none"
-          style={styles.previewShade}
-        />
+          <View pointerEvents="none" style={styles.previewShade} />
 
-        {videoUrl ? (
-          <>
-            <View style={styles.playButton}>
-              <AppText style={styles.playIcon}>
-                ▶
+          {videoUrl ? (
+            <>
+              <View style={styles.playButton}>
+                <AppText style={styles.playIcon}>▶</AppText>
+              </View>
+              <AppText style={styles.previewLabel}>
+                Fragmanı oynat
               </AppText>
-            </View>
-
-            <AppText style={styles.previewLabel}>
-              Fragmanı oynat
+            </>
+          ) : (
+            <AppText style={styles.message}>
+              Oynatılabilir video bulunmuyor.
             </AppText>
-          </>
-        ) : (
-          <AppText style={styles.message}>
-            Oynatılabilir video bulunmuyor.
-          </AppText>
-        )}
-      </TouchableOpacity>
+          )}
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.inlinePlayer}>
+          <Video
+            ref={videoRef}
+            source={{ uri: videoUrl }}
+            style={styles.fill}
+            resizeMode="contain"
+            controls={false}
+            paused={paused}
+            repeat={false}
+            onLoadStart={() => {
+              setLoading(true);
+              setError(false);
+            }}
+            onReadyForDisplay={() => setLoading(false)}
+            onBuffer={({ isBuffering }) => setLoading(isBuffering)}
+            onEnd={() => setPaused(true)}
+            onError={() => {
+              setLoading(false);
+              setError(true);
+            }}
+          />
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={paused ? 'Fragmanı oynat' : 'Fragmanı durdur'}
+            style={styles.inlineTouchSurface}
+            onPress={() => setPaused(value => !value)}
+          >
+            {paused && (
+              <View style={styles.inlinePlayButton}>
+                <AppText style={styles.playIcon}>▶</AppText>
+              </View>
+            )}
+          </Pressable>
+
+          <View pointerEvents="none" style={styles.inlineShade} />
+
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Fragmanı tam ekranda aç"
+            style={styles.inlineExpandButton}
+            onPress={openFullscreen}
+          >
+            <AppText style={styles.inlineExpandText}>⛶</AppText>
+          </TouchableOpacity>
+
+          {loading && (
+            <View pointerEvents="none" style={styles.inlineLoading}>
+              <ActivityIndicator color={colors.primary} />
+            </View>
+          )}
+
+          {error && (
+            <View pointerEvents="none" style={styles.inlineError}>
+              <AppText style={styles.message}>Video oynatılamadı.</AppText>
+            </View>
+          )}
+        </View>
+      )}
 
 
     </View>
@@ -449,5 +518,33 @@ export const VideoScreen = ({ route, navigation }: NativeStackScreenProps<AppSta
   React.useLayoutEffect(() => {
     navigation.setOptions({ orientation: wide ? 'landscape' : 'portrait' });
   }, [navigation, wide]);
-  return <FullscreenPlayer {...route.params} onClose={() => navigation.goBack()} onToggleOrientation={() => setWide(value => !value)} />;
+  React.useEffect(() => {
+    Orientation.lockToPortrait();
+
+    return () => {
+      Orientation.lockToPortrait();
+    };
+  }, []);
+
+  const toggleOrientation = () => {
+    setWide(value => {
+      const next = !value;
+
+      if (next) {
+        Orientation.lockToLandscape();
+      } else {
+        Orientation.lockToPortrait();
+      }
+
+      return next;
+    });
+  };
+
+  return (
+    <FullscreenPlayer
+      {...route.params}
+      onClose={() => navigation.goBack()}
+      onToggleOrientation={toggleOrientation}
+    />
+  );
 };

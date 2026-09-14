@@ -9,6 +9,6 @@ const Stack = createNativeStackNavigator<AppStackParamList>();
 export const AppStack = () => (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Main" component={BottomTabStack} options={{ orientation: 'portrait' }} />
-        <Stack.Screen name="Video" component={VideoScreen} options={{ animation: 'fade', orientation: 'portrait', statusBarHidden: true, navigationBarHidden: true, contentStyle: { backgroundColor: '#080B10' } }} />
+        <Stack.Screen name="Video" component={VideoScreen} options={{ animation: 'fade', gestureEnabled: false, orientation: 'portrait', statusBarHidden: true, navigationBarHidden: true, contentStyle: { backgroundColor: '#080B10' } }} />
     </Stack.Navigator>
 );
