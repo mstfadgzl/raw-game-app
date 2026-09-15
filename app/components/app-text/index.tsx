@@ -18,7 +18,7 @@ export const AppText: React.FC<AppTextProps> = ({
     ...props
 }) => {
     const { colors, localize } = useSettings();
-    const textColor = color ?? colors.text;
+    const textColor = color ?? (variant === 'caption' ? colors.secondary : colors.text);
 
     const localizedChildren = React.Children.map(children, child =>
         typeof child === 'string' ? localize(child) : child,
@@ -37,7 +37,8 @@ export const AppText: React.FC<AppTextProps> = ({
         <Text
             style={[
                 getVariantStyle(),
-                { color: textColor, fontWeight: bold ? 'bold' : 'normal' },
+                { color: textColor },
+                bold !== undefined && { fontWeight: bold ? 'bold' : 'normal' },
                 style
             ]}
             {...props}

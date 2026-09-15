@@ -83,7 +83,15 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', state => {
+      if (state !== 'active') setPaused(true);
+    });
+    return () => subscription.remove();
+  }, []);
+
   const openFullscreen = () => {
+    setPaused(true);
     navigation.navigate('Video', { videoUrl, preview });
   };
 
@@ -134,7 +142,7 @@ const PlayerPreview = ({ videoUrl, preview }: PlayerProps) => {
             source={{ uri: videoUrl }}
             style={styles.fill}
             pointerEvents="none"
-            resizeMode="cover"
+            resizeMode="contain"
             controls={false}
             paused={paused}
             repeat={false}

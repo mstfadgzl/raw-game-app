@@ -1,47 +1,40 @@
 import axios from 'axios';
 
-const translationCache: { [key: string]: string } = {};
+const translationCache = new Map<string, string>();
+const pending = new Map<string, Promise<string>>();
+const MAX_ENTRIES = 40;
 
 export const translateText = async (text: string): Promise<string> => {
     if (!text) return '';
+    const cached = translationCache.get(text);
+    if (cached) return cached;
+    const running = pending.get(text);
+    if (running) return running;
 
-    if (translationCache[text]) {
-        return translationCache[text];
-    }
-
-    try {
-        // Google'ın mobil/tarayıcılar için kullandığı güvenli public çeviri API'si
-        const response = await axios.get('https://translate.googleapis.com/translate_a/single', {
-            params: {
-                client: 'gtx',
-                sl: 'en',
-                tl: 'tr',
-                dt: 't',
-                q: text,
-            },
-            timeout: 8000,
-        });
-
-        // Google'ın döndürdüğü karmaşık dizi yapısından çevrilen metni güvenle çekiyoruz
-        if (response.data && response.data[0]) {
-            const translatedArray = response.data[0];
-            let fullTranslation = '';
-
-            translatedArray.forEach((item: any) => {
-                if (item[0]) {
-                    fullTranslation += item[0];
-                }
+    // If the translation service is unavailable, keep the original description usable.
+    const request = (async () => {
+        try {
+            const response = await axios.get('https://translate.googleapis.com/translate_a/single', {
+                params: { client: 'gtx', sl: 'en', tl: 'tr', dt: 't', q: text },
+                timeout: 8000,
             });
-
-            if (fullTranslation.trim().length > 0) {
-                translationCache[text] = fullTranslation;
-                return fullTranslation;
+            const segments: unknown = response.data?.[0];
+            if (!Array.isArray(segments)) return text;
+            const translated = segments.map(segment =>
+                Array.isArray(segment) && typeof segment[0] === 'string' ? segment[0] : '',
+            ).join('');
+            if (!translated.trim()) return text;
+            if (translationCache.size >= MAX_ENTRIES) {
+                const oldest = translationCache.keys().next().value;
+                if (oldest !== undefined) translationCache.delete(oldest);
             }
+            translationCache.set(text, translated);
+            return translated;
+        } catch {
+            return text;
         }
-
-        return text;
-    } catch (error: any) {
-        console.warn('Çeviri yapılırken hata oluştu, orijinal metin gösteriliyor:', error.message);
-        return text;
-    }
+    })();
+    pending.set(text, request);
+    try { return await request; }
+    finally { if (pending.get(text) === request) pending.delete(text); }
 };
