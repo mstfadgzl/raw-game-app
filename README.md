@@ -1,14 +1,3 @@
- şimdi bütün kodları satırları dosyaları teker teker kontrol et her bir detayı en iyi şekilde bak ve kontrol et acelemiz yok sonra gereksiz bulduğun yerleri satırları dosyaları klasörleri sil  kontrollerin bitince uygulama şuan kullanıma hazırmı kontrolünü sağla en sonunda tüm kontroller doğru ve iyiyse bunun apksını nasıl çıkaracağım açıkla
-
-
-
-
-
-
-
-
-
-
 
 
  ---  başlangıç
