@@ -86,7 +86,7 @@ const DetailContent = ({ gameId }: { gameId: number }) => {
     }, [dispatch, gameId, retryKey]);
 
     const isFavorite = favorites.some(
-        (item: any) => Number(item.id) === gameId,
+        item => Number(item.id) === gameId,
     );
 
     const handleFavorite = () => {
@@ -95,12 +95,16 @@ const DetailContent = ({ gameId }: { gameId: number }) => {
         dispatch(
             toggleFavorite({
                 id: detail.id,
+                slug: detail.slug,
                 name: detail.name,
                 background_image: detail.background_image,
                 rating: detail.rating,
                 metacritic: detail.metacritic,
                 released: detail.released,
-            } as any),
+                added: detail.added,
+                playtime: detail.playtime,
+                genres: detail.genres,
+            }),
         );
     };
 

@@ -28,7 +28,7 @@ export const LibraryScreen = () => {
                 ListHeaderComponent={
                     <View style={styles.header}>
                         <AppText variant="h1">Kitaplığım</AppText>
-                        <AppText variant="caption">{favorites.length} Oyun Kaydedildi</AppText>
+                        <AppText variant="caption">{`${favorites.length} Oyun Kaydedildi`}</AppText>
                     </View>
                 }
 

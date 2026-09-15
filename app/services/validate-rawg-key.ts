@@ -11,7 +11,8 @@ export const validateRawgKey = async (
     }
 
     try {
-        await axios.get(`${API_BASE_URL}games`, {
+        await axios.get('/games', {
+            baseURL: API_BASE_URL,
             params: {
                 key: cleanKey,
                 page_size: 1,
