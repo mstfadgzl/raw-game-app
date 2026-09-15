@@ -1,7 +1,10 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BottomTabParamList } from '@types';
-import { LibraryStack, SearchStack, DiscoverStack, HomeStack } from '@navigators';
+import { LibraryStack } from './library-stack';
+import { SearchStack } from './search-stack';
+import { DiscoverStack } from './discover-stack';
+import { HomeStack } from './home-stack';
 import { AnimatedTabIcon } from '../components/animated-tab-icon';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SettingsScreen } from '@screens';

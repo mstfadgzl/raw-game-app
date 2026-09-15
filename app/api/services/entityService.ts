@@ -45,9 +45,6 @@ export const entityService = {
             validate: value => matchesProfile(value, id),
         });
     },
-    getPublishers: async (page: number = 1): Promise<IDeveloperResponse> => {
-        return cachedGet<IDeveloperResponse>('/publishers', { page });
-    },
     peekPublisherDetail: (id: number): IDeveloper | null =>
         peekCached<IDeveloper>(`/publishers/${id}`),
     getPublisherDetail: async (id: number, forceRefresh = false): Promise<IDeveloper> =>

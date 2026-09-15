@@ -28,8 +28,6 @@ export const gameService = {
         cachedGet<IScreenshotResponse>(`/games/${id}/screenshots`),
     peekGameDetail: (id: number): IGameDetail | null =>
         peekCached<IGameDetail>(`/games/${id}`),
-    getDeveloperGames: (id: number, page: number, ordering: '-added' | '-metacritic'): Promise<IGameListResponse> =>
-        cachedGet<IGameListResponse>('/games', { developers: id, page, page_size: 20, ordering }),
     getCompanyGames: (id: number, page: number, ordering: '-added' | '-metacritic', kind: 'developer' | 'publisher' = 'developer'): Promise<IGameListResponse> =>
         cachedGet<IGameListResponse>('/games', { [kind === 'publisher' ? 'publishers' : 'developers']: id, page, page_size: 20, ordering }),
     getGames: async (
@@ -70,17 +68,6 @@ export const gameService = {
             search_precise: false,
             search_exact: false,
             ordering: '-added',
-            page,
-            page_size: 20,
-        });
-    },
-
-    getGamesByGenre: (
-        genreSlug: string,
-        page: number = 1,
-    ): Promise<IGameListResponse> => {
-        return cachedGet<IGameListResponse>('/games', {
-            genres: genreSlug,
             page,
             page_size: 20,
         });
